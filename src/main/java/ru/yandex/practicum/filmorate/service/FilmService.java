@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.FilmValidationException;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -17,18 +17,18 @@ public class FilmService extends ObjectService<Film> {
     }
 
     @Override
-    public Film create(Film film) throws FilmValidationException, FilmAlreadyExistException {
+    public Film create(Film film) throws ValidationException, ObjectAlreadyExistException {
         violations = validator.validate(film);
         if (!violations.isEmpty()) {
             for (ConstraintViolation<Film> violation : violations) {
                 log.warn(violation.getMessage());
             }
-            throw new FilmValidationException("Film validation fail");
+            throw new ValidationException("Film validation fail");
         }
         if (repository.get().containsKey(film.getName())) {
             log.warn("Фильм под названием " +
                     film.getName() + " уже есть в списке фильмов.");
-            throw new FilmAlreadyExistException("Фильм под названием " +
+            throw new ObjectAlreadyExistException("Фильм под названием " +
                     film.getName() + " уже есть в списке фильмов.");
         }
         log.debug("Фильм под названием " +
@@ -38,13 +38,13 @@ public class FilmService extends ObjectService<Film> {
     }
 
     @Override
-    public Film put(Film film) throws FilmValidationException, NoSuchElementException {
+    public Film put(Film film) throws ValidationException, NoSuchElementException {
         violations = validator.validate(film);
         if (!violations.isEmpty()) {
             for (ConstraintViolation<Film> violation : violations) {
                 log.warn(violation.getMessage());
             }
-            throw new FilmValidationException("Film validation fail");
+            throw new ValidationException("Film validation fail");
         }
         if (repository.get().containsKey(film.getName())) {
             repository.get().put(film.getName(), film);
