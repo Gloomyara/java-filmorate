@@ -1,10 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+
 public abstract class ObjectController<T> {
     protected final ObjectService<T> service;
 
