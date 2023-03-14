@@ -9,24 +9,30 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Collection;
 import java.util.Set;
+
 @Slf4j
-public abstract class ObjectService<T>{
+public abstract class ObjectService<T> {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     protected Validator validator = factory.getValidator();
     protected Set<ConstraintViolation<T>> violations;
     protected final ObjectsRepository<T> repository;
+
     public ObjectService(ObjectsRepository<T> repository) {
         this.repository = repository;
     }
+
     public Collection<T> findAll() {
+        Collection<T> collection = repository.findAll();
         log.debug(
                 "Запрос списка {} успешно выполнен, всего {}: {}",
-                repository.findAll().getClass().toString(),
-                repository.findAll().getClass().toString(),
-                repository.get().size()
+                collection.getClass(),
+                collection.getClass(),
+                collection.size()
         );
-        return repository.findAll();
+        return collection;
     }
+
     public abstract T create(T t);
+
     public abstract T put(T t);
 }
