@@ -1,19 +1,33 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
+import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidationException;
+import java.util.Collection;
 import java.util.NoSuchElementException;
 
 @Slf4j
+@Service
 public class UserService extends ObjectService<User> {
+    private final UserRepository userRepository;
 
-    public UserService(ObjectsRepository<User> repository) {
-        super(repository);
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public Collection<User> findAll() {
+        Collection<User> collection = userRepository.findAll();
+        log.debug(
+                "Запрос списка пользователей успешно выполнен, всего пользователей: {}",
+                collection.size()
+        );
+        return collection;
     }
 
     @Override
@@ -25,15 +39,20 @@ public class UserService extends ObjectService<User> {
             }
             throw new ValidationException("User validation fail");
         }
-        if (repository.get().containsKey(user.getEmail())) {
+        if (userRepository.get().containsKey(user.getId())) {
             log.warn("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
             throw new ObjectAlreadyExistException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
         }
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
+        user.setId(id);
+        id++;
         log.debug("Пользователь с электронной почтой " +
                 user.getEmail() + " успешно зарегистрирован.");
-        repository.get().put(user.getEmail(), user);
+        userRepository.get().put(user.getId(), user);
         return user;
     }
 
@@ -46,8 +65,8 @@ public class UserService extends ObjectService<User> {
             }
             throw new ValidationException("User validation fail");
         }
-        if (repository.get().containsKey(user.getEmail())) {
-            repository.get().put(user.getEmail(), user);
+        if (userRepository.get().containsKey(user.getId())) {
+            userRepository.get().put(user.getId(), user);
             log.debug("Данные пользователя с электронной почтой " +
                     user.getEmail() + " успешно обновлены.");
         } else {

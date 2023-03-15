@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -15,22 +14,12 @@ public abstract class ObjectService<T> {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     protected Validator validator = factory.getValidator();
     protected Set<ConstraintViolation<T>> violations;
-    protected final ObjectsRepository<T> repository;
+    protected Integer id = 1;
 
-    public ObjectService(ObjectsRepository<T> repository) {
-        this.repository = repository;
+    public ObjectService() {
     }
 
-    public Collection<T> findAll() {
-        Collection<T> collection = repository.findAll();
-        log.debug(
-                "Запрос списка {} успешно выполнен, всего {}: {}",
-                collection.getClass(),
-                collection.getClass(),
-                collection.size()
-        );
-        return collection;
-    }
+    public abstract Collection<T> findAll();
 
     public abstract T create(T t);
 
