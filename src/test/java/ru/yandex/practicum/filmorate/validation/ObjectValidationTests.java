@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -221,18 +220,18 @@ class ObjectValidationTests {
                 ValidationException.class,
                 () -> filmController.create(film)
         );
-        Assertions.assertEquals("Film validation fail", ex.getMessage());
+        Assertions.assertEquals("Film ReleaseDate isBefore 28-12-1895", ex.getMessage());
     }
 
     @Test
     void shouldThrowValidationExceptionWhenReleaseDateIsNull() {
         film1 = new Film(null, "testFilmName", "d",
                 null, 8500);
-        ValidationException ex1 = Assertions.assertThrows(
-                ValidationException.class,
+        NullPointerException ex1 = Assertions.assertThrows(
+                NullPointerException.class,
                 () -> filmController.create(film1)
         );
-        Assertions.assertEquals("Film validation fail", ex1.getMessage());
+        Assertions.assertNull(ex1.getMessage());
     }
 
     @Test

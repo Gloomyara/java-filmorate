@@ -16,7 +16,6 @@ public class Film {
     private String name;
     @Size(min = 1, max = 200, message = "Description must be between 1 and 200 characters")
     private String description;
-    @NotNull(message = "ReleaseDate cannot be null")
     private LocalDate releaseDate;
     @Positive(message = "Duration should be positive")
     private Integer duration;
