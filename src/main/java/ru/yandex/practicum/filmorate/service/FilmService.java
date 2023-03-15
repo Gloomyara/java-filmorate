@@ -34,7 +34,7 @@ public class FilmService extends ObjectService<Film> {
     @Override
     public Film create(Film film) throws ValidationException, ObjectAlreadyExistException, IllegalArgumentException {
         violations = validator.validate(film);
-        if(film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))){
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Film ReleaseDate isBefore 28-12-1895");
         }
         if (!violations.isEmpty()) {
