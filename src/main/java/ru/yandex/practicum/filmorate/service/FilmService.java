@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,6 +15,7 @@ import java.util.NoSuchElementException;
 public class FilmService extends ObjectService<Film> {
     private final FilmRepository filmRepository;
 
+    @Autowired
     public FilmService(FilmRepository filmRepository) {
         this.filmRepository = filmRepository;
     }

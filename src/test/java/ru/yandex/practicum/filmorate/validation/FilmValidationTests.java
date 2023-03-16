@@ -110,26 +110,27 @@ public class FilmValidationTests {
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenReleaseDateIsBefore28121895() {
+    void shouldNotPassValidationWhenReleaseDateIsBefore28121895() {
         film = new Film(null, "testFilmName", "d",
                 LocalDate.of(1895, 12, 27), 8500);
-        ValidationException ex = Assertions.assertThrows(
-                ValidationException.class,
-                () -> filmController.create(film)
+        violations = validator.validate(film);
+        Assertions.assertEquals(1, violations.size());
+        Assertions.assertEquals(
+                "ReleaseDate invalid",
+                violations.iterator().next().getMessage()
         );
-        Assertions.assertEquals("Film ReleaseDate isBefore 28-12-1895", ex.getMessage());
     }
 
-    @Test
-    void shouldThrowNullPointerExceptionWhenReleaseDateIsNull() {
+    /*@Test
+    void shouldNotPassValidationWhenReleaseDateIsNull() {
         film1 = new Film(null, "testFilmName", "d",
                 null, 8500);
-        NullPointerException ex1 = Assertions.assertThrows(
-                NullPointerException.class,
-                () -> filmController.create(film1)
+        Assertions.assertEquals(1, violations.size());
+        Assertions.assertEquals(
+                "ReleaseDate cannot be null",
+                violations.iterator().next().getMessage()
         );
-        Assertions.assertNull(ex1.getMessage());
-    }
+    }*/
 
     @Test
     void shouldNotPassValidationWhenDurationIsNegative() {

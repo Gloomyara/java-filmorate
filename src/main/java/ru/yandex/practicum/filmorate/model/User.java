@@ -21,8 +21,6 @@ public class User {
     private String login;
     private String name;
     //Без @NotNull создается пользователь с birthday=null.
-    //В фильме дата NullPointerException выдает т.к. ее проверяю через иф.
-    //Собственную аннотацию пытался сделать, но что-то пошло не так и в итоге она браковала все.
     @Past(message = "Birthday should be in the past")
     private LocalDate birthday;
 }
