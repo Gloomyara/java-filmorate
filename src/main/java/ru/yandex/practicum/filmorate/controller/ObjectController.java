@@ -1,12 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 public abstract class ObjectController<T> {
@@ -21,13 +17,7 @@ public abstract class ObjectController<T> {
         return service.findAll();
     }
 
-    @PostMapping
-    public T create(@NotNull @RequestBody T t) {
-        return service.create(t);
-    }
+    public abstract T create(T t);
 
-    @PutMapping
-    public T put(@NotNull @RequestBody T t) {
-        return service.put(t);
-    }
+    public abstract T put(T t);
 }

@@ -6,9 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -32,17 +29,8 @@ public class FilmService extends ObjectService<Film> {
     }
 
     @Override
-    public Film create(Film film) throws ValidationException, ObjectAlreadyExistException, IllegalArgumentException {
-        violations = validator.validate(film);
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Film ReleaseDate isBefore 28-12-1895");
-        }
-        if (!violations.isEmpty()) {
-            for (ConstraintViolation<Film> violation : violations) {
-                log.warn(violation.getMessage());
-            }
-            throw new ValidationException("Film validation fail");
-        }
+    public Film create(Film film) throws ObjectAlreadyExistException, IllegalArgumentException {
+
         if (filmRepository.get().containsKey(film.getId())) {
             log.warn("Фильм под названием " +
                     film.getName() + " уже есть в списке фильмов.");
@@ -58,14 +46,8 @@ public class FilmService extends ObjectService<Film> {
     }
 
     @Override
-    public Film put(Film film) throws ValidationException, NoSuchElementException {
-        violations = validator.validate(film);
-        if (!violations.isEmpty()) {
-            for (ConstraintViolation<Film> violation : violations) {
-                log.warn(violation.getMessage());
-            }
-            throw new ValidationException("Film validation fail");
-        }
+    public Film put(Film film) throws NoSuchElementException {
+
         if (filmRepository.get().containsKey(film.getId())) {
             filmRepository.get().put(film.getId(), film);
             log.debug("Данные о фильме " +

@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ObjectsRepository<T> {
-    protected final Map<Integer, T> objects = new HashMap<>();
+public abstract class ObjectsRepository<K, V> {
+    protected final Map<K, V> objects = new HashMap<>();
 
-    public Collection<T> findAll() {
+    public Collection<V> findAll() {
         return objects.values();
     }
 
-    public Map<Integer, T> get() {
+    public Map<K, V> get() {
         return objects;
     }
 }

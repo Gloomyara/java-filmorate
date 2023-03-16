@@ -6,8 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -31,14 +29,8 @@ public class UserService extends ObjectService<User> {
     }
 
     @Override
-    public User create(User user) throws ValidationException, ObjectAlreadyExistException {
-        violations = validator.validate(user);
-        if (!violations.isEmpty()) {
-            for (ConstraintViolation<User> violation : violations) {
-                log.warn(violation.getMessage());
-            }
-            throw new ValidationException("User validation fail");
-        }
+    public User create(User user) throws ObjectAlreadyExistException {
+
         if (userRepository.get().containsKey(user.getId())) {
             log.warn("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
@@ -57,14 +49,8 @@ public class UserService extends ObjectService<User> {
     }
 
     @Override
-    public User put(User user) throws ValidationException, NoSuchElementException {
-        violations = validator.validate(user);
-        if (!violations.isEmpty()) {
-            for (ConstraintViolation<User> violation : violations) {
-                log.warn(violation.getMessage());
-            }
-            throw new ValidationException("User validation fail");
-        }
+    public User put(User user) throws NoSuchElementException {
+
         if (userRepository.get().containsKey(user.getId())) {
             userRepository.get().put(user.getId(), user);
             log.debug("Данные пользователя с электронной почтой " +
