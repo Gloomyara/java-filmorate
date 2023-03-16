@@ -153,7 +153,10 @@ public class UserValidationTests {
     void create() {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
-        userController.create(user);
+        violations = validator.validate(user);
+        if (violations.isEmpty()) {
+            userController.create(user);
+        }
         AssertionErrors.assertEquals("Количество пользователей не совпадает",
                 1, userController.findAll().size());
     }
@@ -162,13 +165,19 @@ public class UserValidationTests {
     void put() {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
-        userController.create(user);
+        violations = validator.validate(user);
+        if (violations.isEmpty()) {
+            userController.create(user);
+        }
         AssertionErrors.assertEquals("Количество пользователей не совпадает",
                 1, userController.findAll().size());
         user1 = new User(null, "testuser@gmail.com", "testRenewUser",
                 null, LocalDate.of(2023, 1, 1));
         user1.setId(user.getId());
-        userController.put(user1);
+        violations = validator.validate(user1);
+        if (violations.isEmpty()) {
+            userController.put(user1);
+        }
         User user2 = new User(null, "testuser@gmail.com", "testRenewUser",
                 null, LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());

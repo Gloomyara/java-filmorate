@@ -9,7 +9,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -161,7 +164,10 @@ public class FilmValidationTests {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
-        filmController.create(film);
+        violations = validator.validate(film);
+        if (violations.isEmpty()) {
+            filmController.create(film);
+        }
         assertEquals("Количество фильмов не совпадает", 1, filmController.findAll().size());
     }
 
@@ -170,12 +176,18 @@ public class FilmValidationTests {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
-        filmController.create(film);
+        violations = validator.validate(film);
+        if (violations.isEmpty()) {
+            filmController.create(film);
+        }
         assertEquals("Количество фильмов не совпадает", 1, filmController.findAll().size());
         film1 = new Film(null, "testFilmName", "d",
                 LocalDate.of(2020, 1, 1), 8500);
         film1.setId(film.getId());
-        filmController.put(film1);
+        violations = validator.validate(film1);
+        if (violations.isEmpty()) {
+            filmController.put(film1);
+        }
         Film film2 = new Film(null, "testFilmName", "d",
                 LocalDate.of(2020, 1, 1), 8500);
         film2.setId(film.getId());
