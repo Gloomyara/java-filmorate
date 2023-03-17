@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -13,16 +13,16 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Service
 public class FilmService extends ObjectService<Film> {
-    private final FilmRepository filmRepository;
+    private final InMemoryFilmRepository inMemoryFilmRepository;
 
     @Autowired
-    public FilmService(FilmRepository filmRepository) {
-        this.filmRepository = filmRepository;
+    public FilmService(InMemoryFilmRepository inMemoryFilmRepository) {
+        this.inMemoryFilmRepository = inMemoryFilmRepository;
     }
 
     @Override
     public Collection<Film> findAll() {
-        Collection<Film> collection = filmRepository.findAll();
+        Collection<Film> collection = inMemoryFilmRepository.findAll();
         log.debug(
                 "Запрос списка фильмов успешно выполнен, всего фильмов: {}",
                 collection.size()
@@ -33,7 +33,7 @@ public class FilmService extends ObjectService<Film> {
     @Override
     public Film create(Film film) throws ObjectAlreadyExistException, IllegalArgumentException {
 
-        if (filmRepository.get().containsKey(film.getId())) {
+        if (inMemoryFilmRepository.get().containsKey(film.getId())) {
             log.warn("Фильм под названием " +
                     film.getName() + " уже есть в списке фильмов.");
             throw new ObjectAlreadyExistException("Фильм под названием " +
@@ -43,15 +43,15 @@ public class FilmService extends ObjectService<Film> {
         id++;
         log.debug("Фильм под названием " +
                 film.getName() + " успешно добавлен");
-        filmRepository.get().put(film.getId(), film);
+        inMemoryFilmRepository.get().put(film.getId(), film);
         return film;
     }
 
     @Override
     public Film put(Film film) throws NoSuchElementException {
 
-        if (filmRepository.get().containsKey(film.getId())) {
-            filmRepository.get().put(film.getId(), film);
+        if (inMemoryFilmRepository.get().containsKey(film.getId())) {
+            inMemoryFilmRepository.get().put(film.getId(), film);
             log.debug("Данные о фильме " +
                     film.getName() + " успешно обновлены");
         } else {

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -13,16 +13,16 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Service
 public class UserService extends ObjectService<User> {
-    private final UserRepository userRepository;
+    private final InMemoryUserRepository inMemoryUserRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserService(InMemoryUserRepository inMemoryUserRepository) {
+        this.inMemoryUserRepository = inMemoryUserRepository;
     }
 
     @Override
     public Collection<User> findAll() {
-        Collection<User> collection = userRepository.findAll();
+        Collection<User> collection = inMemoryUserRepository.findAll();
         log.debug(
                 "Запрос списка пользователей успешно выполнен, всего пользователей: {}",
                 collection.size()
@@ -33,7 +33,7 @@ public class UserService extends ObjectService<User> {
     @Override
     public User create(User user) throws ObjectAlreadyExistException {
 
-        if (userRepository.get().containsKey(user.getId())) {
+        if (inMemoryUserRepository.get().containsKey(user.getId())) {
             log.warn("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
             throw new ObjectAlreadyExistException("Пользователь с электронной почтой " +
@@ -46,15 +46,15 @@ public class UserService extends ObjectService<User> {
         id++;
         log.debug("Пользователь с электронной почтой " +
                 user.getEmail() + " успешно зарегистрирован.");
-        userRepository.get().put(user.getId(), user);
+        inMemoryUserRepository.get().put(user.getId(), user);
         return user;
     }
 
     @Override
     public User put(User user) throws NoSuchElementException {
 
-        if (userRepository.get().containsKey(user.getId())) {
-            userRepository.get().put(user.getId(), user);
+        if (inMemoryUserRepository.get().containsKey(user.getId())) {
+            inMemoryUserRepository.get().put(user.getId(), user);
             log.debug("Данные пользователя с электронной почтой " +
                     user.getEmail() + " успешно обновлены.");
         } else {

@@ -7,7 +7,7 @@ import org.springframework.test.util.AssertionErrors;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.ConstraintViolation;
@@ -27,14 +27,14 @@ public class UserValidationTests {
     Set<ConstraintViolation<User>> violations;
     User user;
     User user1;
-    UserRepository userRepository;
+    InMemoryUserRepository inMemoryUserRepository;
     UserService userService;
     UserController userController;
 
     @BeforeEach
     void createSomeData() {
-        userRepository = new UserRepository();
-        userService = new UserService(userRepository);
+        inMemoryUserRepository = new InMemoryUserRepository();
+        userService = new UserService(inMemoryUserRepository);
         userController = new UserController(userService);
     }
 

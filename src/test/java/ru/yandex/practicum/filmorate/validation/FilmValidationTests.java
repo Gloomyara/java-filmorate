@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
@@ -26,14 +26,14 @@ public class FilmValidationTests {
     Set<ConstraintViolation<Film>> violations;
     Film film;
     Film film1;
-    FilmRepository filmRepository;
+    InMemoryFilmRepository inMemoryFilmRepository;
     FilmService filmService;
     FilmController filmController;
 
     @BeforeEach
     void createSomeData() {
-        filmRepository = new FilmRepository();
-        filmService = new FilmService(filmRepository);
+        inMemoryFilmRepository = new InMemoryFilmRepository();
+        filmService = new FilmService(inMemoryFilmRepository);
         filmController = new FilmController(filmService);
     }
 
