@@ -6,11 +6,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class FilmReleaseDateValidator implements ConstraintValidator<FilmReleaseDateValidation, LocalDate> {
-    private LocalDate FirstFilmDate;
+    private LocalDate firstFilmDate;
 
     @Override
     public void initialize(FilmReleaseDateValidation constraintAnnotation) {
-        this.FirstFilmDate = LocalDate.parse(constraintAnnotation.value(), DateTimeFormatter.ISO_LOCAL_DATE);
+        this.firstFilmDate = LocalDate.parse(constraintAnnotation.value(), DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     @Override
@@ -18,6 +18,6 @@ public class FilmReleaseDateValidator implements ConstraintValidator<FilmRelease
         if (object == null) {
             return false;
         }
-        return object.isAfter(FirstFilmDate);
+        return object.isAfter(firstFilmDate);
     }
 }
