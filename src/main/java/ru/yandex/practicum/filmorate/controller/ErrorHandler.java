@@ -22,42 +22,27 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleObjectExistException(
             ObjectAlreadyExistException e, WebRequest request) {
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.CONFLICT.value());
-        body.put("error", HttpStatus.CONFLICT.getReasonPhrase());
-        body.put("message", e.getMessage());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
-
-        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(
+                responseBody(HttpStatus.CONFLICT, e.getMessage(), request),
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = ObjectNotFoundException.class)
     public ResponseEntity<Object> handleObjectNotFoundException(
             ObjectNotFoundException e, WebRequest request) {
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", HttpStatus.NOT_FOUND.getReasonPhrase());
-        body.put("message", e.getMessage());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
-
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(
+                responseBody(HttpStatus.NOT_FOUND, e.getMessage(), request),
+                HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentException(
             IllegalArgumentException e, WebRequest request) {
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
-        body.put("message", e.getMessage());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(
+                responseBody(HttpStatus.BAD_REQUEST, e.getMessage(), request),
+                HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -65,13 +50,9 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException ex, HttpHeaders headers,
             HttpStatus status, WebRequest request) {
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
-        body.put("path", request.getDescription(false).replace("uri=", ""));
-
-        return new ResponseEntity<>(body, headers, status);
+        return new ResponseEntity<>(
+                responseBody(status, ex.getMessage(), request),
+                status);
     }
 
     @ExceptionHandler
@@ -79,13 +60,18 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleThrowable(
             final Throwable e, WebRequest request) {
 
+        return new ResponseEntity<>(
+                responseBody(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), request),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public Map<String, Object> responseBody(HttpStatus status, String error, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-        body.put("message", e.getMessage());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", error);
         body.put("path", request.getDescription(false).replace("uri=", ""));
-
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        return body;
     }
 }
