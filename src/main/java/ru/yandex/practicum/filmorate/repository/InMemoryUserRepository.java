@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -8,15 +9,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
-public class InMemoryUserRepository implements ObjectsRepository<Integer, User> {
-    protected final Map<Integer, User> userObjects = new HashMap<>();
+public class InMemoryUserRepository implements UserRepository<Integer> {
+    private static final Map<Integer, User> userStorage = new HashMap<>();
+
     @Override
     public Collection<User> findAll() {
-        return userObjects.values();
+        return userStorage.values();
     }
 
     @Override
-    public Map<Integer, User> get() {
-        return userObjects;
+    public Map<Integer, User> getStorage() {
+        return userStorage;
+    }
+
+    @Override
+    public User getById(Integer id) throws ObjectNotFoundException {
+        return userStorage.get(id);
+    }
+
+    @Override
+    public void put(Integer integer, User user) {
+        userStorage.put(integer, user);
+    }
+    public static boolean contains(Integer id){
+        return userStorage.containsKey(id);
     }
 }

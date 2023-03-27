@@ -124,17 +124,6 @@ public class FilmValidationTests {
         );
     }
 
-    /*@Test
-    void shouldNotPassValidationWhenReleaseDateIsNull() {
-        film1 = new Film(null, "testFilmName", "d",
-                null, 8500);
-        Assertions.assertEquals(1, violations.size());
-        Assertions.assertEquals(
-                "ReleaseDate cannot be null",
-                violations.iterator().next().getMessage()
-        );
-    }*/
-
     @Test
     void shouldNotPassValidationWhenDurationIsNegative() {
         film = new Film(null, "testFilmName", "d",

@@ -1,5 +1,4 @@
 package ru.yandex.practicum.filmorate.repository;
-
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -8,15 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
-public class InMemoryFilmRepository implements ObjectsRepository<Integer, Film> {
-    protected final Map<Integer, Film> filmObjects = new HashMap<>();
+public class InMemoryFilmRepository implements FilmRepository<Integer> {
+    private final Map<Integer, Film> filmStorage = new HashMap<>();
+
     @Override
     public Collection<Film> findAll() {
-        return filmObjects.values();
+        return filmStorage.values();
     }
 
     @Override
-    public Map<Integer, Film> get() {
-        return filmObjects;
+    public Map<Integer, Film> getStorage() {
+        return filmStorage;
+    }
+
+    @Override
+    public Film getById(Integer id) {
+        return filmStorage.get(id);
+    }
+
+    @Override
+    public void put(Integer integer, Film film) {
+        filmStorage.put(integer, film);
     }
 }

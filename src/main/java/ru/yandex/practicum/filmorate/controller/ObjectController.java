@@ -1,24 +1,22 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import javax.validation.Valid;
 import java.util.Collection;
 
 public abstract class ObjectController<T> {
-    protected final ObjectService<T> service;
-
-    public ObjectController(ObjectService<T> service) {
-        this.service = service;
-    }
+    private ObjectService<T> service;
 
     @GetMapping
     public Collection<T> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public T getById(@PathVariable("id") Integer id){
+        return service.getById(id);
     }
 
     @PostMapping
