@@ -45,7 +45,7 @@ public class FilmValidationTests {
                 NoSuchElementException.class,
                 () -> filmController.put(film)
         );
-        Assertions.assertEquals("Film doesn't exist", ex1.getMessage());
+        Assertions.assertEquals("Film Id: null doesn't exist", ex1.getMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class FilmValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> filmController.create(film1)
         );
-        Assertions.assertEquals("Фильм под названием testFilmName уже есть в списке фильмов.", ex1.getMessage());
+        Assertions.assertEquals("Фильм под Id: 1 уже есть в списке фильмов.", ex1.getMessage());
     }
 
     @Test

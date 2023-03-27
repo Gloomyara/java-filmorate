@@ -6,16 +6,37 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends ObjectController<User> {
+public class UserController implements ObjectController<User> {
     private final UserService service;
 
     @Autowired
     public UserController(UserService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public Collection<User> findAll() {
+        return service.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getById(@PathVariable("id") Integer id) {
+        return service.getById(id);
+    }
+
+    @PostMapping
+    public User create(@Valid @RequestBody User user) {
+        return service.create(user);
+    }
+
+    @PutMapping
+    public User put(@Valid @RequestBody User user) {
+        return service.put(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.validation;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,10 @@ public class UserValidationTests {
         userService = new UserService(inMemoryUserRepository);
         userController = new UserController(userService);
     }
+    @AfterEach
+    void clearUserRepository() {
+        inMemoryUserRepository.getStorage().clear();
+    }
 
     @Test
     void shouldThrowNoSuchElementExceptionWhenPutNewUser() {
@@ -46,7 +51,7 @@ public class UserValidationTests {
                 NoSuchElementException.class,
                 () -> userController.put(user)
         );
-        assertEquals("User doesn't exist", ex.getMessage());
+        assertEquals("User with id: null doesn't exist!", ex.getMessage());
     }
 
     @Test
@@ -77,7 +82,6 @@ public class UserValidationTests {
         );
     }
 
-    /*@Test
     void shouldNotPassValidationWhenUserBirthdayIsNull() {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", null);
@@ -87,7 +91,7 @@ public class UserValidationTests {
                 "Birthday cannot be null",
                 violations.iterator().next().getMessage()
         );
-    }*/
+    }
 
     @Test
     void shouldNotPassValidationWhenUserEmailIsBlank() {

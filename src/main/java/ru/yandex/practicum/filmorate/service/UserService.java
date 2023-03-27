@@ -68,7 +68,7 @@ public class UserService implements ObjectService<User> {
                             user.getEmail() + " уже зарегистрирован."
             );
         }
-        if (user.getName() == null) {
+        if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         user.setId(id);

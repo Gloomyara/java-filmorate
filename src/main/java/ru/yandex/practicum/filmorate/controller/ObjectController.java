@@ -1,31 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.service.ObjectService;
-
-import javax.validation.Valid;
 import java.util.Collection;
 
-public abstract class ObjectController<T> {
-    private ObjectService<T> service;
+public interface ObjectController<T> {
 
-    @GetMapping
-    public Collection<T> findAll() {
-        return service.findAll();
-    }
+    Collection<T> findAll();
 
-    @GetMapping("/{id}")
-    public T getById(@PathVariable("id") Integer id){
-        return service.getById(id);
-    }
+    T getById(Integer id);
 
-    @PostMapping
-    public T create(@Valid @RequestBody T t) {
-        return service.create(t);
-    }
+    T create(T t);
 
-    @PutMapping
-    public T put(@Valid @RequestBody T t) {
-        return service.put(t);
-    }
+    T put(T t);
 }

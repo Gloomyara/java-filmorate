@@ -90,7 +90,7 @@ public class FilmService implements ObjectService<Film> {
                     film.getId()
             );
             throw new ObjectNotFoundException(
-                    "Film Id: " + film.getId() + "doesn't exist"
+                    "Film Id: " + film.getId() + " doesn't exist"
             );
         }
         return film;
@@ -102,7 +102,7 @@ public class FilmService implements ObjectService<Film> {
                     "Фильм под Id: {} не найден.", filmId
             );
             throw new ObjectNotFoundException(
-                    "Film Id: " + filmId + "doesn't exist"
+                    "Film Id: " + filmId + " doesn't exist"
             );
         }
         if (!InMemoryUserRepository.contains(userId)) {
@@ -129,7 +129,7 @@ public class FilmService implements ObjectService<Film> {
                     "Фильм под Id: {} не найден.", filmId
             );
             throw new ObjectNotFoundException(
-                    "Film Id: " + filmId + "doesn't exist"
+                    "Film Id: " + filmId + " doesn't exist"
             );
         }
         if (!InMemoryUserRepository.contains(userId)) {
@@ -166,6 +166,6 @@ public class FilmService implements ObjectService<Film> {
                 .collect(Collectors.toList());
     }
     private int compare(Film f0, Film f1) {
-        return f0.getLikesInfo().size() - f1.getLikesInfo().size();
+        return f1.getLikesInfo().size() - f0.getLikesInfo().size();
     }
 }
