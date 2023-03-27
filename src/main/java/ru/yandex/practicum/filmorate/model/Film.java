@@ -31,6 +31,7 @@ public class Film {
     public void addLike(Integer id) {
         likesInfo.add(id);
     }
+
     public void deleteLike(Integer id) {
         likesInfo.remove(id);
     }

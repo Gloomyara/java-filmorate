@@ -31,7 +31,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public void put(Integer integer, User user) {
         userStorage.put(integer, user);
     }
-    public static boolean contains(Integer id){
+
+    public static boolean contains(Integer id) {
         return userStorage.containsKey(id);
     }
 }

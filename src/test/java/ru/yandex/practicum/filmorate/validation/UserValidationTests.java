@@ -38,6 +38,7 @@ public class UserValidationTests {
         userService = new UserService(inMemoryUserRepository);
         userController = new UserController(userService);
     }
+
     @AfterEach
     void clearUserRepository() {
         inMemoryUserRepository.getStorage().clear();
@@ -86,7 +87,7 @@ public class UserValidationTests {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", null);
         violations = validator.validate(user);
-        assertEquals( 1, violations.size() );
+        assertEquals(1, violations.size());
         assertEquals(
                 "Birthday cannot be null",
                 violations.iterator().next().getMessage()

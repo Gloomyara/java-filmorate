@@ -150,7 +150,7 @@ public class UserService implements ObjectService<User> {
             );
         }
         User initialUser = userRepository.getById(userId);
-        if (!initialUser.getFriends().contains(friendId)){
+        if (!initialUser.getFriends().contains(friendId)) {
             log.warn(
                     "Ошибка! Не удалось удалить пользователя из друзей. " +
                             "Пользователя под Id: {} нет в списке друзей.", friendId

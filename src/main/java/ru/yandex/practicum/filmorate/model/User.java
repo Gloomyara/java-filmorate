@@ -30,6 +30,7 @@ public class User {
     public void addFriend(Integer id) {
         friends.add(id);
     }
+
     public void deleteFriend(Integer id) {
         friends.remove(id);
     }
