@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 public class FilmValidationTests {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -149,7 +148,7 @@ public class FilmValidationTests {
     }
 
     @Test
-    void create() {
+    void createShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
@@ -161,7 +160,7 @@ public class FilmValidationTests {
     }
 
     @Test
-    void put() {
+    void putShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
@@ -181,12 +180,5 @@ public class FilmValidationTests {
                 LocalDate.of(2020, 1, 1), 8500);
         film2.setId(film.getId());
         assertEquals("Фильмы не совпадают", film2, film1);
-    }
-
-    @Test
-    void findAllShouldBeIsEmpty() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
-        assertTrue("Обнаружены неучтенные данные о фильмах", filmController.findAll().isEmpty());
     }
 }

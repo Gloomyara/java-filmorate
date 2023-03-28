@@ -1,2 +1,8 @@
 # java-filmorate
-Template repository for Filmorate project.
+    Final 9
+
+Каркас Spring Boot приложения "Filmorate" для оценки фильмов
+
+    Final 10
+
+Добавлены методы позволяющие пользователям добавлять друг друга в друзья, получать список общих друзей и лайкать фильмы.

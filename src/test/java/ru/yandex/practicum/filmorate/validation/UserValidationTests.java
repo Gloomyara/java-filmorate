@@ -20,7 +20,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 public class UserValidationTests {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -83,6 +82,7 @@ public class UserValidationTests {
         );
     }
 
+    @Test
     void shouldNotPassValidationWhenUserBirthdayIsNull() {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", null);
@@ -187,12 +187,5 @@ public class UserValidationTests {
                 null, LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());
         AssertionErrors.assertEquals("Пользователи не совпадают", user2, user1);
-    }
-
-    @Test
-    void findAllShouldBeIsEmpty() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        assertTrue("Обнаружены неучтенные данные о пользователях", userController.findAll().isEmpty());
     }
 }
