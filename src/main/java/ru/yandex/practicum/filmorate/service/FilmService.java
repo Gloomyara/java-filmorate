@@ -145,15 +145,15 @@ public class FilmService implements ObjectService<Film> {
                     .filter(
                             (p) -> film.getLikesInfo().contains(
                                     optionalUserId.orElseThrow(
-                                            () -> new ObjectNotFoundException
-                                                    ("Error! Cannot delete user Id: " + userId
+                                            () -> new ObjectNotFoundException(
+                                                    "Error! Cannot delete user Id: " + userId
                                                             + " like, user like not found.")
                                     )
                             )
                     )
                     .orElseThrow(
-                            () -> new ObjectNotFoundException
-                                    ("Error! Cannot delete user Id: " + userId
+                            () -> new ObjectNotFoundException(
+                                    "Error! Cannot delete user Id: " + userId
                                             + " like, user like not found.")
                     );
 
