@@ -17,11 +17,6 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     }
 
     @Override
-    public Map<Integer, Film> getStorage() {
-        return filmStorage;
-    }
-
-    @Override
     public Film getById(Integer id) {
         return filmStorage.get(id);
     }
@@ -29,5 +24,10 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     @Override
     public void put(Integer integer, Film film) {
         filmStorage.put(integer, film);
+    }
+
+    @Override
+    public boolean contains(Integer id) {
+        return filmStorage.containsKey(id);
     }
 }

@@ -27,11 +27,11 @@ public class User {
     private LocalDate birthday;
     private final Set<Integer> friends = new HashSet<>();
 
-    public void addFriend(Integer id) {
-        friends.add(id);
+    public void addFriend(Integer userId) {
+        friends.add(userId);
     }
 
-    public void deleteFriend(Integer id) {
-        friends.remove(id);
+    public void deleteFriend(Integer userId) {
+        friends.remove(userId);
     }
 }

@@ -1,31 +1,30 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService implements ObjectService<Film> {
     private final FilmRepository<Integer> filmRepository;
+    private final UserRepository<Integer> userRepository;
     private Integer id = 1;
-
-    @Autowired
-    public FilmService(FilmRepository<Integer> filmRepository) {
-        this.filmRepository = filmRepository;
-    }
 
     @Override
     public boolean repositoryContains(Integer id) {
-        return filmRepository.getStorage().containsKey(id);
+        return filmRepository.contains(id);
     }
 
     @Override
@@ -40,23 +39,24 @@ public class FilmService implements ObjectService<Film> {
 
     @Override
     public Film getById(Integer filmId) throws ObjectNotFoundException {
-        if (repositoryContains(filmId)) {
+        Optional<Integer> optionalFilmId = Optional.ofNullable(filmId);
+        try {
+            int i = optionalFilmId
+                    .filter(this::repositoryContains)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Film with Id: " + filmId + " not found"));
             log.debug(
-                    "Запрос фильма по Id: {} успешно выполнен.", filmId
+                    "Запрос фильма по Id: {} успешно выполнен.", i
             );
-            return filmRepository.getById(filmId);
-        } else {
-            log.warn(
-                    "Фильм c Id: {} не найден.", filmId
-            );
-            throw new ObjectNotFoundException(
-                    "Film with Id: " + filmId + " not found"
-            );
+            return filmRepository.getById(i);
+        } catch (ObjectNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e;
         }
     }
 
     @Override
-    public Film create(Film film) throws ObjectAlreadyExistException, IllegalArgumentException {
+    public Film create(Film film) throws ObjectAlreadyExistException {
 
         if (repositoryContains(film.getId())) {
             log.warn(
@@ -70,7 +70,7 @@ public class FilmService implements ObjectService<Film> {
         film.setId(id);
         id++;
         log.debug(
-                "Фильм под Id: {} успешно добавлен", id
+                "Фильм под Id: {} успешно добавлен", film.getId()
         );
         filmRepository.put(film.getId(), film);
         return film;
@@ -78,95 +78,92 @@ public class FilmService implements ObjectService<Film> {
 
     @Override
     public Film put(Film film) throws ObjectNotFoundException {
-
-        if (repositoryContains(film.getId())) {
-            filmRepository.put(film.getId(), film);
+        Optional<Integer> optionalFilmId = Optional.ofNullable(film.getId());
+        try {
+            int i = optionalFilmId
+                    .filter(this::repositoryContains)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Film with Id: " + film.getId() + " not found"));
+            filmRepository.put(i, film);
             log.debug(
                     "Данные о фильме {} успешно обновлены", film.getName()
             );
-        } else {
-            log.warn(
-                    "Фильм под Id: {} не найден.",
-                    film.getId()
-            );
-            throw new ObjectNotFoundException(
-                    "Film Id: " + film.getId() + " doesn't exist"
-            );
+            return filmRepository.getById(i);
+        } catch (NoSuchElementException e) {
+            log.warn(e.getMessage());
+            throw e;
         }
-        return film;
     }
 
     public Film addLike(Integer filmId, Integer userId) {
-        if (!repositoryContains(filmId)) {
-            log.warn(
-                    "Фильм под Id: {} не найден.", filmId
+        Optional<Integer> optionalFilmId = Optional.ofNullable(filmId);
+        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
+        try {
+            int i = optionalFilmId
+                    .filter(this::repositoryContains)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Film Id: " + filmId + " doesn't exist"));
+            Film film = filmRepository.getById(i);
+
+            int j = optionalUserId
+                    .filter((p) -> userRepository.contains(optionalUserId.orElseThrow()))
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "User Id:" + userId + " doesn't exist"));
+
+            film.addLike(j);
+            log.debug(
+                    "Фильм под Id: {} получил лайк от пользователя" +
+                            " с Id: {}.\n Всего лайков: {}.",
+                    i, j, film.getLikesInfo().size()
             );
-            throw new ObjectNotFoundException(
-                    "Film Id: " + filmId + " doesn't exist"
-            );
+            return filmRepository.getById(i);
+        } catch (ObjectNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e;
         }
-        if (!InMemoryUserRepository.contains(userId)) {
-            log.warn(
-                    "Пользователь под Id: {} не найден.", userId
-            );
-            throw new ObjectNotFoundException(
-                    "User Id:" + userId + " doesn't exist"
-            );
-        }
-        Film film = filmRepository.getById(filmId);
-        film.addLike(userId);
-        log.debug(
-                "Фильм под Id: {} получил лайк от пользователя" +
-                        " с Id: {}.\n Всего лайков: {}.",
-                filmId, userId, film.getLikesInfo().size()
-        );
-        return film;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
-        if (!repositoryContains(filmId)) {
-            log.warn(
-                    "Фильм под Id: {} не найден.", filmId
+        Optional<Integer> optionalFilmId = Optional.ofNullable(filmId);
+        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
+        try {
+            int i = optionalFilmId
+                    .filter(this::repositoryContains)
+                    .orElseThrow(() -> new ObjectNotFoundException(
+                            "Film Id: " + filmId + " doesn't exist"));
+            Film film = filmRepository.getById(i);
+
+            int j = optionalUserId
+                    .filter((p) -> userRepository.contains(
+                            optionalUserId.orElseThrow(() -> new ObjectNotFoundException(
+                                    "Error! Cannot delete user Id: " + userId + " like, user like not found.")
+                            ))
+                    )
+                    .filter((p) -> film.getLikesInfo().contains(
+                            optionalUserId.orElseThrow(() -> new ObjectNotFoundException
+                                    ("Error! Cannot delete user Id: " + userId + " like, user like not found.")
+                            ))
+                    )
+                    .orElseThrow(() -> new ObjectNotFoundException
+                            ("Error! Cannot delete user Id: " + userId + " like, user like not found."));
+
+            film.deleteLike(j);
+            log.debug(
+                    "У фильма под Id: {} удален лайк от пользователя" +
+                            " с Id: {}.\n Всего лайков: {}.",
+                    i, j, film.getLikesInfo().size()
             );
-            throw new ObjectNotFoundException(
-                    "Film Id: " + filmId + " doesn't exist"
-            );
+            return filmRepository.getById(i);
+        } catch (ObjectNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e;
         }
-        if (!InMemoryUserRepository.contains(userId)) {
-            log.warn(
-                    "Пользователь под Id: {} не найден.", userId
-            );
-            throw new ObjectNotFoundException(
-                    "User Id:" + userId + " doesn't exist"
-            );
-        }
-        Film film = filmRepository.getById(filmId);
-        if (!film.getLikesInfo().contains(userId)) {
-            log.warn(
-                    "Ошибка! Не удалось удалить лайк от пользователя под Id: {}" +
-                            " лайк не найден.", userId
-            );
-            throw new ObjectNotFoundException(
-                    "Error! Cannot delete user Id: " + userId + " like, user like not found."
-            );
-        }
-        film.deleteLike(userId);
-        log.debug(
-                "У фильма под Id: {} удален лайк от пользователя" +
-                        " с Id: {}.\n Всего лайков: {}.",
-                filmId, userId, film.getLikesInfo().size()
-        );
-        return film;
     }
 
     public Collection<Film> getPopularFilms(Integer count) {
-        return filmRepository.getStorage().values().stream()
-                .sorted(this::compare)
+        return filmRepository.findAll().stream()
+                .sorted((f0, f1) -> f1.getLikesInfo().size() - f0.getLikesInfo().size())
                 .limit(count)
                 .collect(Collectors.toList());
-    }
-
-    private int compare(Film f0, Film f1) {
-        return f1.getLikesInfo().size() - f0.getLikesInfo().size();
     }
 }
