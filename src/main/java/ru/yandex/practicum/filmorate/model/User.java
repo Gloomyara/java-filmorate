@@ -31,7 +31,11 @@ public class User {
         friends.add(userId);
     }
 
-    public void deleteFriend(Integer userId) {
-        friends.remove(userId);
+    public boolean deleteFriend(Integer userId) {
+        if (friends.contains(userId)) {
+            friends.remove(userId);
+            return true;
+        }
+        return false;
     }
 }
