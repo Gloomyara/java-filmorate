@@ -43,8 +43,10 @@ public class FilmService implements ObjectService<Film> {
         try {
             int i = optionalFilmId
                     .filter(this::repositoryContains)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "Film with Id: " + filmId + " not found"));
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "Film with Id: " + filmId + " not found")
+                    );
             log.debug(
                     "Запрос фильма по Id: {} успешно выполнен.", i
             );
@@ -82,8 +84,10 @@ public class FilmService implements ObjectService<Film> {
         try {
             int i = optionalFilmId
                     .filter(this::repositoryContains)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "Film with Id: " + film.getId() + " not found"));
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "Film with Id: " + film.getId() + " not found")
+                    );
             filmRepository.put(i, film);
             log.debug(
                     "Данные о фильме {} успешно обновлены", film.getName()
@@ -101,14 +105,18 @@ public class FilmService implements ObjectService<Film> {
         try {
             int i = optionalFilmId
                     .filter(this::repositoryContains)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "Film Id: " + filmId + " doesn't exist"));
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "Film Id: " + filmId + " doesn't exist")
+                    );
             Film film = filmRepository.getById(i);
 
             int j = optionalUserId
-                    .filter((p) -> userRepository.contains(optionalUserId.orElseThrow()))
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "User Id:" + userId + " doesn't exist"));
+                    .filter((p) -> userRepository.contains(optionalUserId.orElse(null)))
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "User Id:" + userId + " doesn't exist")
+                    );
 
             film.addLike(j);
             log.debug(
@@ -129,19 +137,19 @@ public class FilmService implements ObjectService<Film> {
         try {
             int i = optionalFilmId
                     .filter(this::repositoryContains)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                                    "Film Id: " + filmId + " doesn't exist"));
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "Film Id: " + filmId + " doesn't exist")
+                    );
             Film film = filmRepository.getById(i);
 
             int j = optionalUserId
-                    .filter((p) -> userRepository.contains(optionalUserId.orElseThrow(
-                            () -> new ObjectNotFoundException("Error! Cannot delete user Id: " + userId
-                                    + " like, user like not found."))))
-                    .filter((p) -> film.getLikesInfo().contains(optionalUserId.orElseThrow(
-                                    () -> new ObjectNotFoundException("Error! Cannot delete user Id: "
-                                            + userId + " like, user like not found."))))
-                    .orElseThrow(() -> new ObjectNotFoundException("Error! Cannot delete user Id: "
-                            + userId + " like, user like not found."));
+                    .filter((p) -> userRepository.contains(optionalUserId.orElse(null)))
+                    .filter((p) -> film.getLikesInfo().contains(optionalUserId.orElse(null)))
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete user Id: "
+                                    + userId + " like, user like not found.")
+                    );
 
             film.deleteLike(j);
             log.debug(
