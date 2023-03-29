@@ -102,7 +102,7 @@ class FilmServiceTest {
                 NoSuchElementException.class,
                 () -> filmService.addLike(nonExistId, userId)
         );
-        assertEquals("Film Id: " + nonExistId + " doesn't exist", ex.getMessage());
+        assertEquals("Film with Id: " + nonExistId + " not found", ex.getMessage());
     }
 
 

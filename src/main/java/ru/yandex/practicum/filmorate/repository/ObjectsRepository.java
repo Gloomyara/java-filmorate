@@ -6,9 +6,7 @@ public interface ObjectsRepository<K, V> {
 
     Collection<V> findAll();
 
-    V getById(Integer id);
+    V getById(K k);
 
     void put(K k, V v);
-
-    boolean contains(K k);
 }

@@ -20,7 +20,7 @@ public class UserService implements ObjectService<User> {
 
     @Override
     public boolean repositoryContains(Integer id) {
-        return userRepository.contains(id);
+        return userRepository.getById(id) != null;
     }
 
     @Override
@@ -35,18 +35,14 @@ public class UserService implements ObjectService<User> {
 
     @Override
     public User getById(Integer userId) throws ObjectNotFoundException {
-        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
         try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with Id: " + userId + " not found")
-                    );
-            log.debug(
-                    "Запрос пользователя по Id: {} успешно выполнен.", i
+            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with Id: " + userId + " not found")
             );
-            return userRepository.getById(i);
+            log.debug(
+                    "Запрос пользователя по Id: {} успешно выполнен.", userId
+            );
+            return user;
         } catch (ObjectNotFoundException e) {
             log.warn(e.getMessage());
             throw e;
@@ -82,15 +78,12 @@ public class UserService implements ObjectService<User> {
 
     @Override
     public User put(User user) throws ObjectNotFoundException {
-        Optional<Integer> optionalUserId = Optional.ofNullable(user.getId());
         try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + user.getId() + " doesn't exist!")
-                    );
-            userRepository.put(i, user);
+            Integer userId = user.getId();
+            Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+            );
+            userRepository.put(userId, user);
             log.debug(
                     "Данные пользователя с электронной почтой {} успешно обновлены.",
                     user.getEmail()
@@ -103,32 +96,23 @@ public class UserService implements ObjectService<User> {
     }
 
     public User addFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
-        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
-        Optional<Integer> optionalFriendId = Optional.ofNullable(friendId);
-        try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + userId + " doesn't exist!")
-                    );
-            int j = optionalFriendId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "Error! Cannot add friend with id:" + friendId
-                                            + ", user doesn't exist!")
-                    );
 
-            User initialUser = userRepository.getById(i);
-            initialUser.addFriend(j);
-            userRepository.getById(j).addFriend(i);
+        try {
+            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+            );
+            User friend = Optional.ofNullable(userRepository.getById(friendId)).orElseThrow(
+                    () -> new ObjectNotFoundException("Error! Cannot add friend with id:" + friendId
+                            + ", user doesn't exist!")
+            );
+            user.addFriend(friendId);
+            friend.addFriend(userId);
             log.debug(
                     "Запрос пользователя под Id: {} на добавление в друзья, " +
                             "пользователя Id: {}, успешно выполнен!\n" +
-                            "Всего друзей в списке: {}.", i, j, initialUser.getFriends().size()
+                            "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
             );
-            return initialUser;
+            return user;
         } catch (ObjectNotFoundException e) {
             log.warn(e.getMessage());
             throw e;
@@ -136,33 +120,29 @@ public class UserService implements ObjectService<User> {
     }
 
     public User deleteFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
-        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
-        Optional<Integer> optionalFriendId = Optional.ofNullable(friendId);
-        try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + userId + " doesn't exist!")
-                    );
-            User initialUser = userRepository.getById(i);
 
-            int j = optionalFriendId
-                    .filter(this::repositoryContains)
-                    .filter((p) -> initialUser.getFriends().contains(optionalFriendId.orElse(null)))
+        try {
+            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+            );
+            User friend = Optional.ofNullable(userRepository.getById(friendId)).orElseThrow(
+                    () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                            + friendId + ", user doesn't in your friends list!")
+            );
+            Optional.ofNullable(friendId)
+                    .filter((p) -> user.getFriends().contains(friendId))
                     .orElseThrow(
                             () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
                                     + friendId + ", user doesn't in your friends list!")
                     );
-
-            initialUser.deleteFriend(j);
-            userRepository.getById(j).deleteFriend(i);
+            user.deleteFriend(friendId);
+            friend.deleteFriend(userId);
             log.debug(
                     "Запрос пользователя под Id: {} на удаление из друзей, " +
                             "пользователя Id: {}, успешно выполнен!\n" +
-                            "Всего друзей в списке: {}.", i, j, initialUser.getFriends().size()
+                            "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
             );
-            return initialUser;
+            return user;
         } catch (ObjectNotFoundException e) {
             log.warn(e.getMessage());
             throw e;
@@ -170,15 +150,10 @@ public class UserService implements ObjectService<User> {
     }
 
     public Collection<User> getFriendsListById(Integer userId) throws ObjectNotFoundException {
-        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
         try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + userId + " doesn't exist!")
-                    );
-            User user = userRepository.getById(i);
+            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+            );
             log.debug(
                     "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
                             "Всего друзей в списке: {}.", userId, user.getFriends().size()
@@ -196,29 +171,18 @@ public class UserService implements ObjectService<User> {
     public Collection<User> getMutualFriendsList(
             Integer userId, Integer otherId) throws ObjectNotFoundException {
 
-        Optional<Integer> optionalUserId = Optional.ofNullable(userId);
-        Optional<Integer> optionalFriendId = Optional.ofNullable(otherId);
         try {
-            int i = optionalUserId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + userId + " doesn't exist!")
-                    );
-            int j = optionalFriendId
-                    .filter(this::repositoryContains)
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "User with id: " + otherId + " doesn't exist!")
-                    );
-
-            User user = userRepository.getById(i);
+            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+            );
+            User otherUser = Optional.ofNullable(userRepository.getById(otherId)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with id: " + otherId + " doesn't exist!")
+            );
             Set<Integer> mutualFriendsSet = new HashSet<>(user.getFriends());
-            User otherUser = userRepository.getById(j);
             mutualFriendsSet.retainAll(otherUser.getFriends());
             log.debug(
                     "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
-                            "Всего общих друзей: {}.", i, j, mutualFriendsSet.size()
+                            "Всего общих друзей: {}.", userId, otherId, mutualFriendsSet.size()
             );
             return mutualFriendsSet.stream()
                     .map(this::getById)

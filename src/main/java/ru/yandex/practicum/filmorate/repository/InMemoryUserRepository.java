@@ -19,16 +19,14 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
 
     @Override
     public User getById(Integer id) throws ObjectNotFoundException {
-        return userStorage.get(id);
+        if (userStorage.containsKey(id)) {
+            return userStorage.get(id);
+        }
+        return null;
     }
 
     @Override
     public void put(Integer integer, User user) {
         userStorage.put(integer, user);
-    }
-
-    @Override
-    public boolean contains(Integer id) {
-        return userStorage.containsKey(id);
     }
 }
