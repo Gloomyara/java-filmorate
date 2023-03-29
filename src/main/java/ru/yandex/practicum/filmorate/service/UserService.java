@@ -68,12 +68,12 @@ public class UserService implements ObjectService<User> {
         }
 
         user.setId(id);
-        id++;
         log.debug(
                 "Пользователь с электронной почтой {} успешно зарегистрирован.",
                 user.getEmail()
         );
-        userRepository.put(user.getId(), user);
+        userRepository.put(id, user);
+        id++;
         return user;
     }
 

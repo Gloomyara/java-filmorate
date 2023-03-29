@@ -68,11 +68,11 @@ public class FilmService implements ObjectService<Film> {
             );
         }
         film.setId(id);
-        id++;
         log.debug(
-                "Фильм под Id: {} успешно добавлен", film.getId()
+                "Фильм под Id: {} успешно добавлен", id
         );
-        filmRepository.put(film.getId(), film);
+        filmRepository.put(id, film);
+        id++;
         return film;
     }
 
