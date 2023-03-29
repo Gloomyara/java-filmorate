@@ -32,7 +32,11 @@ public class Film {
         likesInfo.add(userId);
     }
 
-    public void deleteLike(Integer userId) {
-        likesInfo.remove(userId);
+    public boolean deleteLike(Integer userId) {
+        if (likesInfo.contains(userId)) {
+            likesInfo.remove(userId);
+            return true;
+        }
+        return false;
     }
 }
