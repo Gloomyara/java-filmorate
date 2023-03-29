@@ -141,10 +141,10 @@ public class UserService implements ObjectService<User> {
                     .filter(this::repositoryContains)
                     .filter(
                             (p) -> initialUser.getFriends().contains(
-                            optionalFriendId.orElseThrow(
-                                    () -> new ObjectNotFoundException("Error! Cannot delete friend with id: " + friendId +
-                                            ", user doesn't in your friends list!")
-                            )
+                                    optionalFriendId.orElseThrow(
+                                            () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                                                    + friendId + ", user doesn't in your friends list!")
+                                    )
                             )
                     )
                     .orElseThrow(

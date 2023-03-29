@@ -135,17 +135,27 @@ public class FilmService implements ObjectService<Film> {
 
             int j = optionalUserId
                     .filter((p) -> userRepository.contains(
-                            optionalUserId.orElseThrow(() -> new ObjectNotFoundException(
-                                    "Error! Cannot delete user Id: " + userId + " like, user like not found.")
-                            ))
+                                    optionalUserId.orElseThrow(
+                                            () -> new ObjectNotFoundException(
+                                                    "Error! Cannot delete user Id: " + userId
+                                                            + " like, user like not found.")
+                                    )
+                            )
                     )
-                    .filter((p) -> film.getLikesInfo().contains(
-                            optionalUserId.orElseThrow(() -> new ObjectNotFoundException
+                    .filter(
+                            (p) -> film.getLikesInfo().contains(
+                                    optionalUserId.orElseThrow(
+                                            () -> new ObjectNotFoundException
+                                                    ("Error! Cannot delete user Id: " + userId
+                                                            + " like, user like not found.")
+                                    )
+                            )
+                    )
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException
                                     ("Error! Cannot delete user Id: " + userId
-                                            + " like, user like not found."))))
-                    .orElseThrow(() -> new ObjectNotFoundException
-                            ("Error! Cannot delete user Id: " + userId
-                                    + " like, user like not found."));
+                                            + " like, user like not found.")
+                    );
 
             film.deleteLike(j);
             log.debug(
