@@ -10,16 +10,11 @@ import java.util.Map;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository<Integer> {
-    private static final Map<Integer, User> userStorage = new HashMap<>();
+    private final Map<Integer, User> userStorage = new HashMap<>();
 
     @Override
     public Collection<User> findAll() {
         return userStorage.values();
-    }
-
-    @Override
-    public Map<Integer, User> getStorage() {
-        return userStorage;
     }
 
     @Override
@@ -32,7 +27,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         userStorage.put(integer, user);
     }
 
-    public static boolean contains(Integer id) {
+    @Override
+    public boolean contains(Integer id) {
         return userStorage.containsKey(id);
     }
 }

@@ -28,12 +28,12 @@ public class Film {
     private Integer duration;
     private final Set<Integer> likesInfo = new HashSet<>();
 
-    public void addLike(Integer id) {
-        likesInfo.add(id);
+    public void addLike(Integer userId) {
+        likesInfo.add(userId);
     }
 
-    public void deleteLike(Integer id) {
-        likesInfo.remove(id);
+    public void deleteLike(Integer userId) {
+        likesInfo.remove(userId);
     }
 }
 

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.validation;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +35,6 @@ public class UserValidationTests {
         inMemoryUserRepository = new InMemoryUserRepository();
         userService = new UserService(inMemoryUserRepository);
         userController = new UserController(userService);
-    }
-
-    @AfterEach
-    void clearUserRepository() {
-        inMemoryUserRepository.getStorage().clear();
     }
 
     @Test

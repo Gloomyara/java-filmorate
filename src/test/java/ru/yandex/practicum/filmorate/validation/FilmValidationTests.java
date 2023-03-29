@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
@@ -26,13 +27,15 @@ public class FilmValidationTests {
     Film film;
     Film film1;
     InMemoryFilmRepository inMemoryFilmRepository;
+    InMemoryUserRepository inMemoryUserRepository;
     FilmService filmService;
     FilmController filmController;
 
     @BeforeEach
     void createSomeData() {
         inMemoryFilmRepository = new InMemoryFilmRepository();
-        filmService = new FilmService(inMemoryFilmRepository);
+        inMemoryUserRepository = new InMemoryUserRepository();
+        filmService = new FilmService(inMemoryFilmRepository, inMemoryUserRepository);
         filmController = new FilmController(filmService);
     }
 
@@ -44,7 +47,7 @@ public class FilmValidationTests {
                 NoSuchElementException.class,
                 () -> filmController.put(film)
         );
-        Assertions.assertEquals("Film Id: null doesn't exist", ex1.getMessage());
+        Assertions.assertEquals("Film with Id: null not found", ex1.getMessage());
     }
 
     @Test

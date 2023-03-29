@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +24,6 @@ class UserServiceTest {
     void createSomeData() {
         inMemoryUserRepository = new InMemoryUserRepository();
         userService = new UserService(inMemoryUserRepository);
-    }
-
-    @AfterEach
-    void clearUserRepository() {
-        inMemoryUserRepository.getStorage().clear();
     }
 
     @Test
@@ -126,7 +120,7 @@ class UserServiceTest {
                 () -> userService.deleteFriend(userId, nonExistId)
         );
         assertEquals("Error! Cannot delete friend with id: " + nonExistId
-                + ", user doesn't exist!", ex.getMessage());
+                + ", user doesn't in your friends list!", ex.getMessage());
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.deleteFriend(nonExistId1, user1Id)
