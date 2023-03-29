@@ -15,3 +15,4 @@ public interface ObjectService<T> {
 
     T put(T t);
 }
+

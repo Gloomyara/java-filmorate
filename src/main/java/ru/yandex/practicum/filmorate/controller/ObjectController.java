@@ -12,3 +12,4 @@ public interface ObjectController<T> {
 
     T put(T t);
 }
+

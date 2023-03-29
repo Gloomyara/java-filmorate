@@ -36,3 +36,4 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         return userStorage.containsKey(id);
     }
 }
+

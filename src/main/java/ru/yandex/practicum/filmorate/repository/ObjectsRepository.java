@@ -13,3 +13,4 @@ public interface ObjectsRepository<K, V> {
 
     void put(K k, V v);
 }
+

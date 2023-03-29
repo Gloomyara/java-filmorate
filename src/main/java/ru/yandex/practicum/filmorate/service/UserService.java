@@ -226,3 +226,4 @@ public class UserService implements ObjectService<User> {
         return mutualFriendsList;
     }
 }
+

@@ -189,3 +189,4 @@ public class UserValidationTests {
         AssertionErrors.assertEquals("Пользователи не совпадают", user2, user1);
     }
 }
+
