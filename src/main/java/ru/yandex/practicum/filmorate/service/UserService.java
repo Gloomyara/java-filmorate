@@ -136,6 +136,12 @@ public class UserService implements ObjectService<User> {
                                     + friendId + ", user doesn't in your friends list!")
                     );
             user.deleteFriend(friendId);
+            Optional.ofNullable(userId)
+                    .filter((p) -> friend.getFriends().contains(userId))
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                                    + userId + ", user doesn't in your friends list!")
+                    );
             friend.deleteFriend(userId);
             log.debug(
                     "Запрос пользователя под Id: {} на удаление из друзей, " +

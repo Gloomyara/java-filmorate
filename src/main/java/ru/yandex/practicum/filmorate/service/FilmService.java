@@ -119,10 +119,14 @@ public class FilmService implements ObjectService<Film> {
             Film film = Optional.ofNullable(filmRepository.getById(filmId)).orElseThrow(
                     () -> new ObjectNotFoundException("Film Id: " + filmId + " doesn't exist")
             );
-            Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("Error! Cannot delete user Id: "
-                            + userId + " like, user like not found.")
-            );
+            Optional.ofNullable(userId)
+                    .filter((p) -> userRepository.getById(userId) != null)
+                    .filter((p) -> film.getLikesInfo().contains(userId))
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete user Id: "
+                                    + userId + " like, user like not found.")
+                    );
+
             film.deleteLike(userId);
             log.debug(
                     "У фильма под Id: {} удален лайк от пользователя" +
