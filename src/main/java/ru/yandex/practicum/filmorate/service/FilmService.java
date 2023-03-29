@@ -130,32 +130,18 @@ public class FilmService implements ObjectService<Film> {
             int i = optionalFilmId
                     .filter(this::repositoryContains)
                     .orElseThrow(() -> new ObjectNotFoundException(
-                            "Film Id: " + filmId + " doesn't exist"));
+                                    "Film Id: " + filmId + " doesn't exist"));
             Film film = filmRepository.getById(i);
 
             int j = optionalUserId
-                    .filter((p) -> userRepository.contains(
-                                    optionalUserId.orElseThrow(
-                                            () -> new ObjectNotFoundException(
-                                                    "Error! Cannot delete user Id: " + userId
-                                                            + " like, user like not found.")
-                                    )
-                            )
-                    )
-                    .filter(
-                            (p) -> film.getLikesInfo().contains(
-                                    optionalUserId.orElseThrow(
-                                            () -> new ObjectNotFoundException(
-                                                    "Error! Cannot delete user Id: " + userId
-                                                            + " like, user like not found.")
-                                    )
-                            )
-                    )
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "Error! Cannot delete user Id: " + userId
-                                            + " like, user like not found.")
-                    );
+                    .filter((p) -> userRepository.contains(optionalUserId.orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete user Id: " + userId
+                                    + " like, user like not found."))))
+                    .filter((p) -> film.getLikesInfo().contains(optionalUserId.orElseThrow(
+                                    () -> new ObjectNotFoundException("Error! Cannot delete user Id: "
+                                            + userId + " like, user like not found."))))
+                    .orElseThrow(() -> new ObjectNotFoundException("Error! Cannot delete user Id: "
+                            + userId + " like, user like not found."));
 
             film.deleteLike(j);
             log.debug(

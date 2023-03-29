@@ -133,26 +133,20 @@ public class UserService implements ObjectService<User> {
         try {
             int i = optionalUserId
                     .filter(this::repositoryContains)
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "User with id: " + userId + " doesn't exist!"));
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException(
+                                    "User with id: " + userId + " doesn't exist!")
+                    );
             User initialUser = userRepository.getById(i);
 
             int j = optionalFriendId
                     .filter(this::repositoryContains)
-                    .filter(
-                            (p) -> initialUser.getFriends().contains(
-                                    optionalFriendId.orElseThrow(
-                                            () -> new ObjectNotFoundException(
-                                                    "Error! Cannot delete friend with id: "
-                                                            + friendId + ", user doesn't in your friends list!")
-                                    )
-                            )
-                    )
+                    .filter((p) -> initialUser.getFriends().contains(optionalFriendId.orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                                    + friendId + ", user doesn't in your friends list!"))))
                     .orElseThrow(
-                            () -> new ObjectNotFoundException(
-                                    "Error! Cannot delete friend with id: " + friendId
-                                            + ", user doesn't in your friends list!")
-                    );
+                            () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                                    + friendId + ", user doesn't in your friends list!"));
 
             initialUser.deleteFriend(j);
             userRepository.getById(j).deleteFriend(i);
