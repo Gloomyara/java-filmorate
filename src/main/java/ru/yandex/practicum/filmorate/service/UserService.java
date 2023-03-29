@@ -230,4 +230,3 @@ public class UserService implements ObjectService<User> {
         }
     }
 }
-

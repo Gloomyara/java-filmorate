@@ -12,4 +12,3 @@ public interface ObjectsRepository<K, V> {
 
     boolean contains(K k);
 }
-

@@ -32,4 +32,3 @@ public abstract class ObjectController<S extends ObjectService<T>, T> {
         return service.put(t);
     }
 }
-

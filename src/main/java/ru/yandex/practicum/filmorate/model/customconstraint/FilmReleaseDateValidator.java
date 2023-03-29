@@ -21,4 +21,3 @@ public class FilmReleaseDateValidator implements ConstraintValidator<FilmRelease
         return object.isAfter(firstFilmDate);
     }
 }
-

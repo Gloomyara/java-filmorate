@@ -36,4 +36,3 @@ public class Film {
         likesInfo.remove(userId);
     }
 }
-
