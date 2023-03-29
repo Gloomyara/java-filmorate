@@ -33,10 +33,6 @@ public class Film {
     }
 
     public boolean deleteLike(Integer userId) {
-        if (likesInfo.contains(userId)) {
-            likesInfo.remove(userId);
-            return true;
-        }
-        return false;
+        return likesInfo.remove(userId);
     }
 }
