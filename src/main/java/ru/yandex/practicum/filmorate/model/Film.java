@@ -26,6 +26,7 @@ public class Film {
     @NotNull(message = "Duration cannot be null")
     @Positive(message = "Duration should be positive")
     private Integer duration;
+
     private final Set<Integer> likesInfo = new HashSet<>();
 
     public void addLike(Integer userId) {

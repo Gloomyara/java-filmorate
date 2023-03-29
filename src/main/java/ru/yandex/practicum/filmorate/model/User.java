@@ -31,7 +31,7 @@ public class User {
         friends.add(userId);
     }
 
-    public boolean deleteFriend(Integer userId) {
-        return friends.remove(userId);
+    public boolean deleteFriend(Integer friendId) {
+        return friends.remove(friendId);
     }
 }
