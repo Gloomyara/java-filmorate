@@ -53,6 +53,7 @@ public class UserService implements ObjectService<User> {
 
     @Override
     public User create(User user) throws ObjectAlreadyExistException {
+
         if (repositoryContains(user.getId())) {
             log.warn(
                     "Пользователь с электронной почтой {} уже зарегистрирован.",
@@ -138,13 +139,18 @@ public class UserService implements ObjectService<User> {
 
             int j = optionalFriendId
                     .filter(this::repositoryContains)
-                    .filter((p) -> initialUser.getFriends().contains(
-                            optionalFriendId.orElseThrow(() -> new ObjectNotFoundException(
-                                    "Error! Cannot delete friend with id: " + friendId +
-                                            ", user doesn't in your friends list!"))))
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "Error! Cannot delete friend with id: " + friendId
-                                    + ", user doesn't in your friends list!"));
+                    .filter(
+                            (p) -> initialUser.getFriends().contains(
+                            optionalFriendId.orElseThrow(
+                                    () -> new ObjectNotFoundException("Error! Cannot delete friend with id: " + friendId +
+                                            ", user doesn't in your friends list!")
+                            )
+                            )
+                    )
+                    .orElseThrow(
+                            () -> new ObjectNotFoundException("Error! Cannot delete friend with id: " + friendId
+                                    + ", user doesn't in your friends list!")
+                    );
 
             initialUser.deleteFriend(j);
             userRepository.getById(j).deleteFriend(i);
