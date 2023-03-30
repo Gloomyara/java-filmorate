@@ -9,7 +9,7 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends ObjectController<UserService, User> {
+public class UserController extends ObjectController<UserService, Integer, User> {
 
     public UserController(UserService service) {
         super(service);

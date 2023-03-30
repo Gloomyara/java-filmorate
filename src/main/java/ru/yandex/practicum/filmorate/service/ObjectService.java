@@ -3,15 +3,15 @@ package ru.yandex.practicum.filmorate.service;
 import java.util.Collection;
 
 
-public interface ObjectService<T> {
+public interface ObjectService<K, V> {
 
-    boolean repositoryContainsKey(Integer id);
+    boolean repositoryContainsKey(K k);
 
-    Collection<T> findAll();
+    Collection<V> findAll();
 
-    T getByKey(Integer id);
+    V getByKey(K k);
 
-    T create(T t);
+    V create(V v);
 
-    T put(T t);
+    V put(V v);
 }

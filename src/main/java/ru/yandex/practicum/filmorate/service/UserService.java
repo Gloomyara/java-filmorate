@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements ObjectService<User> {
+public class UserService implements ObjectService<Integer, User> {
     private final UserRepository<Integer> userRepository;
     private Integer id = 1;
 

@@ -9,7 +9,7 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/films")
-public class FilmController extends ObjectController<FilmService, Film> {
+public class FilmController extends ObjectController<FilmService, Integer, Film> {
 
     public FilmController(FilmService service) {
         super(service);

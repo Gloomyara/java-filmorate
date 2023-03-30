@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FilmService implements ObjectService<Film> {
+public class FilmService implements ObjectService<Integer, Film> {
 
     private final FilmRepository<Integer> filmRepository;
     private final UserRepository<Integer> userRepository;
