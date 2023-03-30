@@ -45,7 +45,7 @@ public class UserValidationTests {
                 NoSuchElementException.class,
                 () -> userController.put(user)
         );
-        assertEquals("User with id: null doesn't exist!", ex.getMessage());
+        assertEquals("User with Id: null not found", ex.getMessage());
     }
 
     @Test

@@ -76,13 +76,13 @@ class UserServiceTest {
                 NoSuchElementException.class,
                 () -> userService.addFriend(userId, nonExistId)
         );
-        assertEquals("Error! Cannot add friend with id:" + nonExistId
-                + ", user doesn't exist!", ex.getMessage());
+        assertEquals("User with Id: " + nonExistId
+                + " not found", ex.getMessage());
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.addFriend(nonExistId1, user1Id)
         );
-        assertEquals("User with id: " + nonExistId1 + " doesn't exist!", ex1.getMessage());
+        assertEquals("User with Id: " + nonExistId1 + " not found", ex1.getMessage());
     }
 
     @Test
@@ -119,13 +119,13 @@ class UserServiceTest {
                 NoSuchElementException.class,
                 () -> userService.deleteFriend(userId, nonExistId)
         );
-        assertEquals("Error! Cannot delete friend with id: " + nonExistId
-                + ", user doesn't in your friends list!", ex.getMessage());
+        assertEquals("User with Id: " + nonExistId
+                + " not found", ex.getMessage());
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.deleteFriend(nonExistId1, user1Id)
         );
-        assertEquals("User with id: " + nonExistId1 + " doesn't exist!", ex1.getMessage());
+        assertEquals("User with Id: " + nonExistId1 + " not found", ex1.getMessage());
     }
 
     @Test
@@ -155,7 +155,7 @@ class UserServiceTest {
                 NoSuchElementException.class,
                 () -> userService.getFriendsListById(id)
         );
-        assertEquals("User with id: " + id + " doesn't exist!", ex.getMessage());
+        assertEquals("User with Id: " + id + " not found", ex.getMessage());
     }
 
     @Test
@@ -226,12 +226,12 @@ class UserServiceTest {
                 NoSuchElementException.class,
                 () -> userService.getMutualFriendsList(userId, nonExistId)
         );
-        assertEquals("User with id: " + nonExistId + " doesn't exist!", ex.getMessage());
+        assertEquals("User with Id: " + nonExistId + " not found", ex.getMessage());
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.getMutualFriendsList(nonExistId1, user1Id)
         );
-        assertEquals("User with id: " + nonExistId1 + " doesn't exist!", ex1.getMessage());
+        assertEquals("User with Id: " + nonExistId1 + " not found", ex1.getMessage());
     }
 
     @Test
