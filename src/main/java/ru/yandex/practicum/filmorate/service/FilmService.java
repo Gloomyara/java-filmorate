@@ -22,13 +22,13 @@ public class FilmService implements ObjectService<Film> {
     private final UserRepository<Integer> userRepository;
     private Integer id = 1;
 
-    public boolean userRepositoryContains(Integer id) {
-        return userRepository.getById(id) != null;
+    public boolean userRepositoryContainsKey(Integer id) {
+        return userRepository.getByKey(id) != null;
     }
 
     @Override
-    public boolean repositoryContains(Integer id) {
-        return filmRepository.getById(id) != null;
+    public boolean repositoryContainsKey(Integer id) {
+        return filmRepository.getByKey(id) != null;
     }
 
     @Override
@@ -42,9 +42,9 @@ public class FilmService implements ObjectService<Film> {
     }
 
     @Override
-    public Film getById(Integer filmId) throws ObjectNotFoundException {
+    public Film getByKey(Integer filmId) throws ObjectNotFoundException {
         try {
-            Film film = Optional.ofNullable(filmRepository.getById(filmId)).orElseThrow(
+            Film film = Optional.ofNullable(filmRepository.getByKey(filmId)).orElseThrow(
                     () -> new ObjectNotFoundException("Film with Id: " + filmId + " not found")
             );
             log.debug(
@@ -61,7 +61,7 @@ public class FilmService implements ObjectService<Film> {
     @Override
     public Film create(Film film) throws ObjectAlreadyExistException {
 
-        if (repositoryContains(film.getId())) {
+        if (repositoryContainsKey(film.getId())) {
             log.warn(
                     "Фильм под Id: {} уже есть в списке фильмов.",
                     film.getId()
@@ -83,7 +83,7 @@ public class FilmService implements ObjectService<Film> {
     public Film put(Film film) throws ObjectNotFoundException {
 
         Integer filmId = film.getId();
-        getById(filmId);
+        getByKey(filmId);
 
         filmRepository.put(filmId, film);
         log.debug(
@@ -95,8 +95,8 @@ public class FilmService implements ObjectService<Film> {
 
     public Film addLike(Integer filmId, Integer userId) {
 
-        Film film = getById(filmId);
-        if (!userRepositoryContains(userId)) {
+        Film film = getByKey(filmId);
+        if (!userRepositoryContainsKey(userId)) {
             log.warn(
                     "User Id: {} doesn't exist",
                     userId
@@ -114,8 +114,8 @@ public class FilmService implements ObjectService<Film> {
 
     public Film deleteLike(Integer filmId, Integer userId) {
 
-        Film film = getById(filmId);
-        if (!userRepositoryContains(userId) || !film.deleteLike(userId)) {
+        Film film = getByKey(filmId);
+        if (!userRepositoryContainsKey(userId) || !film.deleteLike(userId)) {
             log.warn(
                     "Error! Cannot delete user Id: {} like, user like not found.",
                     userId

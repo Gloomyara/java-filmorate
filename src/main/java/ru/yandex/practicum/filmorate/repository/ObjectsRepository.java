@@ -6,7 +6,7 @@ public interface ObjectsRepository<K, V> {
 
     Collection<V> findAll();
 
-    V getById(K k);
+    V getByKey(K k);
 
     void put(K k, V v);
 }

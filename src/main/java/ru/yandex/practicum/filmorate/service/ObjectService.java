@@ -5,11 +5,11 @@ import java.util.Collection;
 
 public interface ObjectService<T> {
 
-    boolean repositoryContains(Integer id);
+    boolean repositoryContainsKey(Integer id);
 
     Collection<T> findAll();
 
-    T getById(Integer id);
+    T getByKey(Integer id);
 
     T create(T t);
 

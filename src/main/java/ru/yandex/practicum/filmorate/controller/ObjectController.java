@@ -18,8 +18,8 @@ public abstract class ObjectController<S extends ObjectService<T>, T> {
     }
 
     @GetMapping("/{id}")
-    public T getById(@PathVariable("id") Integer id) {
-        return service.getById(id);
+    public T getByKey(@PathVariable("id") Integer id) {
+        return service.getByKey(id);
     }
 
     @PostMapping

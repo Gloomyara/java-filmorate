@@ -46,7 +46,7 @@ class FilmServiceTest {
                 LocalDate.of(2020, 1, 1), 8500);
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
-                () -> filmService.getById(id)
+                () -> filmService.getByKey(id)
         );
         assertEquals("Film with Id: " + id + " not found", ex.getMessage());
     }
@@ -60,7 +60,7 @@ class FilmServiceTest {
         int id = film.getId();
         film1 = new Film(id, "testFilmName", "d",
                 LocalDate.of(2020, 1, 1), 8500);
-        assertEquals(film1, filmService.getById(id), "Фильмы не совпадают");
+        assertEquals(film1, filmService.getByKey(id), "Фильмы не совпадают");
     }
 
     @Test
@@ -75,7 +75,7 @@ class FilmServiceTest {
         int filmId = film.getId();
         inMemoryUserRepository.put(userId, user);
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -96,7 +96,7 @@ class FilmServiceTest {
         int filmId = film.getId();
         inMemoryUserRepository.put(userId, user);
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -117,7 +117,7 @@ class FilmServiceTest {
         int filmId = film.getId();
         inMemoryUserRepository.put(userId, user);
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
     }
 
@@ -133,7 +133,7 @@ class FilmServiceTest {
         userService.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -155,7 +155,7 @@ class FilmServiceTest {
         int filmId = film.getId();
         inMemoryUserRepository.put(userId, user);
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -175,10 +175,10 @@ class FilmServiceTest {
         userService.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getById(filmId).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         filmService.deleteLike(filmId, userId);
-        assertTrue("Лайк не был удален", filmService.getById(filmId).getLikesInfo().isEmpty());
+        assertTrue("Лайк не был удален", filmService.getByKey(filmId).getLikesInfo().isEmpty());
     }
 
     @Test
@@ -210,14 +210,14 @@ class FilmServiceTest {
         int user1Id = user1.getId();
         filmService.addLike(filmId, userId);
         filmService.addLike(filmId, user1Id);
-        System.out.println(filmService.getById(filmId).getLikesInfo().size());
-        assertEquals(2, filmService.getById(filmId).getLikesInfo().size(),
+        System.out.println(filmService.getByKey(filmId).getLikesInfo().size());
+        assertEquals(2, filmService.getByKey(filmId).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         filmService.addLike(film1Id, user1Id);
-        assertEquals(1, filmService.getById(film1Id).getLikesInfo().size(),
+        assertEquals(1, filmService.getByKey(film1Id).getLikesInfo().size(),
                 "Количество лайков не совпадает");
         assertTrue("Фильмы не совпадают",
-                filmService.getPopularFilms(1).contains(filmService.getById(filmId)));
+                filmService.getPopularFilms(1).contains(filmService.getByKey(filmId)));
         assertEquals(2, filmService.getPopularFilms(2).size(),
                 "Количество фильмов не совпадает");
     }

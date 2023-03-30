@@ -17,7 +17,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     }
 
     @Override
-    public Film getById(Integer id) {
+    public Film getByKey(Integer id) {
         if (filmStorage.containsKey(id)) {
             return filmStorage.get(id);
         }

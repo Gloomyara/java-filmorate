@@ -40,7 +40,7 @@ class UserServiceTest {
                 null, LocalDate.of(2023, 1, 1));
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
-                () -> userService.getById(id)
+                () -> userService.getByKey(id)
         );
         assertEquals("User with Id: " + id + " not found", ex.getMessage());
     }
@@ -54,7 +54,7 @@ class UserServiceTest {
         int id = user.getId();
         user1 = new User(id, "testuser@gmail.com", "testUser",
                 "testUser", LocalDate.of(2023, 1, 1));
-        assertEquals(user1, userService.getById(id), "Фильмы не совпадают");
+        assertEquals(user1, userService.getByKey(id), "Фильмы не совпадают");
     }
 
     @Test
