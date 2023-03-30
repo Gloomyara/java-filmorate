@@ -8,7 +8,10 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,7 +43,8 @@ public class UserService implements ObjectService<User> {
                     () -> new ObjectNotFoundException("User with Id: " + userId + " not found")
             );
             log.debug(
-                    "Запрос пользователя по Id: {} успешно выполнен.", userId
+                    "Запрос пользователя по Id: {} успешно выполнен.",
+                    userId
             );
             return user;
         } catch (ObjectNotFoundException e) {
@@ -57,10 +61,8 @@ public class UserService implements ObjectService<User> {
                     "Пользователь с электронной почтой {} уже зарегистрирован.",
                     user.getEmail()
             );
-            throw new ObjectAlreadyExistException(
-                    "Пользователь с электронной почтой " +
-                            user.getEmail() + " уже зарегистрирован."
-            );
+            throw new ObjectAlreadyExistException("Пользователь с электронной почтой " +
+                    user.getEmail() + " уже зарегистрирован.");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -78,121 +80,88 @@ public class UserService implements ObjectService<User> {
 
     @Override
     public User put(User user) throws ObjectNotFoundException {
-        try {
-            Integer userId = user.getId();
-            Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
-            );
-            userRepository.put(userId, user);
-            log.debug(
-                    "Данные пользователя с электронной почтой {} успешно обновлены.",
-                    user.getEmail()
-            );
-            return user;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
-        }
+        Integer userId = user.getId();
+        getById(userId);
+        userRepository.put(userId, user);
+        log.debug(
+                "Данные пользователя с электронной почтой {} успешно обновлены.",
+                user.getEmail()
+        );
+        return user;
     }
 
     public User addFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
 
-        try {
-            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
-            );
-            User friend = Optional.ofNullable(userRepository.getById(friendId)).orElseThrow(
-                    () -> new ObjectNotFoundException("Error! Cannot add friend with id:" + friendId
-                            + ", user doesn't exist!")
-            );
-            user.addFriend(friendId);
-            friend.addFriend(userId);
-            log.debug(
-                    "Запрос пользователя под Id: {} на добавление в друзья, " +
-                            "пользователя Id: {}, успешно выполнен!\n" +
-                            "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
-            );
-            return user;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
-        }
+        User user = getById(userId);
+        User friend = getById(friendId);
+        user.addFriend(friendId);
+        friend.addFriend(userId);
+        log.debug(
+                "Запрос пользователя под Id: {} на добавление в друзья, " +
+                        "пользователя Id: {}, успешно выполнен!\n" +
+                        "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
+        );
+        return user;
     }
 
     public User deleteFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
 
-        try {
-            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
+        User user = getById(userId);
+        User friend = getById(friendId);
+        boolean b1 = user.deleteFriend(friendId);
+        boolean b2 = friend.deleteFriend(userId);
+        String exMsg = null;
+        if (!b1) {
+            exMsg = friendId.toString();
+            log.warn(
+                    "Error! Cannot delete friend with id: {}," +
+                            " user doesn't in your friends list!", friendId
             );
-            User friend = Optional.ofNullable(userRepository.getById(friendId)).orElseThrow(
-                    () -> new ObjectNotFoundException("Error! Cannot delete friend with id: "
-                            + friendId + ", user doesn't in your friends list!")
-            );
-            boolean b1 = user.deleteFriend(friendId);
-            boolean b2 = friend.deleteFriend(userId);
-            if (!b1) {
-                throw new ObjectNotFoundException("Error! Cannot delete friend with id: "
-                        + friendId + ", user doesn't in your friends list!");
-            }
-            if (!b2) {
-                throw new ObjectNotFoundException("Error! Cannot delete friend with id: "
-                        + userId + ", user doesn't in your friends list!");
-            }
-            log.debug(
-                    "Запрос пользователя под Id: {} на удаление из друзей, " +
-                            "пользователя Id: {}, успешно выполнен!\n" +
-                            "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
-            );
-            return user;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
         }
+        if (!b2) {
+            exMsg = exMsg + " , " + userId.toString();
+            log.warn(
+                    "Error! Cannot delete friend with id: {}," +
+                            " user doesn't in your friends list!", userId
+            );
+        }
+        if (!b1 || !b2) {
+            throw new ObjectNotFoundException("Error! Cannot delete friend with id: "
+                    + exMsg + ", user doesn't in your friends list!");
+        }
+        log.debug(
+                "Запрос пользователя под Id: {} на удаление из друзей, " +
+                        "пользователя Id: {}, успешно выполнен!\n" +
+                        "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
+        );
+        return user;
     }
 
     public Collection<User> getFriendsListById(Integer userId) throws ObjectNotFoundException {
-        try {
-            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
-            );
-            log.debug(
-                    "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
-                            "Всего друзей в списке: {}.", userId, user.getFriends().size()
-            );
-            return user.getFriends().stream()
-                    .map(this::getById)
-                    .collect(Collectors.toList());
 
-        } catch (NoSuchElementException e) {
-            log.warn(e.getMessage());
-            throw e;
-        }
+        User user = getById(userId);
+        log.debug(
+                "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
+                        "Всего друзей в списке: {}.", userId, user.getFriends().size()
+        );
+        return user.getFriends().stream()
+                .map(this::getById)
+                .collect(Collectors.toList());
     }
 
     public Collection<User> getMutualFriendsList(
             Integer userId, Integer otherId) throws ObjectNotFoundException {
 
-        try {
-            User user = Optional.ofNullable(userRepository.getById(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + userId + " doesn't exist!")
-            );
-            User otherUser = Optional.ofNullable(userRepository.getById(otherId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with id: " + otherId + " doesn't exist!")
-            );
-            Set<Integer> mutualFriendsSet = new HashSet<>(user.getFriends());
-            mutualFriendsSet.retainAll(otherUser.getFriends());
-            log.debug(
-                    "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
-                            "Всего общих друзей: {}.", userId, otherId, mutualFriendsSet.size()
-            );
-            return mutualFriendsSet.stream()
-                    .map(this::getById)
-                    .collect(Collectors.toList());
-
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
-        }
+        User user = getById(userId);
+        User otherUser = getById(otherId);
+        Set<Integer> mutualFriendsSet = new HashSet<>(user.getFriends());
+        mutualFriendsSet.retainAll(otherUser.getFriends());
+        log.debug(
+                "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
+                        "Всего общих друзей: {}.", userId, otherId, mutualFriendsSet.size()
+        );
+        return mutualFriendsSet.stream()
+                .map(this::getById)
+                .collect(Collectors.toList());
     }
 }
