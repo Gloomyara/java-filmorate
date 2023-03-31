@@ -22,13 +22,13 @@ public class FilmService implements ObjectService<Integer, Film> {
     private final UserRepository<Integer> userRepository;
     private Integer id = 1;
 
-    public boolean userRepositoryContainsKey(Integer id) {
-        return userRepository.getByKey(id) != null;
+    public boolean userRepositoryContainsKey(Integer k) {
+        return userRepository.getByKey(k) != null;
     }
 
     @Override
-    public boolean repositoryContainsKey(Integer id) {
-        return filmRepository.getByKey(id) != null;
+    public boolean repositoryContainsKey(Integer k) {
+        return filmRepository.getByKey(k) != null;
     }
 
     @Override
@@ -42,16 +42,16 @@ public class FilmService implements ObjectService<Integer, Film> {
     }
 
     @Override
-    public Film getByKey(Integer filmId) throws ObjectNotFoundException {
+    public Film getByKey(Integer id1) throws ObjectNotFoundException {
         try {
-            Film film = Optional.ofNullable(filmRepository.getByKey(filmId)).orElseThrow(
-                    () -> new ObjectNotFoundException("Film with Id: " + filmId + " not found")
+            Film f = Optional.ofNullable(filmRepository.getByKey(id1)).orElseThrow(
+                    () -> new ObjectNotFoundException("Film with Id: " + id1 + " not found")
             );
             log.debug(
                     "Запрос фильма по Id: {} успешно выполнен.",
-                    filmId
+                    id1
             );
-            return film;
+            return f;
         } catch (ObjectNotFoundException e) {
             log.warn(e.getMessage());
             throw e;
@@ -59,77 +59,77 @@ public class FilmService implements ObjectService<Integer, Film> {
     }
 
     @Override
-    public Film create(Film film) throws ObjectAlreadyExistException {
+    public Film create(Film f) throws ObjectAlreadyExistException {
 
-        if (repositoryContainsKey(film.getId())) {
+        if (repositoryContainsKey(f.getId())) {
             log.warn(
                     "Фильм под Id: {} уже есть в списке фильмов.",
-                    film.getId()
+                    f.getId()
             );
             throw new ObjectAlreadyExistException("Фильм под Id: "
-                    + film.getId() + " уже есть в списке фильмов.");
+                    + f.getId() + " уже есть в списке фильмов.");
         }
-        film.setId(id);
+        f.setId(id);
         log.debug(
                 "Фильм под Id: {} успешно добавлен",
                 id
         );
-        filmRepository.put(id, film);
+        filmRepository.put(id, f);
         id++;
-        return film;
+        return f;
     }
 
     @Override
-    public Film put(Film film) throws ObjectNotFoundException {
+    public Film put(Film f) throws ObjectNotFoundException {
 
-        Integer filmId = film.getId();
-        getByKey(filmId);
+        Integer id1 = f.getId();
+        getByKey(id1);
 
-        filmRepository.put(filmId, film);
+        filmRepository.put(id1, f);
         log.debug(
                 "Данные о фильме {} успешно обновлены",
-                film.getName()
+                f.getName()
         );
-        return film;
+        return f;
     }
 
-    public Film addLike(Integer filmId, Integer userId) {
+    public Film addLike(Integer id1, Integer id2) {
 
-        Film film = getByKey(filmId);
-        if (!userRepositoryContainsKey(userId)) {
+        Film f = getByKey(id1);
+        if (!userRepositoryContainsKey(id2)) {
             log.warn(
                     "User Id: {} doesn't exist",
-                    userId
+                    id2
             );
-            throw new ObjectNotFoundException("User Id:" + userId + " doesn't exist");
+            throw new ObjectNotFoundException("User Id:" + id2 + " doesn't exist");
         }
-        film.addLike(userId);
+        f.addLike(id2);
         log.debug(
                 "Фильм под Id: {} получил лайк от пользователя" +
                         " с Id: {}.\n Всего лайков: {}.",
-                filmId, userId, film.getLikesInfo().size()
+                id1, id2, f.getLikesInfo().size()
         );
-        return film;
+        return f;
     }
 
-    public Film deleteLike(Integer filmId, Integer userId) {
+    public Film deleteLike(Integer id1, Integer id2) {
 
-        Film film = getByKey(filmId);
-        if (!userRepositoryContainsKey(userId) || !film.deleteLike(userId)) {
+        Film f = getByKey(id1);
+        if (!userRepositoryContainsKey(id2) || !f.deleteLike(id2)) {
             log.warn(
                     "Error! Cannot delete user Id: {} like, user like not found.",
-                    userId
+                    id2
             );
             throw new ObjectNotFoundException("Error! Cannot delete user Id: "
-                    + userId + " like, user like not found.");
+                    + id2 + " like, user like not found.");
         }
 
         log.debug(
                 "У фильма под Id: {} удален лайк от пользователя" +
                         " с Id: {}.\n Всего лайков: {}.",
-                filmId, userId, film.getLikesInfo().size()
+                id1, id2, f.getLikesInfo().size()
         );
-        return film;
+        return f;
     }
 
     public Collection<Film> getPopularFilms(Integer count) {

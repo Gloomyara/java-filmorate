@@ -22,8 +22,8 @@ public class UserService implements ObjectService<Integer, User> {
     private Integer id = 1;
 
     @Override
-    public boolean repositoryContainsKey(Integer id) {
-        return userRepository.getByKey(id) != null;
+    public boolean repositoryContainsKey(Integer k) {
+        return userRepository.getByKey(k) != null;
     }
 
     @Override
@@ -37,14 +37,14 @@ public class UserService implements ObjectService<Integer, User> {
     }
 
     @Override
-    public User getByKey(Integer userId) throws ObjectNotFoundException {
+    public User getByKey(Integer id1) throws ObjectNotFoundException {
         try {
-            User user = Optional.ofNullable(userRepository.getByKey(userId)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with Id: " + userId + " not found")
+            User user = Optional.ofNullable(userRepository.getByKey(id1)).orElseThrow(
+                    () -> new ObjectNotFoundException("User with Id: " + id1 + " not found")
             );
             log.debug(
                     "Запрос пользователя по Id: {} успешно выполнен.",
-                    userId
+                    id1
             );
             return user;
         } catch (ObjectNotFoundException e) {
@@ -54,75 +54,75 @@ public class UserService implements ObjectService<Integer, User> {
     }
 
     @Override
-    public User create(User user) throws ObjectAlreadyExistException {
+    public User create(User u) throws ObjectAlreadyExistException {
 
-        if (repositoryContainsKey(user.getId())) {
+        if (repositoryContainsKey(u.getId())) {
             log.warn(
                     "Пользователь с электронной почтой {} уже зарегистрирован.",
-                    user.getEmail()
+                    u.getEmail()
             );
             throw new ObjectAlreadyExistException("Пользователь с электронной почтой " +
-                    user.getEmail() + " уже зарегистрирован.");
+                    u.getEmail() + " уже зарегистрирован.");
         }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        if (u.getName() == null || u.getName().isBlank()) {
+            u.setName(u.getLogin());
         }
 
-        user.setId(id);
+        u.setId(id);
         log.debug(
                 "Пользователь с электронной почтой {} успешно зарегистрирован.",
-                user.getEmail()
+                u.getEmail()
         );
-        userRepository.put(id, user);
+        userRepository.put(id, u);
         id++;
-        return user;
+        return u;
     }
 
     @Override
-    public User put(User user) throws ObjectNotFoundException {
-        Integer userId = user.getId();
-        getByKey(userId);
-        userRepository.put(userId, user);
+    public User put(User u) throws ObjectNotFoundException {
+        Integer id1 = u.getId();
+        getByKey(id1);
+        userRepository.put(id1, u);
         log.debug(
                 "Данные пользователя с электронной почтой {} успешно обновлены.",
-                user.getEmail()
+                u.getEmail()
         );
-        return user;
+        return u;
     }
 
-    public User addFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
+    public User addFriend(Integer id1, Integer id2) throws ObjectNotFoundException {
 
-        User user = getByKey(userId);
-        User friend = getByKey(friendId);
-        user.addFriend(friendId);
-        friend.addFriend(userId);
+        User user = getByKey(id1);
+        User friend = getByKey(id2);
+        user.addFriend(id2);
+        friend.addFriend(id1);
         log.debug(
                 "Запрос пользователя под Id: {} на добавление в друзья, " +
                         "пользователя Id: {}, успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
+                        "Всего друзей в списке: {}.", id1, id2, user.getFriends().size()
         );
         return user;
     }
 
-    public User deleteFriend(Integer userId, Integer friendId) throws ObjectNotFoundException {
+    public User deleteFriend(Integer id1, Integer id2) throws ObjectNotFoundException {
 
-        User user = getByKey(userId);
-        User friend = getByKey(friendId);
-        boolean b1 = user.deleteFriend(friendId);
-        boolean b2 = friend.deleteFriend(userId);
+        User u1 = getByKey(id1);
+        User u2 = getByKey(id2);
+        boolean b1 = u1.deleteFriend(id2);
+        boolean b2 = u2.deleteFriend(id1);
         String exMsg = null;
         if (!b1) {
-            exMsg = friendId.toString();
+            exMsg = id2.toString();
             log.warn(
                     "Error! Cannot delete friend with id: {}," +
-                            " user doesn't in your friends list!", friendId
+                            " user doesn't in your friends list!", id2
             );
         }
         if (!b2) {
-            exMsg = exMsg + " , " + userId.toString();
+            exMsg = exMsg + " , " + id1.toString();
             log.warn(
                     "Error! Cannot delete friend with id: {}," +
-                            " user doesn't in your friends list!", userId
+                            " user doesn't in your friends list!", id1
             );
         }
         if (!b1 || !b2) {
@@ -132,17 +132,17 @@ public class UserService implements ObjectService<Integer, User> {
         log.debug(
                 "Запрос пользователя под Id: {} на удаление из друзей, " +
                         "пользователя Id: {}, успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", userId, friendId, user.getFriends().size()
+                        "Всего друзей в списке: {}.", id1, id2, u1.getFriends().size()
         );
-        return user;
+        return u1;
     }
 
-    public Collection<User> getFriendsListById(Integer userId) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer id1) throws ObjectNotFoundException {
 
-        User user = getByKey(userId);
+        User user = getByKey(id1);
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", userId, user.getFriends().size()
+                        "Всего друзей в списке: {}.", id1, user.getFriends().size()
         );
         return user.getFriends().stream()
                 .map(this::getByKey)
@@ -150,15 +150,15 @@ public class UserService implements ObjectService<Integer, User> {
     }
 
     public Collection<User> getMutualFriendsList(
-            Integer userId, Integer otherId) throws ObjectNotFoundException {
+            Integer id1, Integer id2) throws ObjectNotFoundException {
 
-        User user = getByKey(userId);
-        User otherUser = getByKey(otherId);
-        Set<Integer> mutualFriendsSet = new HashSet<>(user.getFriends());
-        mutualFriendsSet.retainAll(otherUser.getFriends());
+        User u1 = getByKey(id1);
+        User u2 = getByKey(id2);
+        Set<Integer> mutualFriendsSet = new HashSet<>(u1.getFriends());
+        mutualFriendsSet.retainAll(u2.getFriends());
         log.debug(
                 "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
-                        "Всего общих друзей: {}.", userId, otherId, mutualFriendsSet.size()
+                        "Всего общих друзей: {}.", id1, id2, mutualFriendsSet.size()
         );
         return mutualFriendsSet.stream()
                 .map(this::getByKey)
