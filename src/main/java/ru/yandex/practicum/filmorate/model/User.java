@@ -8,19 +8,30 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 public class User {
 
     private Integer id;
-    @NotNull(message = "Email cannot be null")//иначе создается пользователь с email=null
+    @NotNull(message = "Email cannot be null")
     @Email(message = "Email should be valid")
     private String email;
     @NotBlank(message = "Login cannot be blank")
     private String login;
     private String name;
-    //Без @NotNull создается пользователь с birthday=null.
+    @NotNull(message = "Birthday cannot be null")
     @Past(message = "Birthday should be in the past")
     private LocalDate birthday;
+    private final Set<Integer> friends = new HashSet<>();
+
+    public void addFriend(Integer userId) {
+        friends.add(userId);
+    }
+
+    public boolean deleteFriend(Integer friendId) {
+        return friends.remove(friendId);
+    }
 }

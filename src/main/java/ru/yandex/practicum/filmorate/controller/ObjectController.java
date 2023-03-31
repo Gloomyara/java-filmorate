@@ -1,33 +1,34 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import javax.validation.Valid;
 import java.util.Collection;
 
-public abstract class ObjectController<T> {
-    protected final ObjectService<T> service;
+@RequiredArgsConstructor
+public abstract class ObjectController<S extends ObjectService<K, V>, K, V> {
 
-    public ObjectController(ObjectService<T> service) {
-        this.service = service;
-    }
+    protected final S service;
 
     @GetMapping
-    public Collection<T> findAll() {
+    public Collection<V> findAll() {
         return service.findAll();
     }
 
+    @GetMapping("/{id}")
+    public V getByKey(@PathVariable("id") K k) {
+        return service.getByKey(k);
+    }
+
     @PostMapping
-    public T create(@Valid @RequestBody T t) {
-        return service.create(t);
+    public V create(@Valid @RequestBody V v) {
+        return service.create(v);
     }
 
     @PutMapping
-    public T put(@Valid @RequestBody T t) {
-        return service.put(t);
+    public V put(@Valid @RequestBody V v) {
+        return service.put(v);
     }
 }

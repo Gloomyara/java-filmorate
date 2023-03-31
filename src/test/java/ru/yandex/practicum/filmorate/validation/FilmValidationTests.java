@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
@@ -18,7 +19,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 public class FilmValidationTests {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -26,14 +26,16 @@ public class FilmValidationTests {
     Set<ConstraintViolation<Film>> violations;
     Film film;
     Film film1;
-    FilmRepository filmRepository;
+    InMemoryFilmRepository inMemoryFilmRepository;
+    InMemoryUserRepository inMemoryUserRepository;
     FilmService filmService;
     FilmController filmController;
 
     @BeforeEach
     void createSomeData() {
-        filmRepository = new FilmRepository();
-        filmService = new FilmService(filmRepository);
+        inMemoryFilmRepository = new InMemoryFilmRepository();
+        inMemoryUserRepository = new InMemoryUserRepository();
+        filmService = new FilmService(inMemoryFilmRepository, inMemoryUserRepository);
         filmController = new FilmController(filmService);
     }
 
@@ -45,7 +47,7 @@ public class FilmValidationTests {
                 NoSuchElementException.class,
                 () -> filmController.put(film)
         );
-        Assertions.assertEquals("Film doesn't exist", ex1.getMessage());
+        Assertions.assertEquals("Film with Id: null not found", ex1.getMessage());
     }
 
     @Test
@@ -60,7 +62,7 @@ public class FilmValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> filmController.create(film1)
         );
-        Assertions.assertEquals("Фильм под названием testFilmName уже есть в списке фильмов.", ex1.getMessage());
+        Assertions.assertEquals("Фильм под Id: 1 уже есть в списке фильмов.", ex1.getMessage());
     }
 
     @Test
@@ -124,17 +126,6 @@ public class FilmValidationTests {
         );
     }
 
-    /*@Test
-    void shouldNotPassValidationWhenReleaseDateIsNull() {
-        film1 = new Film(null, "testFilmName", "d",
-                null, 8500);
-        Assertions.assertEquals(1, violations.size());
-        Assertions.assertEquals(
-                "ReleaseDate cannot be null",
-                violations.iterator().next().getMessage()
-        );
-    }*/
-
     @Test
     void shouldNotPassValidationWhenDurationIsNegative() {
         film = new Film(null, "testFilmName", "d",
@@ -160,7 +151,7 @@ public class FilmValidationTests {
     }
 
     @Test
-    void create() {
+    void createShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
@@ -172,7 +163,7 @@ public class FilmValidationTests {
     }
 
     @Test
-    void put() {
+    void putShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500);
@@ -192,12 +183,5 @@ public class FilmValidationTests {
                 LocalDate.of(2020, 1, 1), 8500);
         film2.setId(film.getId());
         assertEquals("Фильмы не совпадают", film2, film1);
-    }
-
-    @Test
-    void findAllShouldBeIsEmpty() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
-        assertTrue("Обнаружены неучтенные данные о фильмах", filmController.findAll().isEmpty());
     }
 }

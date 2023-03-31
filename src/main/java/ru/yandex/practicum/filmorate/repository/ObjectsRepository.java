@@ -1,17 +1,12 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-public abstract class ObjectsRepository<K, V> {
-    protected final Map<K, V> objects = new HashMap<>();
+public interface ObjectsRepository<K, V> {
 
-    public Collection<V> findAll() {
-        return objects.values();
-    }
+    Collection<V> findAll();
 
-    public Map<K, V> get() {
-        return objects;
-    }
+    V getByKey(K k);
+
+    void put(K k, V v);
 }

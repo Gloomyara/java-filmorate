@@ -1,19 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Collection;
 
-@Slf4j
-public abstract class ObjectService<T> {
-    protected Integer id = 1;
 
-    public ObjectService() {
-    }
+public interface ObjectService<K, V> {
 
-    public abstract Collection<T> findAll();
+    boolean repositoryContainsKey(K k);
 
-    public abstract T create(T t);
+    Collection<V> findAll();
 
-    public abstract T put(T t);
+    V getByKey(K k);
+
+    V create(V v);
+
+    V put(V v);
 }

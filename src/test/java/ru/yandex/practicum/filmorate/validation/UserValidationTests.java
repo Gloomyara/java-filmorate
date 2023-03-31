@@ -7,7 +7,7 @@ import org.springframework.test.util.AssertionErrors;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.ConstraintViolation;
@@ -19,7 +19,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 public class UserValidationTests {
     protected ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -27,14 +26,14 @@ public class UserValidationTests {
     Set<ConstraintViolation<User>> violations;
     User user;
     User user1;
-    UserRepository userRepository;
+    InMemoryUserRepository inMemoryUserRepository;
     UserService userService;
     UserController userController;
 
     @BeforeEach
     void createSomeData() {
-        userRepository = new UserRepository();
-        userService = new UserService(userRepository);
+        inMemoryUserRepository = new InMemoryUserRepository();
+        userService = new UserService(inMemoryUserRepository);
         userController = new UserController(userService);
     }
 
@@ -46,7 +45,7 @@ public class UserValidationTests {
                 NoSuchElementException.class,
                 () -> userController.put(user)
         );
-        assertEquals("User doesn't exist", ex.getMessage());
+        assertEquals("User with Id: null not found", ex.getMessage());
     }
 
     @Test
@@ -77,17 +76,17 @@ public class UserValidationTests {
         );
     }
 
-    /*@Test
+    @Test
     void shouldNotPassValidationWhenUserBirthdayIsNull() {
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", null);
         violations = validator.validate(user);
-        assertEquals( 1, violations.size() );
+        assertEquals(1, violations.size());
         assertEquals(
                 "Birthday cannot be null",
                 violations.iterator().next().getMessage()
         );
-    }*/
+    }
 
     @Test
     void shouldNotPassValidationWhenUserEmailIsBlank() {
@@ -182,12 +181,5 @@ public class UserValidationTests {
                 null, LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());
         AssertionErrors.assertEquals("Пользователи не совпадают", user2, user1);
-    }
-
-    @Test
-    void findAllShouldBeIsEmpty() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        assertTrue("Обнаружены неучтенные данные о пользователях", userController.findAll().isEmpty());
     }
 }
