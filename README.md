@@ -12,7 +12,7 @@
     
 Создание схемы базы данных
 
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229368658-4acafd7f-51f9-4969-8746-bd253c4382c7.png)
+![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229373113-1b8f7a1e-a322-41d4-85e5-e73b6b835dba.png)
 
 *SQL* requests example:
 
