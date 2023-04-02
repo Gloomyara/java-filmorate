@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmCategory;
+import ru.yandex.practicum.filmorate.model.enums.FilmRating;
 import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -42,7 +44,7 @@ public class FilmValidationTests {
     @Test
     void shouldThrowNoSuchElementExceptionWhenPutNewObject() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmController.put(film)
@@ -53,10 +55,10 @@ public class FilmValidationTests {
     @Test
     void shouldThrowObjectAlreadyExistExceptionWhenObjectDataAlreadyExist() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         filmController.create(film);
         film1 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         film1.setId(film.getId());
         ObjectAlreadyExistException ex1 = Assertions.assertThrows(
                 ObjectAlreadyExistException.class,
@@ -68,7 +70,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenFilmNameIsBlank() {
         film = new Film(null, " ", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -80,7 +82,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenFilmNameIsNull() {
         film = new Film(null, null, "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -93,7 +95,7 @@ public class FilmValidationTests {
     void shouldNotPassValidationWhenDescriptionSizeIsMoreThan200() {
         char[] charArray = new char[201];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -105,7 +107,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenDescriptionSizeIsLessThan1() {
         film = new Film(null, "testFilmName", "",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -117,7 +119,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenReleaseDateIsBefore28121895() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(1895, 12, 27), 8500);
+                LocalDate.of(1895, 12, 27), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -129,7 +131,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenDurationIsNegative() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), -8500);
+                LocalDate.of(2020, 1, 1), -8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -141,7 +143,7 @@ public class FilmValidationTests {
     @Test
     void shouldNotPassValidationWhenDurationIsNull() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), null);
+                LocalDate.of(2020, 1, 1), null, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -154,7 +156,7 @@ public class FilmValidationTests {
     void createShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         if (violations.isEmpty()) {
             filmController.create(film);
@@ -166,21 +168,21 @@ public class FilmValidationTests {
     void putShouldPassValidation() {
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         violations = validator.validate(film);
         if (violations.isEmpty()) {
             filmController.create(film);
         }
         assertEquals("Количество фильмов не совпадает", 1, filmController.findAll().size());
         film1 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         film1.setId(film.getId());
         violations = validator.validate(film1);
         if (violations.isEmpty()) {
             filmController.put(film1);
         }
         Film film2 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500);
+                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
         film2.setId(film.getId());
         assertEquals("Фильмы не совпадают", film2, film1);
     }

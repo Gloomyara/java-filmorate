@@ -34,4 +34,13 @@ public class User {
     public boolean deleteFriend(Integer friendId) {
         return friends.remove(friendId);
     }
+    /*private final Map<Integer, FriendshipStatus> friends = new HashMap<>();
+
+    public void addFriend(Integer userId, FriendshipStatus fs) {
+        friends.put(userId, fs);
+    }
+
+    public FriendshipStatus deleteFriend(Integer friendId) {
+        return friends.remove(friendId);
+    }*/
 }
