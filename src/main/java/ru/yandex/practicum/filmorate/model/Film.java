@@ -33,11 +33,11 @@ public class Film {
 
     private final Set<Integer> likesInfo = new HashSet<>();
 
-    public void addLike(Integer userId) {
-        likesInfo.add(userId);
+    public void addLike(Integer i) {
+        likesInfo.add(i);
     }
 
-    public boolean deleteLike(Integer userId) {
-        return likesInfo.remove(userId);
+    public boolean deleteLike(Integer i) {
+        return likesInfo.remove(i);
     }
 }

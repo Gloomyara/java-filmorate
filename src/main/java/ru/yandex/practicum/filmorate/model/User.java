@@ -27,12 +27,12 @@ public class User {
     private LocalDate birthday;
     private final Set<Integer> friends = new HashSet<>();
 
-    public void addFriend(Integer userId) {
-        friends.add(userId);
+    public void addFriend(Integer i) {
+        friends.add(i);
     }
 
-    public boolean deleteFriend(Integer friendId) {
-        return friends.remove(friendId);
+    public boolean deleteFriend(Integer i) {
+        return friends.remove(i);
     }
     /*private final Map<Integer, FriendshipStatus> friends = new HashMap<>();
 
