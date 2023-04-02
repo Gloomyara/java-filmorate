@@ -22,7 +22,7 @@
 <summary> Макет БД </summary>
 
    
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229373113-1b8f7a1e-a322-41d4-85e5-e73b6b835dba.png)
+![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229374148-37baa50a-78f5-4478-8a79-220554435bba.png)
 </details>
    
    ### Примеры SQL запросов из ТЗ:
