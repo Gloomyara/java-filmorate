@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class UserService extends ObjectService<UserRepository<Integer>, Integer, User> {
+public class UserService extends ObjectService<Integer, User> {
 
     private Integer id = 1;
 

@@ -11,8 +11,8 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
-    protected final R repository;
+public abstract class ObjectService<K, V> {
+    protected final ObjectsRepository<K, V> repository;
     protected final String valueClassName;
 
     protected boolean repositoryContainsKey(K k) {

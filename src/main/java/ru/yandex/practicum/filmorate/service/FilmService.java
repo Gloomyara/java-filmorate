@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class FilmService extends ObjectService<FilmRepository<Integer>, Integer, Film> {
+public class FilmService extends ObjectService<Integer, Film> {
 
     private final UserRepository<Integer> userRepository;
     private Integer id = 1;
