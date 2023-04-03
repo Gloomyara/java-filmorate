@@ -18,8 +18,7 @@ public class FilmService extends ObjectService<FilmRepository<Integer>, Integer,
     private Integer id = 1;
 
     public FilmService(FilmRepository<Integer> repository, UserRepository<Integer> userRepository) {
-        super(repository);
-        super.valueClassName = "Film";
+        super(repository, "Film");
         this.userRepository = userRepository;
     }
 

@@ -13,7 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
     protected final R repository;
-    protected String valueClassName;
+    protected final String valueClassName;
 
     protected boolean repositoryContainsKey(K k) {
         return repository.getByKey(k) != null;
