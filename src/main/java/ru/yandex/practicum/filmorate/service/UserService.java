@@ -1,93 +1,39 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class UserService implements ObjectService<Integer, User> {
-    private final UserRepository<Integer> userRepository;
+public class UserService extends ObjectService<UserRepository<Integer>, Integer, User> {
+
     private Integer id = 1;
 
-    @Override
-    public boolean repositoryContainsKey(Integer k) {
-        return userRepository.getByKey(k) != null;
+    public UserService(UserRepository<Integer> repository) {
+        super(repository);
+        super.className = "User";
     }
 
     @Override
-    public Collection<User> findAll() {
-        Collection<User> collection = userRepository.findAll();
-        log.debug(
-                "Запрос списка пользователей успешно выполнен, всего пользователей: {}",
-                collection.size()
-        );
-        return collection;
+    protected Integer getKey(User user) {
+        return user.getId();
     }
 
     @Override
-    public User getByKey(Integer id1) throws ObjectNotFoundException {
-        try {
-            User user = Optional.ofNullable(userRepository.getByKey(id1)).orElseThrow(
-                    () -> new ObjectNotFoundException("User with Id: " + id1 + " not found")
-            );
-            log.debug(
-                    "Запрос пользователя по Id: {} успешно выполнен.",
-                    id1
-            );
-            return user;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+    protected Integer objectPreparation(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
-    }
-
-    @Override
-    public User create(User u) throws ObjectAlreadyExistException {
-
-        if (repositoryContainsKey(u.getId())) {
-            log.warn(
-                    "Пользователь с электронной почтой {} уже зарегистрирован.",
-                    u.getEmail()
-            );
-            throw new ObjectAlreadyExistException("Пользователь с электронной почтой " +
-                    u.getEmail() + " уже зарегистрирован.");
-        }
-        if (u.getName() == null || u.getName().isBlank()) {
-            u.setName(u.getLogin());
-        }
-
-        u.setId(id);
-        log.debug(
-                "Пользователь с электронной почтой {} успешно зарегистрирован.",
-                u.getEmail()
-        );
-        userRepository.put(id, u);
-        id++;
-        return u;
-    }
-
-    @Override
-    public User put(User u) throws ObjectNotFoundException {
-        Integer id1 = u.getId();
-        getByKey(id1);
-        userRepository.put(id1, u);
-        log.debug(
-                "Данные пользователя с электронной почтой {} успешно обновлены.",
-                u.getEmail()
-        );
-        return u;
+        user.setId(id);
+        return id++;
     }
 
     public User addFriend(Integer id1, Integer id2) throws ObjectNotFoundException {

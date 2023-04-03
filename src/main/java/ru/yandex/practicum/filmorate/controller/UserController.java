@@ -3,13 +3,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends ObjectController<UserService, Integer, User> {
+public class UserController extends ObjectController<UserService, Integer, User, UserRepository<Integer>> {
 
     public UserController(UserService service) {
         super(service);

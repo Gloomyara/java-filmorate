@@ -2,13 +2,15 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import javax.validation.Valid;
 import java.util.Collection;
 
 @RequiredArgsConstructor
-public abstract class ObjectController<S extends ObjectService<K, V>, K, V> {
+public abstract class ObjectController<S extends ObjectService<R, K, V>,
+        K, V, R extends ObjectsRepository<K, V>> {
 
     protected final S service;
 

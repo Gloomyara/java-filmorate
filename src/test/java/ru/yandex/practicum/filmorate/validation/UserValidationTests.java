@@ -60,14 +60,13 @@ public class UserValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> userController.create(user1)
         );
-        assertEquals("Пользователь с электронной почтой" +
-                " testuser@gmail.com уже зарегистрирован.", ex.getMessage());
+        assertEquals("User под Id: 1 уже зарегистрирован.", ex.getMessage());
     }
 
     @Test
-    void shouldNotPassValidationWhenUserBirthdayInFuture() {
+    void shouldNotPassValidationWhenUserBirthdayInTheFuture() {
         user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 4, 1));
+                " ", LocalDate.of(2026, 12, 1));
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(

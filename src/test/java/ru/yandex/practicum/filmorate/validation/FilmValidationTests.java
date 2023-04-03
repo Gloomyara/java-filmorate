@@ -62,7 +62,7 @@ public class FilmValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> filmController.create(film1)
         );
-        Assertions.assertEquals("Фильм под Id: 1 уже есть в списке фильмов.", ex1.getMessage());
+        Assertions.assertEquals("Film под Id: 1 уже зарегистрирован.", ex1.getMessage());
     }
 
     @Test

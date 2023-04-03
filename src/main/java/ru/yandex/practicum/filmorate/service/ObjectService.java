@@ -1,17 +1,82 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
+
 import java.util.Collection;
+import java.util.Optional;
 
+@Slf4j
+@RequiredArgsConstructor
+public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
+    protected final R repository;
+    protected String className;
 
-public interface ObjectService<K, V> {
+    protected boolean repositoryContainsKey(K k) {
+        return repository.getByKey(k) != null;
+    }
 
-    boolean repositoryContainsKey(K k);
+    public Collection<V> findAll() {
+        Collection<V> collection = repository.findAll();
+        log.debug(
+                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                className, className, collection.size()
+        );
+        return collection;
+    }
 
-    Collection<V> findAll();
+    public V getByKey(K k) throws ObjectNotFoundException {
+        try {
+            V v = Optional.ofNullable(repository.getByKey(k)).orElseThrow(
+                    () -> new ObjectNotFoundException(className + " with Id: " + k + " not found")
+            );
+            log.debug(
+                    "Запрос {} по Id: {} успешно выполнен.",
+                    className, k
+            );
+            return v;
+        } catch (ObjectNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e;
+        }
+    }
 
-    V getByKey(K k);
+    public V create(V v) throws ObjectAlreadyExistException {
+        K k = getKey(v);
+        if (repositoryContainsKey(k)) {
+            log.warn(
+                    "{} под Id: {}, уже зарегистрирован.",
+                    className, k
+            );
+            throw new ObjectAlreadyExistException(className + " под Id: " +
+                    k + " уже зарегистрирован.");
+        }
 
-    V create(V v);
+        k = objectPreparation(v);
+        log.debug(
+                "{} под Id: {}, успешно зарегистрирован.",
+                className, k
+        );
+        repository.put(k, v);
 
-    V put(V v);
+        return v;
+    }
+
+    public V put(V v) throws ObjectNotFoundException {
+        K k = getKey(v);
+        getByKey(k);
+        repository.put(k, v);
+        log.debug(
+                "Данные {} под Id: {}, успешно обновлены.",
+                className, k
+        );
+        return v;
+    }
+
+    protected abstract K getKey(V v);
+
+    protected abstract K objectPreparation(V v);
 }
