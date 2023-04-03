@@ -13,7 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
     protected final R repository;
-    protected String className;
+    protected String valueClassName;
 
     protected boolean repositoryContainsKey(K k) {
         return repository.getByKey(k) != null;
@@ -23,7 +23,7 @@ public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
         Collection<V> collection = repository.findAll();
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}: {}",
-                className, className, collection.size()
+                valueClassName, valueClassName, collection.size()
         );
         return collection;
     }
@@ -31,11 +31,11 @@ public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
     public V getByKey(K k) throws ObjectNotFoundException {
         try {
             V v = Optional.ofNullable(repository.getByKey(k)).orElseThrow(
-                    () -> new ObjectNotFoundException(className + " with Id: " + k + " not found")
+                    () -> new ObjectNotFoundException(valueClassName + " with Id: " + k + " not found")
             );
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
-                    className, k
+                    valueClassName, k
             );
             return v;
         } catch (ObjectNotFoundException e) {
@@ -49,16 +49,16 @@ public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
         if (repositoryContainsKey(k)) {
             log.warn(
                     "{} под Id: {}, уже зарегистрирован.",
-                    className, k
+                    valueClassName, k
             );
-            throw new ObjectAlreadyExistException(className + " под Id: " +
+            throw new ObjectAlreadyExistException(valueClassName + " под Id: " +
                     k + " уже зарегистрирован.");
         }
 
         k = objectPreparation(v);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
-                className, k
+                valueClassName, k
         );
         repository.put(k, v);
 
@@ -71,7 +71,7 @@ public abstract class ObjectService<R extends ObjectsRepository<K, V>, K, V> {
         repository.put(k, v);
         log.debug(
                 "Данные {} под Id: {}, успешно обновлены.",
-                className, k
+                valueClassName, k
         );
         return v;
     }

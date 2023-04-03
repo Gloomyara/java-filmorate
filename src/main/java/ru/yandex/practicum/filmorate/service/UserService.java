@@ -19,7 +19,7 @@ public class UserService extends ObjectService<UserRepository<Integer>, Integer,
 
     public UserService(UserRepository<Integer> repository) {
         super(repository);
-        super.className = "User";
+        super.valueClassName = "User";
     }
 
     @Override

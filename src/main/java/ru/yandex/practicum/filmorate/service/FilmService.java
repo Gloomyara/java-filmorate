@@ -19,8 +19,8 @@ public class FilmService extends ObjectService<FilmRepository<Integer>, Integer,
 
     public FilmService(FilmRepository<Integer> repository, UserRepository<Integer> userRepository) {
         super(repository);
+        super.valueClassName = "Film";
         this.userRepository = userRepository;
-        super.className = "Film";
     }
 
     public boolean userRepositoryContainsKey(Integer k) {
