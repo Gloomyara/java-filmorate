@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.customconstraint.FilmReleaseDateValidation;
+import ru.yandex.practicum.filmorate.model.enums.FilmCategory;
+import ru.yandex.practicum.filmorate.model.enums.FilmRating;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -25,15 +27,17 @@ public class Film {
     private LocalDate releaseDate;
     @NotNull(message = "Duration cannot be null")
     @Positive(message = "Duration should be positive")
-    private Integer duration;
+    private Integer length;
+    private FilmRating rating;
+    private FilmCategory category;
 
     private final Set<Integer> likesInfo = new HashSet<>();
 
-    public void addLike(Integer userId) {
-        likesInfo.add(userId);
+    public void addLike(Integer i) {
+        likesInfo.add(i);
     }
 
-    public boolean deleteLike(Integer userId) {
-        return likesInfo.remove(userId);
+    public boolean deleteLike(Integer i) {
+        return likesInfo.remove(i);
     }
 }
