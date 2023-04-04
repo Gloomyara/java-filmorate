@@ -27,8 +27,8 @@ public class FilmService extends ObjectService<Integer, Film> {
     }
 
     @Override
-    protected Integer getKey(Film film) {
-        return film.getId();
+    protected Integer getKey(Film v) {
+        return v.getId();
     }
 
     @Override
@@ -37,49 +37,49 @@ public class FilmService extends ObjectService<Integer, Film> {
         return id++;
     }
 
-    public Film addLike(Integer id1, Integer id2) {
+    public Film addLike(Integer k1, Integer k2) {
 
-        Film f = getByKey(id1);
-        if (!userRepositoryContainsKey(id2)) {
+        Film v = getByKey(k1);
+        if (!userRepositoryContainsKey(k2)) {
             log.warn(
                     "User Id: {} doesn't exist",
-                    id2
+                    k2
             );
-            throw new ObjectNotFoundException("User Id:" + id2 + " doesn't exist");
+            throw new ObjectNotFoundException("User Id:" + k2 + " doesn't exist");
         }
-        f.addLike(id2);
+        v.addLike(k2);
         log.debug(
                 "Фильм под Id: {} получил лайк от пользователя" +
                         " с Id: {}.\n Всего лайков: {}.",
-                id1, id2, f.getLikesInfo().size()
+                k1, k2, v.getLikesInfo().size()
         );
-        return f;
+        return v;
     }
 
-    public Film deleteLike(Integer id1, Integer id2) {
+    public Film deleteLike(Integer k1, Integer k2) {
 
-        Film f = getByKey(id1);
-        if (!userRepositoryContainsKey(id2) || !f.deleteLike(id2)) {
+        Film v = getByKey(k1);
+        if (!userRepositoryContainsKey(k2) || !v.deleteLike(k2)) {
             log.warn(
                     "Error! Cannot delete user Id: {} like, user like not found.",
-                    id2
+                    k2
             );
             throw new ObjectNotFoundException("Error! Cannot delete user Id: "
-                    + id2 + " like, user like not found.");
+                    + k2 + " like, user like not found.");
         }
 
         log.debug(
                 "У фильма под Id: {} удален лайк от пользователя" +
                         " с Id: {}.\n Всего лайков: {}.",
-                id1, id2, f.getLikesInfo().size()
+                k1, k2, v.getLikesInfo().size()
         );
-        return f;
+        return v;
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
+    public Collection<Film> getPopularFilms(Integer i) {
         return repository.findAll().stream()
                 .sorted((f0, f1) -> f1.getLikesInfo().size() - f0.getLikesInfo().size())
-                .limit(count)
+                .limit(i)
                 .collect(Collectors.toList());
     }
 }

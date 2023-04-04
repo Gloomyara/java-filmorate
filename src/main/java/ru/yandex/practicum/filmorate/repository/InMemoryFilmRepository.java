@@ -17,15 +17,15 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     }
 
     @Override
-    public Film getByKey(Integer id) {
-        if (filmStorage.containsKey(id)) {
-            return filmStorage.get(id);
+    public Film getByKey(Integer k) {
+        if (filmStorage.containsKey(k)) {
+            return filmStorage.get(k);
         }
         return null;
     }
 
     @Override
-    public void put(Integer integer, Film film) {
-        filmStorage.put(integer, film);
+    public void put(Integer k, Film v) {
+        filmStorage.put(k, v);
     }
 }

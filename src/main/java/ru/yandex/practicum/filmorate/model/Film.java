@@ -29,7 +29,7 @@ public class Film {
     @Positive(message = "Duration should be positive")
     private Integer length;
     private FilmRating rating;
-    private FilmCategory category;
+    private FilmCategory[] category;
 
     private final Set<Integer> likesInfo = new HashSet<>();
 

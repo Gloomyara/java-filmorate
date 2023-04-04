@@ -22,52 +22,52 @@ public class UserService extends ObjectService<Integer, User> {
     }
 
     @Override
-    protected Integer getKey(User user) {
-        return user.getId();
+    protected Integer getKey(User v) {
+        return v.getId();
     }
 
     @Override
-    protected Integer objectPreparation(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+    protected Integer objectPreparation(User v) {
+        if (v.getName() == null || v.getName().isBlank()) {
+            v.setName(v.getLogin());
         }
-        user.setId(id);
+        v.setId(id);
         return id++;
     }
 
-    public User addFriend(Integer id1, Integer id2) throws ObjectNotFoundException {
+    public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        User user = getByKey(id1);
-        User friend = getByKey(id2);
-        user.addFriend(id2);
-        friend.addFriend(id1);
+        User v1 = getByKey(k1);
+        User v2 = getByKey(k2);
+        v1.addFriend(k2);
+        v2.addFriend(k1);
         log.debug(
                 "Запрос пользователя под Id: {} на добавление в друзья, " +
                         "пользователя Id: {}, успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", id1, id2, user.getFriends().size()
+                        "Всего друзей в списке: {}.", k1, k2, v1.getFriends().size()
         );
-        return user;
+        return v1;
     }
 
-    public User deleteFriend(Integer id1, Integer id2) throws ObjectNotFoundException {
+    public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        User u1 = getByKey(id1);
-        User u2 = getByKey(id2);
-        boolean b1 = u1.deleteFriend(id2);
-        boolean b2 = u2.deleteFriend(id1);
+        User v1 = getByKey(k1);
+        User v2 = getByKey(k2);
+        boolean b1 = v1.deleteFriend(k2);
+        boolean b2 = v2.deleteFriend(k1);
         String exMsg = null;
         if (!b1) {
-            exMsg = id2.toString();
+            exMsg = k2.toString();
             log.warn(
                     "Error! Cannot delete friend with id: {}," +
-                            " user doesn't in your friends list!", id2
+                            " user doesn't in your friends list!", k2
             );
         }
         if (!b2) {
-            exMsg = exMsg + " , " + id1.toString();
+            exMsg = exMsg + " , " + k1.toString();
             log.warn(
                     "Error! Cannot delete friend with id: {}," +
-                            " user doesn't in your friends list!", id1
+                            " user doesn't in your friends list!", k1
             );
         }
         if (!b1 || !b2) {
@@ -77,17 +77,17 @@ public class UserService extends ObjectService<Integer, User> {
         log.debug(
                 "Запрос пользователя под Id: {} на удаление из друзей, " +
                         "пользователя Id: {}, успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", id1, id2, u1.getFriends().size()
+                        "Всего друзей в списке: {}.", k1, k2, v1.getFriends().size()
         );
-        return u1;
+        return v1;
     }
 
-    public Collection<User> getFriendsListById(Integer id1) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k1) throws ObjectNotFoundException {
 
-        User user = getByKey(id1);
+        User user = getByKey(k1);
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", id1, user.getFriends().size()
+                        "Всего друзей в списке: {}.", k1, user.getFriends().size()
         );
         return user.getFriends().stream()
                 .map(this::getByKey)
@@ -95,15 +95,15 @@ public class UserService extends ObjectService<Integer, User> {
     }
 
     public Collection<User> getMutualFriendsList(
-            Integer id1, Integer id2) throws ObjectNotFoundException {
+            Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        User u1 = getByKey(id1);
-        User u2 = getByKey(id2);
-        Set<Integer> mutualFriendsSet = new HashSet<>(u1.getFriends());
-        mutualFriendsSet.retainAll(u2.getFriends());
+        User v1 = getByKey(k1);
+        User v2 = getByKey(k2);
+        Set<Integer> mutualFriendsSet = new HashSet<>(v1.getFriends());
+        mutualFriendsSet.retainAll(v2.getFriends());
         log.debug(
                 "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
-                        "Всего общих друзей: {}.", id1, id2, mutualFriendsSet.size()
+                        "Всего общих друзей: {}.", k1, k2, mutualFriendsSet.size()
         );
         return mutualFriendsSet.stream()
                 .map(this::getByKey)
