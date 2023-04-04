@@ -14,11 +14,14 @@
 
 <summary> Создание схемы базы данных </summary>
    
-### Схема:
+   ### Схема:
    
 <details>
    
-<summary> Макет БД </summary>
+<summary> ${\color{lightgreen}DB \space Diagram}$ </summary>
+   
+   ### [dbdiagram.io](https://dbdiagram.io/d/)
+   
 
 ![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229625278-628874b4-f287-4528-b827-41d944ab3671.png)
 </details>
@@ -27,15 +30,15 @@
    
 <details>
 
-<summary> Filmorate DB description </summary>
+<summary> ${\color{lightgreen}Filmorate \space DB \space description}$ </summary>
    
-   - База данных состоит из таблиц с данными о пользователях(_users_), друзьях(_friends_), любимых фильмах(_favorite_films_), фильмах(_films_), жанров фильмов(_category_) и служебной таблицы для связи фильмов и жанров(_film_category_).
+   - База данных состоит из таблиц с данными о пользователях(${\color{lightblue}users}$), друзьях(${\color{lightblue}friends}$), любимых фильмах(${\color{lightblue}favorite \space films}$), фильмах(${\color{lightblue}films}$), жанров фильмов(${\color{lightblue}category}$) и служебной таблицы для связи фильмов и жанров(${\color{lightblue}film \space category}$).
    
-   - Таблица _friends_ связана многие к одному с PK(id) _users_, также имеет поле для определения связи(_дружбы_) между пользователями.
+   - Таблица ${\color{lightblue}friends}$ связана многие к одному с ${\color{pink}PK\color{lightgreen}(\color{purple}id\color{lightgreen})}$ ${\color{lightblue}users}$, также имеет поле для определения связи/дружбы между пользователями.
    
-   - Таблицы _users_ и _films_ связаны один к многим по PK(id) с таблицей _favorite_films_ для хранения информации о любимых фильмах пользователя.
+   - Таблицы ${\color{lightblue}users}$ и ${\color{lightblue}films}$ связаны один к многим по ${\color{pink}PK\color{lightgreen}(\color{purple}id\color{lightgreen})}$ с таблицей ${\color{lightblue}favorite \space films}$ для хранения информации о любимых фильмах пользователя.
    
-   - Таблицы _films_ и _category_ связаны один ко многим по PK(id) с таблицей _film_category_ для сортировки/поиска фильмов по жанрам, 
+   - Таблицы ${\color{lightblue}films}$ и ${\color{lightblue}category}$ связаны один ко многим по ${\color{pink}PK\color{lightgreen}(\color{purple}id\color{lightgreen})}$ с таблицей ${\color{lightblue}film \space category}$ для сортировки/поиска фильмов по жанрам, 
    а также для удовлетворения требований по нормализации баз данных.
    
 </details>
@@ -44,13 +47,13 @@
    
 <details>
 
-<summary> SQL requests example </summary>
+<summary> ${\color{lightgreen}SQL \space requests \space example}$ </summary>
 
    ### Поиск общих друзей:
    
 <details>
 
-<summary> getMutualFriends </summary>
+<summary> ${\color{orange}getMutualFriends()}$ </summary>
    
 ```sql   
 1.  SELECT *
@@ -72,7 +75,7 @@
    
 <details>
 
-<summary> findAllFilms </summary> 
+<summary> ${\color{orange}findAllFilms()}$ </summary> 
 
 ```sql 
 1. SELECT *
@@ -86,7 +89,7 @@
    
 <details>
 
-<summary> findAllUsers </summary> 
+<summary> ${\color{orange}findAllUsers()}$ </summary> 
    
 ```sql
 1. SELECT *
@@ -100,7 +103,7 @@
    
 <details>
    
-<summary> topNMostPopularFilms </summary>
+<summary> ${\color{orange}topNMostPopularFilms()}$ </summary>
    
 ```sql
 1.  SELECT *
