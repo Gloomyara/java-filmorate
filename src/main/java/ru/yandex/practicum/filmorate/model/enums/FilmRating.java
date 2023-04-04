@@ -6,7 +6,7 @@ public enum FilmRating {
     PG_13("PG-13", "Детям до 13 лет просмотр не желателен"),
     R("R", "Лицам до 17 лет просматривать фильм " +
             "можно только в присутствии взрослого"),
-    NC_17("NC-17", " лицам до 18 лет просмотр запрещён");
+    NC_17("NC-17", "Лицам до 18 лет просмотр запрещён");
     private final String ratingName;
     private final String ratingDescription;
 
