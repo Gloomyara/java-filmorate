@@ -110,7 +110,7 @@
 3.  WHERE f.id IN (SELECT most_popular.film_id
 4.                FROM (SELECT film_id,
 5.                             COUNT(user_id) likes_count
-6.                      FROM user_likes
+6.                      FROM favorite_films
 7.                      GROUP BY film_id
 8.                      ORDER BY likes_count DESC
 9.                      LIMIT N) as most_popular)
