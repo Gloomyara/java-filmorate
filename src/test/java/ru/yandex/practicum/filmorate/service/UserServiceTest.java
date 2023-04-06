@@ -182,7 +182,7 @@ class UserServiceTest {
         assertEquals(1, userService.getFriendsListById(userId).size(),
                 "Количество друзей не совпадает");
         assertTrue("Пользователи не совпадают",
-                userService.getFriendsListById(userId).contains(user1));
+                userService.getFriendsListById(userId).containsKey(user1));
     }
 
     @Test
@@ -247,8 +247,11 @@ class UserServiceTest {
         userService.create(user1);
         userService.create(user2);
         userService.addFriend(getId.apply(user), getId.apply(user1));
+        userService.addFriend(getId.apply(user1), getId.apply(user));
         userService.addFriend(getId.apply(user), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user));
         userService.addFriend(getId.apply(user1), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user1));
         assertTrue("Друзья не совпадают",
                 userService.getMutualFriendsList(getId.apply(user), getId.apply(user1)).contains(user2));
         assertTrue("Друзья не совпадают",

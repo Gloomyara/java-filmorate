@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.enums.FilmCategory;
-import ru.yandex.practicum.filmorate.model.enums.FilmRating;
 import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
 
@@ -29,15 +27,15 @@ class FilmServiceTest {
     @BeforeEach
     void createSomeData() {
         inMemoryUserRepository = new InMemoryUserRepository();
-        inMemoryFilmRepository = new InMemoryFilmRepository();
-        filmService = new FilmService(inMemoryFilmRepository, inMemoryUserRepository);
+        inMemoryFilmRepository = new InMemoryFilmRepository(inMemoryUserRepository);
+        filmService = new FilmService(inMemoryFilmRepository);
         userService = new UserService(inMemoryUserRepository);
     }
 
     @Test
     void findAllShouldBeIsEmpty() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         assertTrue("Обнаружены неучтенные данные о фильмах", filmService.findAll().isEmpty());
     }
 
@@ -45,7 +43,7 @@ class FilmServiceTest {
     void getByIdShouldThrowNoSuchElementException() {
         int id = 1;
         film = new Film(id, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmService.getByKey(id)
@@ -56,49 +54,50 @@ class FilmServiceTest {
     @Test
     void getById() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         filmService.create(film);
         assertEquals(1, filmService.findAll().size(), "Фильм не был добавлен в репозиторий");
         int id = film.getId();
         film1 = new Film(id, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         assertEquals(film1, filmService.getByKey(id), "Фильмы не совпадают");
     }
 
     @Test
     void addLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
-        int userId = 9;
         int nonExistId = 999;
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
-        user = new User(userId, "testuser@gmail.com", "testUser",
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
+        user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.put(userId, user);
+        inMemoryUserRepository.create(user);
+        int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmService.addLike(filmId, nonExistId)
         );
-        assertEquals("User Id:" + nonExistId + " doesn't exist", ex.getMessage());
+        assertEquals("User with Id: " + nonExistId + " not found", ex.getMessage());
     }
 
     @Test
     void addLikeShouldThrowNoSuchElementExceptionWhenFilmIdIncorrect() {
-        int userId = 9;
+
         int nonExistId = 999;
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
-        user = new User(userId, "testuser@gmail.com", "testUser",
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
+        user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.put(userId, user);
+        inMemoryUserRepository.create(user);
+        int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -110,16 +109,16 @@ class FilmServiceTest {
 
     @Test
     void addLike() {
-        int userId = 9;
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
-        user = new User(userId, "testuser@gmail.com", "testUser",
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
+        user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.put(userId, user);
+        inMemoryUserRepository.create(user);
+        int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
     }
 
@@ -127,7 +126,7 @@ class FilmServiceTest {
     void deleteLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
@@ -135,29 +134,29 @@ class FilmServiceTest {
         userService.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmService.deleteLike(filmId, nonExistId)
         );
-        assertEquals("Error! Cannot delete user Id: " + nonExistId
-                + " like, user like not found.", ex.getMessage());
+        assertEquals("User with Id: " + nonExistId + " not found", ex.getMessage());
     }
 
     @Test
     void deleteLikeShouldThrowNoSuchElementExceptionWhenFilmIdIncorrect() {
-        int userId = 9;
+
         int nonExistId = 999;
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
-        user = new User(userId, "testuser@gmail.com", "testUser",
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
+        user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.put(userId, user);
+        inMemoryUserRepository.create(user);
+        int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -169,7 +168,7 @@ class FilmServiceTest {
     @Test
     void deleteLike() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
@@ -177,16 +176,16 @@ class FilmServiceTest {
         userService.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getLikesInfo().size(),
+        assertEquals(1, film.getRate(),
                 "Количество лайков не совпадает");
         filmService.deleteLike(filmId, userId);
-        assertTrue("Лайк не был удален", filmService.getByKey(filmId).getLikesInfo().isEmpty());
+        assertTrue("Лайк не был удален", film.getRate() == 0);
     }
 
     @Test
     void getPopularFilmsShouldBeIsEmpty() {
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         assertTrue("Обнаружены неучтенные данные о фильмах",
                 filmService.getPopularFilms(10).isEmpty());
     }
@@ -195,9 +194,9 @@ class FilmServiceTest {
     void getPopularFilms() {
 
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         film1 = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2010, 1, 1), 1500, FilmRating.G, FilmCategory.NOIR);
+                LocalDate.of(2010, 1, 1), 1500, null, null, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         user1 = new User(null, "testuser1@gmail.com", "testUser1",
@@ -212,11 +211,11 @@ class FilmServiceTest {
         int user1Id = user1.getId();
         filmService.addLike(filmId, userId);
         filmService.addLike(filmId, user1Id);
-        System.out.println(filmService.getByKey(filmId).getLikesInfo().size());
-        assertEquals(2, filmService.getByKey(filmId).getLikesInfo().size(),
+
+        assertEquals(2, film.getRate(),
                 "Количество лайков не совпадает");
         filmService.addLike(film1Id, user1Id);
-        assertEquals(1, filmService.getByKey(film1Id).getLikesInfo().size(),
+        assertEquals(1, film1.getRate(),
                 "Количество лайков не совпадает");
         assertTrue("Фильмы не совпадают",
                 filmService.getPopularFilms(1).contains(filmService.getByKey(filmId)));
