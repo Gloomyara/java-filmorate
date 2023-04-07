@@ -55,8 +55,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
             throw new ObjectAlreadyExistException("User Id: " + k + " should be null," +
                     " Id генерируется автоматически.");
         }
-        if (v.getName() == null || v.getName().isBlank()) {
-            v.setName(v.getLogin());
+        if (v.getUsername() == null || v.getUsername().isBlank()) {
+            v.setUsername(v.getLogin());
         }
         v.setId(id);
         log.debug(
@@ -166,9 +166,6 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         getByKey(k2);
         Set<Integer> mutualFriendsSet = friendsInfo.get(k1).keySet().stream()
                 .filter(friendsInfo.get(k1)::get)
-                /*.filter(friendsInfo.get(k2).keySet().stream()
-                        .filter(friendsInfo.get(k2)::get)
-                        .collect(Collectors.toSet())::contains)*/
                 .collect(Collectors.toSet());
 
         mutualFriendsSet.retainAll(friendsInfo.get(k2).keySet().stream()

@@ -34,7 +34,7 @@ public class FilmValidationTests {
     @BeforeEach
     void createSomeData() {
         inMemoryUserRepository = new InMemoryUserRepository();
-        inMemoryFilmRepository = new InMemoryFilmRepository(inMemoryUserRepository);
+        inMemoryFilmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(inMemoryFilmRepository);
         filmController = new FilmController(filmService);
     }

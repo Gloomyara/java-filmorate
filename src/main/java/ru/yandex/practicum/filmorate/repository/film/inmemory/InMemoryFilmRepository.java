@@ -1,24 +1,20 @@
 package ru.yandex.practicum.filmorate.repository.film.inmemory;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-@RequiredArgsConstructor
 public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private final Map<Integer, Film> filmStorage = new HashMap<>();
     private final Map<Integer, Set<Integer>> likesInfo = new HashMap<>();
-    private final UserRepository<Integer> userRepository;
 
     private Integer id = 1;
 
@@ -86,7 +82,6 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
 
         Film v = getByKey(k1);
-        userRepository.getByKey(k2);
         Set<Integer> tempSet = likesInfo.getOrDefault(k1, new HashSet<>());
         tempSet.add(k2);
         v.setRate(tempSet.size());
@@ -103,7 +98,6 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
 
         Film v = getByKey(k1);
-        userRepository.getByKey(k2);
         Set<Integer> tempSet = likesInfo.getOrDefault(k1, new HashSet<>());
         if (!tempSet.remove(k2)) {
             log.warn(

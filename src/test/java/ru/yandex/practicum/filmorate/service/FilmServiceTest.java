@@ -28,7 +28,7 @@ class FilmServiceTest {
     @BeforeEach
     void createSomeData() {
         inMemoryUserRepository = new InMemoryUserRepository();
-        inMemoryFilmRepository = new InMemoryFilmRepository(inMemoryUserRepository);
+        inMemoryFilmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(inMemoryFilmRepository);
         userService = new UserService(inMemoryUserRepository);
     }

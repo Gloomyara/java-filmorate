@@ -19,15 +19,16 @@ public class Film {
 
     private Integer id;
     @NotBlank(message = "Name cannot be blank")
-    private String name;
+    private String title;
     @Size(min = 1, max = 200, message = "Description must be between 1 and 200 characters")
     private String description;
     @FilmReleaseDateValidation(message = "ReleaseDate invalid", value = "1895-12-28")
     private LocalDate releaseDate;
-    @NotNull(message = "Duration cannot be null")
-    @Positive(message = "Duration should be positive")
+    @NotNull(message = "Length cannot be null")
+    @Positive(message = "Length should be positive")
     private Integer length;
     private Integer ratingId;
-    private Set<Integer> categoryId;
+    private Set<Integer> genreIdSet;
+    @NotNull(message = "Rate cannot be null")
     private Integer rate;
 }

@@ -21,7 +21,7 @@ public class User {
     private String email;
     @NotBlank(message = "Login cannot be blank")
     private String login;
-    private String name;
+    private String username;
     @NotNull(message = "Birthday cannot be null")
     @Past(message = "Birthday should be in the past")
     private LocalDate birthday;

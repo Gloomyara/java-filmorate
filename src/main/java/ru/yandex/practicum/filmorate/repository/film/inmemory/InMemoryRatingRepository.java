@@ -16,6 +16,11 @@ import java.util.Optional;
 @Repository
 public class InMemoryRatingRepository implements RatingRepository<Integer> {
     private final Map<Integer, Rating> ratingStorage = new HashMap<>();
+    private Integer id = 1;
+
+    public InMemoryRatingRepository() {
+        ratingStorage.put(0, null);
+    }
 
     @Override
     public Collection<Rating> findAll() {

@@ -17,6 +17,8 @@ import java.util.Optional;
 public class InMemoryGenreRepository implements GenreRepository<Integer> {
     private final Map<Integer, Genre> genreStorage = new HashMap<>();
 
+    private Integer id = 1;
+
     @Override
     public Collection<Genre> findAll() {
         Collection<Genre> collection = genreStorage.values();
