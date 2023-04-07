@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -53,6 +54,16 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(
                 responseBody(status, ex.getMessage(), request),
                 status);
+    }
+
+    @ExceptionHandler(value = MethodNotAllowedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ResponseEntity<Object> handleMethodNotAllowedException(
+            final Throwable e, WebRequest request) {
+
+        return new ResponseEntity<>(
+                responseBody(HttpStatus.METHOD_NOT_ALLOWED, e.getMessage(), request),
+                HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler

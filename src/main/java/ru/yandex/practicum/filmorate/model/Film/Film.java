@@ -1,8 +1,9 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.Film;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.customconstraint.FilmReleaseDateValidation;
+import ru.yandex.practicum.filmorate.model.Film.customconstraint.FilmReleaseDateValidation;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class Film {
 

@@ -7,7 +7,7 @@ import org.springframework.test.util.AssertionErrors;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.ConstraintViolation;
@@ -66,7 +66,7 @@ public class UserValidationTests {
     @Test
     void shouldNotPassValidationWhenUserBirthdayInTheFuture() {
         user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2026, 12, 1));
+                " ", LocalDate.now().plusMonths(1));
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(

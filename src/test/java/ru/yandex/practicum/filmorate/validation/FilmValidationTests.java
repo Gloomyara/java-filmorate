@@ -3,12 +3,12 @@ package ru.yandex.practicum.filmorate.validation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.controller.film.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.InMemoryFilmRepository;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryFilmRepository;
+import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;

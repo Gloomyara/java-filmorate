@@ -9,7 +9,7 @@ public interface ObjectsRepository<K, V> {
 
     Collection<V> findAll();
 
-    V getByKey(K k);
+    V getByKey(K k) throws ObjectNotFoundException;
 
     V create(V v) throws ObjectAlreadyExistException;
 

@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.repository;
+package ru.yandex.practicum.filmorate.repository.user.inmemory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,11 +49,11 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         Integer k = v.getId();
         if (userStorage.containsKey(k)) {
             log.warn(
-                    "{} под Id: {}, уже зарегистрирован.",
+                    "{} Id: {} should be null, Id генерируется автоматически.",
                     "User", k
             );
-            throw new ObjectAlreadyExistException("User под Id: " +
-                    k + " уже зарегистрирован.");
+            throw new ObjectAlreadyExistException("User Id: " + k + " should be null," +
+                    " Id генерируется автоматически.");
         }
         if (v.getName() == null || v.getName().isBlank()) {
             v.setName(v.getLogin());
@@ -112,32 +113,36 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
 
     @Override
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-
-        User v1 = getByKey(k1);
-        getByKey(k2);
-        var tempMap1 = friendsInfo.get(k1);
-        if (tempMap1.get(k2)) {
-            var tempMap2 = friendsInfo.get(k2);
-            Optional.ofNullable(
-                    tempMap2.remove(k1)).orElseThrow(() ->
+        try {
+            User v1 = getByKey(k1);
+            getByKey(k2);
+            var tempMap1 = friendsInfo.get(k1);
+            if (tempMap1.get(k2)) {
+                var tempMap2 = friendsInfo.get(k2);
+                Optional.ofNullable(
+                        tempMap2.remove(k1)).orElseThrow(() ->
+                        new ObjectNotFoundException(
+                                "Error! Cannot delete User Id: " + k2 + " friend with id: "
+                                        + k1 + ", user doesn't in your friends list!")
+                );
+                friendsInfo.put(k2, tempMap2);
+            }
+            Optional.ofNullable(tempMap1.remove(k2)).orElseThrow(() ->
                     new ObjectNotFoundException(
-                            "Error! Cannot delete User Id: " + k2 + " friend with id: "
-                                    + k1 + ", user doesn't in your friends list!")
+                            "Error! Cannot delete User Id: " + k1 + "friend with id: "
+                                    + k2 + ", user doesn't in your friends list!")
             );
-            friendsInfo.put(k2, tempMap2);
+            friendsInfo.put(k1, tempMap1);
+            log.debug(
+                    "Запрос пользователя под Id: {} на удаление из друзей, " +
+                            "пользователя под Id: {}, успешно выполнен!",
+                    k1, k2
+            );
+            return v1;
+        } catch (ObjectNotFoundException e) {
+            log.warn(e.getMessage());
+            throw e;
         }
-        Optional.ofNullable(tempMap1.remove(k2)).orElseThrow(() ->
-                new ObjectNotFoundException(
-                        "Error! Cannot delete User Id: " + k1 + "friend with id: "
-                                + k2 + ", user doesn't in your friends list!")
-        );
-        friendsInfo.put(k1, tempMap1);
-        log.debug(
-                "Запрос пользователя под Id: {} на удаление из друзей, " +
-                        "пользователя под Id: {}, успешно выполнен!",
-                k1, k2
-        );
-        return v1;
     }
 
     @Override

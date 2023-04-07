@@ -1,13 +1,13 @@
-package ru.yandex.practicum.filmorate.repository;
+package ru.yandex.practicum.filmorate.repository.film.inmemory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmCategory;
-import ru.yandex.practicum.filmorate.model.FilmRating;
+import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private final Map<Integer, Film> filmStorage = new HashMap<>();
-    private final Map<Integer, FilmCategory> filmCategoryStorage = new HashMap<>();
-    private final Map<Integer, FilmRating> filmRatingStorage = new HashMap<>();
     private final Map<Integer, Set<Integer>> likesInfo = new HashMap<>();
     private final UserRepository<Integer> userRepository;
 
@@ -56,11 +54,11 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
         Integer k = v.getId();
         if (filmStorage.containsKey(k)) {
             log.warn(
-                    "{} под Id: {}, уже зарегистрирован.",
+                    "{} Id: {} should be null, Id генерируется автоматически.",
                     "Film", k
             );
-            throw new ObjectAlreadyExistException("Film под Id: " +
-                    k + " уже зарегистрирован.");
+            throw new ObjectAlreadyExistException("Film Id: " + k + " should be null," +
+                    " Id генерируется автоматически.");
         }
         v.setId(id);
         log.debug(
