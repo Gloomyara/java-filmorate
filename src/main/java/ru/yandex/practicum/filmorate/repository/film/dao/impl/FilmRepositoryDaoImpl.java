@@ -29,12 +29,24 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
+                "select id from films where id = ?", k);
+        if (filmRows.next()) {
+            return true;
+        }
+        log.warn("{} with Id: {} not found",
+                "Film", k);
+        throw new ObjectNotFoundException("Film with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<Film> findAll() {
         String sqlQuery = "select id, title, description, release_date, " +
                 "length, rating_id, rate from films";
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
                 "Film", "Film", collection.size()
         );
         return collection;
@@ -101,7 +113,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        getByKey(k);
+        containsOrElseThrow(k);
         String sqlQuery = "update films set " +
                 "title = ?, description = ?, release_date = ?, length = ?, rating_id = ?" +
                 " where id = ?";
@@ -185,7 +197,8 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         return collection;
     }
 
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+    @Override
+    public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         String sqlQuery = "select genre_id, from film_genre where film_id = ?";
         var tempSet = jdbcTemplate.queryForStream(
                         sqlQuery, (rs, rn) -> rs.getInt("genre_id"),

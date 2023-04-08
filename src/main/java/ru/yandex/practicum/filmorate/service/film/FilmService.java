@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
@@ -17,9 +18,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FilmService implements ObjectService<Integer, Film> {
     private final FilmRepository<Integer> repository;
-    private final UserRepository<Integer> userRepository;
     private final GenreRepository<Integer> genreRepository;
     private final RatingRepository<Integer> ratingRepository;
+    private final UserRepository<Integer> userRepository;
 
     @Override
     public Collection<Film> findAll() {
@@ -27,39 +28,39 @@ public class FilmService implements ObjectService<Integer, Film> {
     }
 
     @Override
-    public Film getByKey(Integer k) {
+    public Film getByKey(Integer k) throws ObjectNotFoundException {
         return repository.getByKey(k);
     }
 
     @Override
-    public Film create(Film v) {
+    public Film create(Film v) throws ObjectNotFoundException, ObjectAlreadyExistException {
         int ratingId = v.getRatingId();
-        ratingRepository.getByKey(ratingId);
+        ratingRepository.containsOrElseThrow(ratingId);
         Set<Integer> genreIdSet = v.getGenreIdSet();
         for (int i : genreIdSet) {
-            genreRepository.getByKey(i);
+            genreRepository.containsOrElseThrow(i);
         }
         return repository.create(v);
     }
 
     @Override
-    public Film put(Film v) {
+    public Film put(Film v) throws ObjectNotFoundException {
         int ratingId = v.getRatingId();
-        ratingRepository.getByKey(ratingId);
+        ratingRepository.containsOrElseThrow(ratingId);
         Set<Integer> genreIdSet = v.getGenreIdSet();
         for (int i : genreIdSet) {
-            genreRepository.getByKey(i);
+            genreRepository.containsOrElseThrow(i);
         }
         return repository.put(v);
     }
 
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
-        userRepository.getByKey(k2);
+        userRepository.containsOrElseThrow(k2);
         return repository.addLike(k1, k2);
     }
 
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
-        userRepository.getByKey(k2);
+        userRepository.containsOrElseThrow(k2);
         return repository.deleteLike(k1, k2);
     }
 

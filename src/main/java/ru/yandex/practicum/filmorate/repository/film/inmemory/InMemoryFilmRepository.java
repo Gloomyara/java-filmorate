@@ -19,10 +19,18 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private Integer id = 1;
 
     @Override
+    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+        if (filmStorage.containsKey(k)) {
+            return true;
+        }
+        throw new ObjectNotFoundException("Film with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<Film> findAll() {
         Collection<Film> collection = filmStorage.values();
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
                 "Film", "Film", collection.size()
         );
         return collection;
@@ -69,7 +77,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        getByKey(k);
+        containsOrElseThrow(k);
         filmStorage.put(k, v);
         log.debug(
                 "Данные {} по Id: {}, успешно обновлены.",

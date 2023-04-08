@@ -7,6 +7,8 @@ import java.util.Collection;
 
 public interface ObjectsRepository<K, V> {
 
+    boolean containsOrElseThrow(K k) throws ObjectNotFoundException;
+
     Collection<V> findAll();
 
     V getByKey(K k) throws ObjectNotFoundException;

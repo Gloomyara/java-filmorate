@@ -23,10 +23,18 @@ public class InMemoryRatingRepository implements RatingRepository<Integer> {
     }
 
     @Override
+    public boolean containsOrElseThrow(Integer k) {
+        if (ratingStorage.containsKey(k)) {
+            return true;
+        }
+        throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<Rating> findAll() {
         Collection<Rating> collection = ratingStorage.values();
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}: {}'s",
                 "Rating", "Rating", collection.size()
         );
         return collection;

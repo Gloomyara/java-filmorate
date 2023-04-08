@@ -18,10 +18,18 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     private Integer id = 1;
 
     @Override
+    public boolean containsOrElseThrow(Integer k) {
+        if (userStorage.containsKey(k) && friendsInfo.containsKey(k)) {
+            return true;
+        }
+        throw new ObjectNotFoundException("User with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<User> findAll() {
         Collection<User> collection = userStorage.values();
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
                 "User", "User", collection.size()
         );
         return collection;
@@ -72,7 +80,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     @Override
     public User put(User v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        getByKey(k);
+        containsOrElseThrow(k);
         userStorage.put(k, v);
         log.debug(
                 "Данные {} по Id: {}, успешно обновлены.",
@@ -85,7 +93,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
 
         User v = getByKey(k1);
-        getByKey(k2);
+        containsOrElseThrow(k2);
         var tempMap1 = friendsInfo.getOrDefault(k1, new HashMap<>());
         var tempMap2 = friendsInfo.getOrDefault(k2, new HashMap<>());
         if (tempMap2.containsKey(k1)) {
@@ -115,7 +123,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
         try {
             User v1 = getByKey(k1);
-            getByKey(k2);
+            containsOrElseThrow(k2);
             var tempMap1 = friendsInfo.get(k1);
             if (tempMap1.get(k2)) {
                 var tempMap2 = friendsInfo.get(k2);
@@ -162,8 +170,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        getByKey(k1);
-        getByKey(k2);
+        containsOrElseThrow(k1);
+        containsOrElseThrow(k2);
         Set<Integer> mutualFriendsSet = friendsInfo.get(k1).keySet().stream()
                 .filter(friendsInfo.get(k1)::get)
                 .collect(Collectors.toSet());

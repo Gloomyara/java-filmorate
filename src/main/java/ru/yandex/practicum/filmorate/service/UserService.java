@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.user.UserRepository;
@@ -21,17 +22,17 @@ public class UserService implements ObjectService<Integer, User> {
     }
 
     @Override
-    public User getByKey(Integer k) {
+    public User getByKey(Integer k) throws ObjectNotFoundException {
         return repository.getByKey(k);
     }
 
     @Override
-    public User create(User v) {
+    public User create(User v) throws ObjectAlreadyExistException {
         return repository.create(v);
     }
 
     @Override
-    public User put(User v) {
+    public User put(User v) throws ObjectNotFoundException {
         return repository.put(v);
     }
 

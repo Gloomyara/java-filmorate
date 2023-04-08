@@ -29,11 +29,21 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(
+                "select id from users where id = ?", k);
+        if (userRows.next()) {
+            return true;
+        }
+        throw new ObjectNotFoundException("User with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<User> findAll() {
         String sqlQuery = "select id, email, username, login, birthday from users";
         Collection<User> collection = jdbcTemplate.query(sqlQuery, this::mapRowToUser);
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
                 "User", "User", collection.size()
         );
         return collection;
@@ -96,7 +106,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     @Override
     public User put(User v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        getByKey(k);
+        containsOrElseThrow(k);
         String sqlQuery = "update users set " +
                 "email = ?, username = ?, login = ?, birthday = ? " +
                 "where id = ?";
@@ -112,7 +122,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     @Override
     public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
         User v = getByKey(k1);
-        getByKey(k2);
+        containsOrElseThrow(k2);
         SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
                 "select status from friends " +
                         "where user_id = ? " +
@@ -151,7 +161,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
         try {
             User v = getByKey(k1);
-            getByKey(k2);
+            containsOrElseThrow(k2);
             String sqlQuery1 = "delete from friends where user_id = ? and friend_user_id = ?";
             boolean b1 = jdbcTemplate.update(sqlQuery1, k1, k2) > 0;
             String sqlQuery2 = "delete from friends where user_id = ? and friend_user_id = ?";
@@ -182,7 +192,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
 
     @Override
     public Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException {
-        getByKey(k);
+        containsOrElseThrow(k);
         String sqlQuery = "select u.id, u.email, u.username, u.login, u.birthday, f.status " +
                 "from users u " +
                 "join friends f on u.id=f.friend_user_id " +
@@ -200,8 +210,8 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
 
     @Override
     public Collection<User> getMutualFriendsList(Integer k1, Integer k2) throws ObjectNotFoundException {
-        getByKey(k1);
-        getByKey(k2);
+        containsOrElseThrow(k1);
+        containsOrElseThrow(k2);
         String sqlQuery = "select id, email, username, login, birthday " +
                 "from users " +
                 "where id in(select friend_user_id " +
@@ -221,7 +231,8 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         return collection;
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
+    @Override
+    public User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
                 .id(resultSet.getInt("id"))
                 .email(resultSet.getString("email"))
@@ -231,7 +242,8 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 .build();
     }
 
-    private Map.Entry<User, Boolean> mapRowToMapEntry(ResultSet resultSet, int rowNum) throws SQLException {
+    @Override
+    public Map.Entry<User, Boolean> mapRowToMapEntry(ResultSet resultSet, int rowNum) throws SQLException {
         return Map.entry(
                 mapRowToUser(resultSet, rowNum)
                 , resultSet.getBoolean("status")

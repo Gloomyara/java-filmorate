@@ -108,6 +108,7 @@ VALUES ('Fantasy film',
 'Films defined by situations that transcend natural laws and/or by settings inside a fictional universe,
  with narratives that are often inspired by or involve human myths.');
 
+/*
 INSERT
     INTO
     GENRE(NAME,
@@ -172,4 +173,4 @@ INSERT
     GENRE(NAME,
     DESCRIPTION)
 VALUES ('Western',
-'A genre in which films are set in the American West during the 19th century.');
+'A genre in which films are set in the American West during the 19th century.');*/

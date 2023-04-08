@@ -6,11 +6,15 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryFilmRepository;
+import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryGenreRepository;
+import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryRatingRepository;
 import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -20,17 +24,28 @@ class FilmServiceTest {
     Film film1;
     User user;
     User user1;
-    InMemoryUserRepository inMemoryUserRepository;
-    InMemoryFilmRepository inMemoryFilmRepository;
+    InMemoryUserRepository userRepository;
+    InMemoryFilmRepository filmRepository;
     FilmService filmService;
     UserService userService;
+    Set<Integer> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
-        inMemoryUserRepository = new InMemoryUserRepository();
-        inMemoryFilmRepository = new InMemoryFilmRepository();
-        filmService = new FilmService(inMemoryFilmRepository);
-        userService = new UserService(inMemoryUserRepository);
+        genreIdSet = new HashSet<>();
+        genreIdSet.add(1);
+        char[] charArray = new char[200];
+        film = new Film(null, "testFilmName", String.valueOf(charArray),
+                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+        film1 = new Film(null, "testFilm1Name", "d1",
+                LocalDate.of(2020, 1, 1), 1500, 1, genreIdSet, 0);
+        user = new User(null, "testuser@gmail.com", "testUser",
+                " ", LocalDate.of(2023, 1, 1));
+        var genreRepository = new InMemoryGenreRepository();
+        var ratingRepository = new InMemoryRatingRepository();
+        userRepository = new InMemoryUserRepository();
+        filmRepository = new InMemoryFilmRepository();
+        filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
     }
 
     @Test
@@ -43,8 +58,7 @@ class FilmServiceTest {
     @Test
     void getByIdShouldThrowNoSuchElementException() {
         int id = 1;
-        film = new Film(id, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
+        film.setId(id);
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmService.getByKey(id)
@@ -54,26 +68,20 @@ class FilmServiceTest {
 
     @Test
     void getById() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         filmService.create(film);
         assertEquals(1, filmService.findAll().size(), "Фильм не был добавлен в репозиторий");
         int id = film.getId();
-        film1 = new Film(id, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        assertEquals(film1, filmService.getByKey(id), "Фильмы не совпадают");
+        Film film2 = new Film(id, "testFilmName", film.getDescription(),
+                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+        assertEquals(film2, filmService.getByKey(id), "Фильмы не совпадают");
     }
 
     @Test
     void addLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -89,13 +97,9 @@ class FilmServiceTest {
     void addLikeShouldThrowNoSuchElementExceptionWhenFilmIdIncorrect() {
 
         int nonExistId = 999;
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -110,13 +114,9 @@ class FilmServiceTest {
 
     @Test
     void addLike() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -126,10 +126,6 @@ class FilmServiceTest {
     @Test
     void deleteLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
         userService.create(user);
@@ -148,13 +144,9 @@ class FilmServiceTest {
     void deleteLikeShouldThrowNoSuchElementExceptionWhenFilmIdIncorrect() {
 
         int nonExistId = 999;
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         filmService.create(film);
         int filmId = film.getId();
-        inMemoryUserRepository.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -168,10 +160,7 @@ class FilmServiceTest {
 
     @Test
     void deleteLike() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
+
         filmService.create(film);
         int filmId = film.getId();
         userService.create(user);
@@ -185,8 +174,6 @@ class FilmServiceTest {
 
     @Test
     void getPopularFilmsShouldBeIsEmpty() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         assertTrue("Обнаружены неучтенные данные о фильмах",
                 filmService.getPopularFilms(10).isEmpty());
     }
@@ -194,12 +181,6 @@ class FilmServiceTest {
     @Test
     void getPopularFilms() {
 
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
-        film1 = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2010, 1, 1), 1500, null, null, 0);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         user1 = new User(null, "testuser1@gmail.com", "testUser1",
                 " ", LocalDate.of(2013, 1, 1));
         filmService.create(film);

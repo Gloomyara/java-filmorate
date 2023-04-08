@@ -20,10 +20,18 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
     private Integer id = 1;
 
     @Override
+    public boolean containsOrElseThrow(Integer k) {
+        if (genreStorage.containsKey(k)) {
+            return true;
+        }
+        throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
+    }
+
+    @Override
     public Collection<Genre> findAll() {
         Collection<Genre> collection = genreStorage.values();
         log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}: {}",
+                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
                 "Genre", "Genre", collection.size()
         );
         return collection;

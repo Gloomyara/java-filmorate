@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.RatingRepository;
 import ru.yandex.practicum.filmorate.service.ObjectService;
@@ -19,7 +20,7 @@ public class RatingService implements ObjectService<Integer, Rating> {
     }
 
     @Override
-    public Rating getByKey(Integer k) {
+    public Rating getByKey(Integer k) throws ObjectNotFoundException {
         return repository.getByKey(k);
     }
 
