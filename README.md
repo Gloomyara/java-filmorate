@@ -1,4 +1,4 @@
-# **java-filmorate**
+   # **java-filmorate**
 
    ### **Final 9**
 
@@ -9,48 +9,107 @@
 Добавлены методы позволяющие пользователям добавлять друг друга в друзья, получать список общих друзей и лайкать фильмы.
 
    ### **Staging task 11**
-    
-Создание схемы базы данных
+   
+<details>
 
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229368658-4acafd7f-51f9-4969-8746-bd253c4382c7.png)
+<summary> Создание схемы базы данных </summary>
+   
+   ### Схема:
+   
+<details>
+   
+<summary> DB Diagram </summary>
 
-*SQL* requests example:
+   ### [dbdiagram.io](https://dbdiagram.io/d/)
 
-- *getMutualFriends*
+![Схема базы данных:](https://user-images.githubusercontent.com/115705343/230781050-901603e6-8b43-402f-ac1c-ba0dc56d75f0.jpg)
+   
+</details>
 
-      1.  SELECT *
-      2.  FROM users u
-      3.  WHERE id IN(SELECT friend_id
-      4.             FROM friends
-      5.             WHERE user_id = X
-      6.             AND confirmed = true
-      7.             AND friend_id IN(SELECT friend_id
-      8.                             FROM friends
-      9.                             WHERE user_id = Y
-      10.                            AND confirmed = true))
-      11. GROUP BY u.id;
+   ### Короткое описание БД:
+   
+<details>
 
-- *findAllFilms*
+<summary> Filmorate DB description </summary>
+   
+   - База данных состоит из таблиц с данными о пользователях(*users*), друзьях(*friends*), любимых фильмах(*favorite_films*), фильмах(*films*), жанров фильмов(*genre*), рейтинга фильмов(*ratings*) и служебной таблицы для связи фильмов и жанров(*film_genre*).
+   
+   - Таблица _friends_ связана многие к одному с _PK(id)_ _users_, также имеет поле для определения связи(дружбы) между пользователями.
+   
+   - Таблицы _users_ и _films_ связаны один к многим по _PK(id)_ с таблицей *favorite_films* для хранения информации о любимых фильмах пользователя.
 
-      1. SELECT *
-      2. FROM films f
-      3. GROUP BY f.id;
+   - Таблица _films_ связана многие к одному по _FK(rating_id)_ с таблицей *ratings* для (здесь могла быть ваша реклама).
 
-- *findAllUsers*
+   - Таблицы _films_ и _genres_ связаны один ко многим по _PK(id)_ с таблицей *film_category* для сортировки/поиска фильмов по жанрам, а также для удовлетворения требований по нормализации баз данных.
+   
+</details>
+   
+   ### Примеры SQL запросов из ТЗ:
+   
+<details>
 
-      1. SELECT *
-      2. FROM users u
-      3. GROUP BY u.id;
+<summary> SQL requests example </summary>
 
-- *topNMostPopularFilms*
+   ### Поиск общих друзей:
+   
+<details>
 
-      1.  SELECT *
-      2.  FROM films f
-      3.  WHERE f.id IN (SELECT most_popular.film_id
-      4.                FROM (SELECT film_id,
-      5.                             COUNT(user_id) likes_count
-      6.                      FROM user_likes
-      7.                      GROUP BY film_id
-      8.                      ORDER BY likes_count DESC
-      9.                      LIMIT N) as most_popular)
-      10. GROUP BY f.id;
+<summary> getMutualFriends </summary>
+   
+```sql   
+1.  SELECT *
+2.  FROM users u
+3.  WHERE id IN(SELECT friend_id
+4.             FROM friends
+5.             WHERE user_id = X
+6.             AND status = true
+7.             AND user_friend_id IN(SELECT user_friend_id
+8.                             FROM friends
+9.                             WHERE user_id = Y
+10.                            AND status = true))
+```
+   
+</details>
+
+   ### Получить список всех фильмов:
+   
+<details>
+
+<summary> findAllFilms </summary> 
+
+```sql 
+1. SELECT *
+2. FROM films f
+```
+   
+</details>
+
+   ### Получить список всех пользователей:
+   
+<details>
+
+<summary> findAllUsers </summary> 
+   
+```sql
+1. SELECT *
+2. FROM users u
+```
+   
+</details>
+
+   ### Получить список N популярных фильмов:
+   
+<details>
+   
+<summary> topNMostPopularFilms </summary>
+   
+```sql
+1.  SELECT *
+2.  FROM films f
+3.  ORDER BY rate DESC
+4.  LIMIT N;              
+```
+   
+</details>
+</details>
+</details>
