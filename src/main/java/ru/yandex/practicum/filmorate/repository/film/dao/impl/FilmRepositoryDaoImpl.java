@@ -203,7 +203,8 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         String sqlQuery = "select id, name from genres " +
-                "where id in(select genre_id, from film_genre where film_id = ?)";
+                "where id in(select genre_id, from film_genre where film_id = ?)" +
+                "order by id";
         TreeSet<Genre> tempSet = new TreeSet<>(Comparator.comparing(Genre::getId));
         tempSet.addAll(jdbcTemplate.queryForStream(sqlQuery,
                         this::mapRowToGenre,
