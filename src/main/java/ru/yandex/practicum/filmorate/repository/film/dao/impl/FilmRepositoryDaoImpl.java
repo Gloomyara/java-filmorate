@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
-import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
     private final GenreRepositoryDao<Integer> genreRepository;
-    private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
     public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -207,21 +205,24 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
 
-        String sqlQuery = "select id, name from genres " +
-                "where id in(select genre_id, from film_genre where film_id = ?)" +
-                "order by id";
+        String sqlQuery = "select genre_id, from film_genre where film_id = ? order by genre_id";
         TreeSet<Genre> sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
-        Set<Genre> tempSet = jdbcTemplate.queryForStream(sqlQuery,
-                        genreRepository::mapRowToGenre,
-                        resultSet.getInt("id"))
-                .collect(Collectors.toSet());
-        if (!tempSet.isEmpty()) {
-            sortedSet.addAll(tempSet);
+        List<Integer> tempList = jdbcTemplate.query(sqlQuery,
+                (rs, rw) -> rs.getInt("genre_id"),
+                resultSet.getInt("id"));
+        if (!tempList.isEmpty()) {
+            sortedSet.addAll(tempList.stream().map(genreRepository::getByKey).collect(Collectors.toList()));
         }
-        String sqlQuery1 = "select id, name from ratings where id = ?";
-        Rating v = jdbcTemplate.queryForObject(sqlQuery1,
-                ratingRepository::mapRowToRating,
+        Rating v = null;
+        SqlRowSet ratingRows = jdbcTemplate.queryForRowSet(
+                "select id, name from ratings where id = ?",
                 resultSet.getInt("rating_id"));
+        if (ratingRows.next()) {
+            v = Rating.builder()
+                    .id(ratingRows.getInt("id"))
+                    .name(ratingRows.getString("name"))
+                    .build();
+        }
 
         return Film.builder()
                 .id(resultSet.getInt("id"))
