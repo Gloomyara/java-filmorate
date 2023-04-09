@@ -99,10 +99,10 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
         Integer k = v.getId();
         containsOrElseThrow(k);
         String sqlQuery = "update ratings set name = ?, description = ? where id = ?";
-        jdbcTemplate.update(sqlQuery
-                , v.getName()
-                , v.getDescription()
-                , k);
+        jdbcTemplate.update(sqlQuery,
+                v.getName(),
+                v.getDescription(),
+                k);
         return v;
     }
 

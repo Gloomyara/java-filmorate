@@ -19,7 +19,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -100,10 +99,10 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
         Integer k = v.getId();
         containsOrElseThrow(k);
         String sqlQuery = "update genres set name = ?, description = ? where id = ?";
-        jdbcTemplate.update(sqlQuery
-                , v.getName()
-                , v.getDescription()
-                , k);
+        jdbcTemplate.update(sqlQuery,
+                v.getName(),
+                v.getDescription(),
+                k);
         return v;
     }
 

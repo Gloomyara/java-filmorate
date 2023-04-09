@@ -120,13 +120,13 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         String sqlQuery = "update films set " +
                 "title = ?, description = ?, release_date = ?, length = ?, rating_id = ?" +
                 " where id = ?";
-        jdbcTemplate.update(sqlQuery
-                , v.getName()
-                , v.getDescription()
-                , Date.valueOf(v.getReleaseDate())
-                , v.getDuration()
-                , v.getMpa().getId()
-                , k);
+        jdbcTemplate.update(sqlQuery,
+                v.getName(),
+                v.getDescription(),
+                Date.valueOf(v.getReleaseDate()),
+                v.getDuration(),
+                v.getMpa().getId(),
+                k);
         String sqlQuery1 = "delete from film_genre where film_id = ?";
         jdbcTemplate.update(sqlQuery1, k);
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
@@ -206,14 +206,15 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         String sqlQuery = "select id, name, description from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)";
-        var tempSet = jdbcTemplate.queryForStream(sqlQuery
-                        , this::mapRowToGenre
-                        , resultSet.getInt("id"))
+        var tempSet = jdbcTemplate.queryForStream(sqlQuery,
+                        this::mapRowToGenre,
+                        resultSet.getInt("id"))
                 .collect(Collectors.toSet());
+
         String sqlQuery1 = "select id, name, description from ratings where id = ?";
-        Rating v = jdbcTemplate.queryForObject(sqlQuery1
-                , this::mapRowToRating
-                , resultSet.getInt("rating_id"));
+        Rating v = jdbcTemplate.queryForObject(sqlQuery1,
+                this::mapRowToRating,
+                resultSet.getInt("rating_id"));
 
         return Film.builder()
                 .id(resultSet.getInt("id"))

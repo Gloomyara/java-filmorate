@@ -107,12 +107,12 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         String sqlQuery = "update users set " +
                 "email = ?, username = ?, login = ?, birthday = ? " +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery
-                , v.getEmail()
-                , v.getName()
-                , v.getLogin()
-                , Date.valueOf(v.getBirthday())
-                , k);
+        jdbcTemplate.update(sqlQuery,
+                v.getEmail(),
+                v.getName(),
+                v.getLogin(),
+                Date.valueOf(v.getBirthday()),
+                k);
         return v;
     }
 
