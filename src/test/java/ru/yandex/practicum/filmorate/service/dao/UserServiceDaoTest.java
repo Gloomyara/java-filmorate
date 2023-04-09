@@ -127,7 +127,7 @@ public class UserServiceDaoTest {
 
     @Test
     void getFriendsListByIdShouldThrowNoSuchElementException() {
-        int id = 1;
+        int id = 999;
         user.setId(id);
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
