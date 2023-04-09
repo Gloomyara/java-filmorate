@@ -202,15 +202,19 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+
         String sqlQuery = "select id, name from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)" +
                 "order by id";
-        TreeSet<Genre> tempSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
-        tempSet.addAll(jdbcTemplate.queryForStream(sqlQuery,
+        TreeSet<Genre> sortedSet = null;
+        Set<Genre> tempSet = jdbcTemplate.queryForStream(sqlQuery,
                         this::mapRowToGenre,
                         resultSet.getInt("id"))
-                .collect(Collectors.toSet()));
-
+                .collect(Collectors.toSet());
+        if (!tempSet.isEmpty()) {
+            sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
+            sortedSet.addAll(tempSet);
+        }
         String sqlQuery1 = "select id, name from ratings where id = ?";
         Rating v = jdbcTemplate.queryForObject(sqlQuery1,
                 this::mapRowToRating,
@@ -223,7 +227,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
                 .mpa(v)
-                .genres(tempSet)
+                .genres(sortedSet)
                 .rate(resultSet.getInt("rate"))
                 .build();
     }
