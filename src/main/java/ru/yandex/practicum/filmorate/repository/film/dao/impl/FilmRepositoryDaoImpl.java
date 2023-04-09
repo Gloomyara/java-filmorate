@@ -20,9 +20,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -206,10 +204,11 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         String sqlQuery = "select id, name from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)";
-        var tempSet = jdbcTemplate.queryForStream(sqlQuery,
+        TreeSet<Genre> tempSet = new TreeSet<>(Comparator.comparing(Genre::getId));
+        tempSet.addAll(jdbcTemplate.queryForStream(sqlQuery,
                         this::mapRowToGenre,
                         resultSet.getInt("id"))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()));
 
         String sqlQuery1 = "select id, name from ratings where id = ?";
         Rating v = jdbcTemplate.queryForObject(sqlQuery1,
