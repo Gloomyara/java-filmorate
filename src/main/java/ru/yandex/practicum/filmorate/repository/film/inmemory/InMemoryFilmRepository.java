@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
 
 import java.util.*;
@@ -65,6 +66,11 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
                     " Id генерируется автоматически.");
         }
         v.setId(id);
+        if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
+            v.setGenres(genreIdSet);
+        }
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
                 "Film", k
@@ -77,6 +83,11 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
         Integer k = v.getId();
+        if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
+            v.setGenres(genreIdSet);
+        }
         containsOrElseThrow(k);
         filmStorage.put(k, v);
         log.debug(

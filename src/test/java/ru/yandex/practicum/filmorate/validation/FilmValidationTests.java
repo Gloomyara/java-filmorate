@@ -19,7 +19,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class FilmValidationTests {
 
     FilmService filmService;
     FilmController filmController;
-    Set<Genre> genreIdSet;
+    List<Genre> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
@@ -51,7 +52,7 @@ public class FilmValidationTests {
         var userRepository = new InMemoryUserRepository();
         genreRepository.create(genre);
         ratingRepository.create(rating);
-        genreIdSet = new HashSet<>();
+        genreIdSet = new ArrayList<>();
         genreIdSet.add(genre);
         filmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
