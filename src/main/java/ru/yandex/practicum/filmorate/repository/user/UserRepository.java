@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 
 import java.util.Collection;
-import java.util.Map;
 
 public interface UserRepository<K> extends ObjectsRepository<K, User> {
     User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException;

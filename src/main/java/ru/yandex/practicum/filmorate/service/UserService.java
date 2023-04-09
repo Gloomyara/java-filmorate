@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 
 @Service

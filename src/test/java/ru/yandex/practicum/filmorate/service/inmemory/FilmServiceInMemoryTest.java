@@ -22,7 +22,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
- class FilmServiceInMemoryTest {
+
+class FilmServiceInMemoryTest {
     Film film;
     Film film1;
     User user;

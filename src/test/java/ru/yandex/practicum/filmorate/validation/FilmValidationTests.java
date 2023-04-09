@@ -179,7 +179,7 @@ public class FilmValidationTests {
             filmController.put(film1);
         }
         Film film2 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         film2.setId(film.getId());
         assertEquals("Фильмы не совпадают", film2, film1);
     }

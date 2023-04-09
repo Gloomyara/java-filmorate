@@ -37,13 +37,13 @@ public class FilmServiceDaoTest {
     Film film;
     Film film1;
     User user;
-    Set<Integer> genreIdSet;
+    Set<Genre> genreIdSet;
     Rating mpa;
 
     @BeforeEach
     void createSomeData() {
         genreIdSet = new HashSet<>();
-        genreIdSet.add(1);
+        genreIdSet.add(genreController.getByKey(1));
         mpa = ratingController.getByKey(1);
         film = new Film(null, "testFilmName", "d",
                 LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
@@ -152,8 +152,9 @@ public class FilmServiceDaoTest {
         int id = film.getId();
         assertEquals(film, filmService.getByKey(id), "Фильмы не совпадают");
     }
+
     @Test
-    void create(){
+    void create() {
         Rating rating = new Rating(1, null, null);
         Film test = new Film(null, "nisi eiusmod", "adipisicing",
                 LocalDate.of(1967, 3, 25), 100, rating, null, null);
