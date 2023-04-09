@@ -206,7 +206,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
 
         String sqlQuery = "select genre_id, from film_genre where film_id = ? order by genre_id";
-        TreeSet<Genre> sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
+        TreeSet<Genre> sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         List<Integer> tempList = jdbcTemplate.query(sqlQuery,
                 (rs, rw) -> rs.getInt("genre_id"),
                 resultSet.getInt("id"));
