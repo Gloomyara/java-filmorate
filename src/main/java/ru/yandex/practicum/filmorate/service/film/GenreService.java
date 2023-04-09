@@ -14,6 +14,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreService implements ObjectService<Integer, Genre> {
     private final GenreRepository<Integer> repository;
+
     @Override
     public Collection<Genre> findAll() {
         return repository.findAll();
@@ -25,7 +26,7 @@ public class GenreService implements ObjectService<Integer, Genre> {
     }
 
     @Override
-    public Genre create(Genre v) throws ObjectAlreadyExistException  {
+    public Genre create(Genre v) throws ObjectAlreadyExistException {
         return repository.create(v);
     }
 
