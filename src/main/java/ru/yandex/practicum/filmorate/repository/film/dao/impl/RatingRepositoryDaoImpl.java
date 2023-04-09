@@ -41,7 +41,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
 
     @Override
     public Collection<Rating> findAll() {
-        String sqlQuery = "select id, name, description from ratings";
+        String sqlQuery = "select id, name from ratings";
         Collection<Rating> collection = jdbcTemplate.query(sqlQuery, this::mapRowToRating);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -53,7 +53,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     @Override
     public Rating getByKey(Integer k) throws ObjectNotFoundException {
         try {
-            String sqlQuery = "select id, name, description from ratings where id = ?";
+            String sqlQuery = "select id, name from ratings where id = ?";
             Rating v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, k);
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
@@ -77,12 +77,11 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("Rating Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into ratings(name, description) values (?, ?)";
+        String sqlQuery = "insert into ratings(name) values (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
             stmt.setString(1, v.getName());
-            stmt.setString(2, v.getDescription());
             return stmt;
         }, keyHolder);
         Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
@@ -98,11 +97,8 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     public Rating put(Rating v) throws ObjectNotFoundException {
         Integer k = v.getId();
         containsOrElseThrow(k);
-        String sqlQuery = "update ratings set name = ?, description = ? where id = ?";
-        jdbcTemplate.update(sqlQuery,
-                v.getName(),
-                v.getDescription(),
-                k);
+        String sqlQuery = "update ratings set name = ? where id = ?";
+        jdbcTemplate.update(sqlQuery, v.getName(), k);
         return v;
     }
 
@@ -112,7 +108,6 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
         return Rating.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
                 .build();
     }
 }

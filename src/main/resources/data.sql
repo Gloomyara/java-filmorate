@@ -28,82 +28,55 @@ FROM
 
 INSERT
     INTO
-    RATINGS(NAME,
-    DESCRIPTION)
-VALUES ('G',
-'У фильма нет возрастных ограничений!');
+    RATINGS(NAME)
+VALUES ('G');
 
 INSERT
     INTO
-    RATINGS(NAME,
-    DESCRIPTION)
-VALUES ('PG',
-'Детям рекомендуется смотреть фильм с родителями!');
+    RATINGS(NAME)
+VALUES ('PG');
 
 INSERT
     INTO
-    RATINGS(NAME,
-    DESCRIPTION)
-VALUES ('PG-13',
-'Детям до 13 лет просмотр не желателен!');
+    RATINGS(NAME)
+VALUES ('PG-13');
 
 INSERT
     INTO
-    RATINGS(NAME,
-    DESCRIPTION)
-VALUES ('R',
-'Лицам до 17 лет просматривать фильм можно только в присутствии взрослого!');
+    RATINGS(NAME)
+VALUES ('R');
 
 INSERT
     INTO
-    RATINGS(NAME,
-    DESCRIPTION)
-VALUES ('NC-17',
-'Лицам до 18 лет просмотр запрещён!');
+    RATINGS(NAME)
+VALUES ('NC-17');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Комедия',
-'Defined by events that are primarily intended to make the audience laugh.');
+    GENRES(NAME)
+VALUES ('Комедия');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Драма',
-'Focused on emotions and defined by conflict, often looking to reality rather than sensationalism.');
+    GENRES(NAME)
+VALUES ('Драма');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Мультфильм',
-'A film medium in which the films images are primarily created by computer or hand
- and the characters are voiced by actors. Animation can incorporate any GENRES and subGENRES.');
+    GENRES(NAME)
+VALUES ('Мультфильм');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Триллер',
-'Films that evoke excitement and suspense in the audience. The suspense element found
- in most films plots is particularly exploited by the filmmaker in this GENRES.
- Tension is created by delaying what the audience sees as inevitable, and is built
- through situations that are menacing or where escape seems impossible.');
+    GENRES(NAME)
+VALUES ('Триллер');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Документальный',
-'Films that either provide more-or-less accurate representations of historical accounts 
- or depict fictional narratives placed inside an accurate depiction of a historical setting.');
+    GENRES(NAME)
+VALUES ('Документальный');
 
 INSERT
     INTO
-    GENRES(NAME,
-    DESCRIPTION)
-VALUES ('Боевик',
-'Associated with particular types of spectacle (e.g., explosions, chases, combat).');
+    GENRES(NAME)
+VALUES ('Боевик');

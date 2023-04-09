@@ -35,8 +35,8 @@ class FilmServiceInMemoryTest {
 
     @BeforeEach
     void createSomeData() {
-        Genre genre = new Genre(null, "genre1", "d");
-        Rating rating = new Rating(null, "rating1", "d");
+        Genre genre = new Genre(null, "genre1");
+        Rating rating = new Rating(null, "rating1");
         var genreRepository = new InMemoryGenreRepository();
         var ratingRepository = new InMemoryRatingRepository();
         genreRepository.create(genre);

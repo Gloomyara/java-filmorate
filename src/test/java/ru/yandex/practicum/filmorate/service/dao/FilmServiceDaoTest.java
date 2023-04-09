@@ -65,14 +65,13 @@ public class FilmServiceDaoTest {
 
     @Test
     void getGenreById() {
-        Genre genre = new Genre(1, "Комедия",
-                "Defined by events that are primarily intended to make the audience laugh.");
+        Genre genre = new Genre(1, "Комедия");
         assertEquals(genre, genreController.getByKey(1), "Жанры не совпадают");
     }
 
     @Test
     void getRatingById() {
-        Rating rating = new Rating(1, "G", "У фильма нет возрастных ограничений!");
+        Rating rating = new Rating(1, "G");
         assertEquals(rating, ratingController.getByKey(1), "Рейтинги не совпадают");
     }
 
@@ -80,7 +79,7 @@ public class FilmServiceDaoTest {
     void shouldThrowMethodNotAllowedExceptionWhenCreateNewRating() {
         MethodNotAllowedException ex1 = Assertions.assertThrows(
                 MethodNotAllowedException.class,
-                () -> ratingController.create(new Rating(null, "rating", "d"))
+                () -> ratingController.create(new Rating(null, "rating"))
         );
         Assertions.assertEquals("405 METHOD_NOT_ALLOWED \"Request method 'POST' not supported\"", ex1.getMessage());
     }
@@ -89,7 +88,7 @@ public class FilmServiceDaoTest {
     void shouldThrowMethodNotAllowedExceptionWhenPutNewRating() {
         MethodNotAllowedException ex1 = Assertions.assertThrows(
                 MethodNotAllowedException.class,
-                () -> ratingController.put(new Rating(null, "rating", "d"))
+                () -> ratingController.put(new Rating(null, "rating"))
         );
         Assertions.assertEquals("405 METHOD_NOT_ALLOWED \"Request method 'PUT' not supported\"", ex1.getMessage());
     }
@@ -98,7 +97,7 @@ public class FilmServiceDaoTest {
     void shouldThrowMethodNotAllowedExceptionWhenCreateNewGenre() {
         MethodNotAllowedException ex1 = Assertions.assertThrows(
                 MethodNotAllowedException.class,
-                () -> genreController.create(new Genre(null, "genre", "d"))
+                () -> genreController.create(new Genre(null, "genre"))
         );
         Assertions.assertEquals("405 METHOD_NOT_ALLOWED \"Request method 'POST' not supported\"", ex1.getMessage());
     }
@@ -107,7 +106,7 @@ public class FilmServiceDaoTest {
     void shouldThrowMethodNotAllowedExceptionWhenPutNewGenre() {
         MethodNotAllowedException ex1 = Assertions.assertThrows(
                 MethodNotAllowedException.class,
-                () -> genreController.put(new Genre(null, "genre", "d"))
+                () -> genreController.put(new Genre(null, "genre"))
         );
         Assertions.assertEquals("405 METHOD_NOT_ALLOWED \"Request method 'PUT' not supported\"", ex1.getMessage());
     }
@@ -155,7 +154,7 @@ public class FilmServiceDaoTest {
 
     @Test
     void create() {
-        Rating rating = new Rating(1, null, null);
+        Rating rating = new Rating(1, null);
         Film test = new Film(null, "nisi eiusmod", "adipisicing",
                 LocalDate.of(1967, 3, 25), 100, rating, null, null);
         filmService.create(test);

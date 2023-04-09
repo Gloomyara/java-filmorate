@@ -41,7 +41,7 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
 
     @Override
     public Collection<Genre> findAll() {
-        String sqlQuery = "select id, name, description from genres";
+        String sqlQuery = "select id, name from genres";
         Collection<Genre> collection = jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -53,7 +53,7 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     @Override
     public Genre getByKey(Integer k) throws ObjectNotFoundException {
         try {
-            String sqlQuery = "select id, name, description from genres where id = ?";
+            String sqlQuery = "select id, name from genres where id = ?";
             Genre v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, k);
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
@@ -77,12 +77,11 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("Genre Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into genres(name, description) values (?, ?)";
+        String sqlQuery = "insert into genres(name) values (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
             stmt.setString(1, v.getName());
-            stmt.setString(2, v.getDescription());
             return stmt;
         }, keyHolder);
         Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
@@ -98,11 +97,8 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     public Genre put(Genre v) throws ObjectNotFoundException {
         Integer k = v.getId();
         containsOrElseThrow(k);
-        String sqlQuery = "update genres set name = ?, description = ? where id = ?";
-        jdbcTemplate.update(sqlQuery,
-                v.getName(),
-                v.getDescription(),
-                k);
+        String sqlQuery = "update genres set name = ? where id = ?";
+        jdbcTemplate.update(sqlQuery, v.getName(), k);
         return v;
     }
 
@@ -112,7 +108,6 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
         return Genre.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
                 .build();
     }
 }

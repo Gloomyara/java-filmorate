@@ -204,14 +204,14 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        String sqlQuery = "select id, name, description from genres " +
+        String sqlQuery = "select id, name from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)";
         var tempSet = jdbcTemplate.queryForStream(sqlQuery,
                         this::mapRowToGenre,
                         resultSet.getInt("id"))
                 .collect(Collectors.toSet());
 
-        String sqlQuery1 = "select id, name, description from ratings where id = ?";
+        String sqlQuery1 = "select id, name from ratings where id = ?";
         Rating v = jdbcTemplate.queryForObject(sqlQuery1,
                 this::mapRowToRating,
                 resultSet.getInt("rating_id"));
@@ -233,7 +233,6 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         return Rating.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
                 .build();
     }
 
@@ -242,7 +241,6 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         return Genre.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
                 .build();
     }
 }

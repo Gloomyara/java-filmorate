@@ -20,7 +20,7 @@ public class GenreServiceInMemoryTest {
 
     @BeforeEach
     void createSomeData() {
-        genre = new Genre(null, "genre1", "d");
+        genre = new Genre(null, "genre1");
         genreRepository = new InMemoryGenreRepository();
         genreService = new GenreService(genreRepository);
     }
@@ -33,7 +33,7 @@ public class GenreServiceInMemoryTest {
     @Test
     void findAll() {
         genreService.create(genre);
-        Genre genre2 = new Genre(genre.getId(), "genre1", "d");
+        Genre genre2 = new Genre(genre.getId(), "genre1");
         Assertions.assertTrue(genreService.findAll().contains(genre2), "Жанры не совпадают");
     }
 
@@ -53,7 +53,7 @@ public class GenreServiceInMemoryTest {
         genreService.create(genre);
         assertEquals(1, genreService.findAll().size(), "Жанр не был добавлен в репозиторий");
         int id = genre.getId();
-        Genre genre2 = new Genre(id, "genre1", "d");
+        Genre genre2 = new Genre(id, "genre1");
         assertEquals(genre2, genreService.getByKey(id), "Жанры не совпадают");
     }
 }

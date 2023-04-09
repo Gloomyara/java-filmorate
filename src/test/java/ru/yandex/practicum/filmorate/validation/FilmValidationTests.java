@@ -39,8 +39,8 @@ public class FilmValidationTests {
 
     @BeforeEach
     void createSomeData() {
-        Genre genre = new Genre(null, "genre1", "d");
-        Rating rating = new Rating(null, "rating1", "d");
+        Genre genre = new Genre(null, "genre1");
+        Rating rating = new Rating(null, "rating1");
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
                 LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);

@@ -11,5 +11,4 @@ public class Rating {
     private Integer id;
     /*@NotBlank(message = "Name cannot be blank")*/
     private String name;
-    private String description;
 }

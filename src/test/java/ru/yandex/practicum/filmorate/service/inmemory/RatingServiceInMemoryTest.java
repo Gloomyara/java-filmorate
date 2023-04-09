@@ -21,7 +21,7 @@ public class RatingServiceInMemoryTest {
 
     @BeforeEach
     void createSomeData() {
-        rating = new Rating(null, "rating1", "d");
+        rating = new Rating(null, "rating1");
         ratingRepository = new InMemoryRatingRepository();
         ratingService = new RatingService(ratingRepository);
     }
@@ -34,7 +34,7 @@ public class RatingServiceInMemoryTest {
     @Test
     void findAll() {
         ratingService.create(rating);
-        Rating rating2 = new Rating(rating.getId(), "rating1", "d");
+        Rating rating2 = new Rating(rating.getId(), "rating1");
         Assertions.assertTrue(ratingService.findAll().contains(rating2), "Рейтинги не совпадают");
     }
 
@@ -54,7 +54,7 @@ public class RatingServiceInMemoryTest {
         ratingService.create(rating);
         assertEquals(1, ratingService.findAll().size(), "Рейтинг не был добавлен в репозиторий");
         int id = rating.getId();
-        Rating rating2 = new Rating(rating.getId(), "rating1", "d");
+        Rating rating2 = new Rating(rating.getId(), "rating1");
         assertEquals(rating2, ratingService.getByKey(id), "Рейтинги не совпадают");
     }
 }
