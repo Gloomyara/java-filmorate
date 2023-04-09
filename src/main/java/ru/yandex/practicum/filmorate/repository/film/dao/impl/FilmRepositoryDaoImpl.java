@@ -15,6 +15,8 @@ import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
+import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
+import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 @Primary
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
+    private final GenreRepositoryDao<Integer> genreRepository;
+    private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
     public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -206,18 +210,17 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         String sqlQuery = "select id, name from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)" +
                 "order by id";
-        TreeSet<Genre> sortedSet = null;
+        TreeSet<Genre> sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
         Set<Genre> tempSet = jdbcTemplate.queryForStream(sqlQuery,
-                        this::mapRowToGenre,
+                        genreRepository::mapRowToGenre,
                         resultSet.getInt("id"))
                 .collect(Collectors.toSet());
         if (!tempSet.isEmpty()) {
-            sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
             sortedSet.addAll(tempSet);
         }
         String sqlQuery1 = "select id, name from ratings where id = ?";
         Rating v = jdbcTemplate.queryForObject(sqlQuery1,
-                this::mapRowToRating,
+                ratingRepository::mapRowToRating,
                 resultSet.getInt("rating_id"));
 
         return Film.builder()
@@ -229,22 +232,6 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .mpa(v)
                 .genres(sortedSet)
                 .rate(resultSet.getInt("rate"))
-                .build();
-    }
-
-    public Rating mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {
-
-        return Rating.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
-                .build();
-    }
-
-    public Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-
-        return Genre.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
                 .build();
     }
 }
