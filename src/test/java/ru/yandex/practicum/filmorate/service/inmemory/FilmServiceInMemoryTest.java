@@ -16,9 +16,9 @@ import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserReposi
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -31,7 +31,7 @@ class FilmServiceInMemoryTest {
     UserRepository<Integer> userRepository;
     FilmRepository<Integer> filmRepository;
     FilmService filmService;
-    Set<Genre> genreIdSet;
+    List<Genre> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
@@ -44,7 +44,7 @@ class FilmServiceInMemoryTest {
         userRepository = new InMemoryUserRepository();
         filmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
-        genreIdSet = new HashSet<>();
+        genreIdSet = new ArrayList<>();
         genreIdSet.add(genre);
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),

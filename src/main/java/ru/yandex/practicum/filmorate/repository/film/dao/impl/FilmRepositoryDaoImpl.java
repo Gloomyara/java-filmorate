@@ -16,12 +16,16 @@ import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
+import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
     private final GenreRepositoryDao<Integer> genreRepository;
+    private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
     public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -99,7 +104,9 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
         v.setId(k);
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
-            Set<Genre> genreIdSet = v.getGenres();
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
+            v.setGenres(genreIdSet);
             for (Genre g : genreIdSet) {
                 String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
                         "values (?, ?)";
@@ -130,7 +137,9 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         String sqlQuery1 = "delete from film_genre where film_id = ?";
         jdbcTemplate.update(sqlQuery1, k);
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
-            Set<Genre> genreIdSet = v.getGenres();
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
+            v.setGenres(genreIdSet);
             for (Genre g : genreIdSet) {
                 String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
                         "values (?, ?)";
@@ -206,22 +215,19 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
 
         String sqlQuery = "select genre_id, from film_genre where film_id = ? order by genre_id";
-        TreeSet<Genre> sortedSet = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         List<Integer> tempList = jdbcTemplate.query(sqlQuery,
                 (rs, rw) -> rs.getInt("genre_id"),
                 resultSet.getInt("id"));
+        List<Genre> genreList = new ArrayList<>();
         if (!tempList.isEmpty()) {
-            sortedSet.addAll(tempList.stream().map(genreRepository::getByKey).collect(Collectors.toList()));
+            genreList = tempList.stream().map(genreRepository::getByKey).collect(Collectors.toList());
         }
         Rating v = null;
         SqlRowSet ratingRows = jdbcTemplate.queryForRowSet(
-                "select id, name from ratings where id = ?",
+                "select id from ratings where id = ?",
                 resultSet.getInt("rating_id"));
         if (ratingRows.next()) {
-            v = Rating.builder()
-                    .id(ratingRows.getInt("id"))
-                    .name(ratingRows.getString("name"))
-                    .build();
+            v = ratingRepository.getByKey(ratingRows.getInt("id"));
         }
 
         return Film.builder()
@@ -231,7 +237,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
                 .mpa(v)
-                .genres(sortedSet)
+                .genres(genreList)
                 .rate(resultSet.getInt("rate"))
                 .build();
     }

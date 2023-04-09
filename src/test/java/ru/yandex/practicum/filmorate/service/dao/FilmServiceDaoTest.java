@@ -19,9 +19,9 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -37,12 +37,12 @@ public class FilmServiceDaoTest {
     Film film;
     Film film1;
     User user;
-    Set<Genre> genreIdSet;
+    List<Genre> genreIdSet;
     Rating mpa;
 
     @BeforeEach
     void createSomeData() {
-        genreIdSet = new HashSet<>();
+        genreIdSet = new ArrayList<>();
         genreIdSet.add(genreController.getByKey(1));
         mpa = ratingController.getByKey(1);
         film = new Film(null, "testFilmName", "d",
