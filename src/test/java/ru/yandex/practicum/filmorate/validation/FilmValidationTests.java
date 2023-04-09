@@ -35,24 +35,24 @@ public class FilmValidationTests {
 
     FilmService filmService;
     FilmController filmController;
-    Set<Integer> genreIdSet;
+    Set<Genre> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
         Genre genre = new Genre(null, "genre1", "d");
         Rating rating = new Rating(null, "rating1", "d");
-        genreIdSet = new HashSet<>();
-        genreIdSet.add(1);
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
         film1 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
         var genreRepository = new InMemoryGenreRepository();
         var ratingRepository = new InMemoryRatingRepository();
         var userRepository = new InMemoryUserRepository();
         genreRepository.create(genre);
         ratingRepository.create(rating);
+        genreIdSet = new HashSet<>();
+        genreIdSet.add(genre);
         filmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
         filmController = new FilmController(filmService);
@@ -81,7 +81,7 @@ public class FilmValidationTests {
 
     @Test
     void shouldNotPassValidationWhenFilmTitleIsBlank() {
-        film.setTitle(" ");
+        film.setName(" ");
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -92,7 +92,7 @@ public class FilmValidationTests {
 
     @Test
     void shouldNotPassValidationWhenFilmTitleIsNull() {
-        film.setTitle(null);
+        film.setName(null);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -137,7 +137,7 @@ public class FilmValidationTests {
 
     @Test
     void shouldNotPassValidationWhenLengthIsNegative() {
-        film.setLength(-8500);
+        film.setDuration(-8500);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -148,7 +148,7 @@ public class FilmValidationTests {
 
     @Test
     void shouldNotPassValidationWhenLengthIsNull() {
-        film.setLength(null);
+        film.setDuration(null);
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
@@ -179,7 +179,7 @@ public class FilmValidationTests {
             filmController.put(film1);
         }
         Film film2 = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
         film2.setId(film.getId());
         assertEquals("Фильмы не совпадают", film2, film1);
     }

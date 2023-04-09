@@ -55,7 +55,7 @@ public class UserService implements ObjectService<Integer, User> {
         return repository.deleteFriend(k1, k2);
     }
 
-    public Map<User, Boolean> getFriendsListById(Integer k1) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k1) throws ObjectNotFoundException {
         repository.containsOrElseThrow(k1);
         return repository.getFriendsListById(k1);
     }

@@ -38,13 +38,15 @@ public class FilmServiceDaoTest {
     Film film1;
     User user;
     Set<Integer> genreIdSet;
+    Rating mpa;
 
     @BeforeEach
     void createSomeData() {
         genreIdSet = new HashSet<>();
         genreIdSet.add(1);
+        mpa = ratingController.getByKey(1);
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 1500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
     }
@@ -57,14 +59,14 @@ public class FilmServiceDaoTest {
 
     @Test
     void findAllRatings() {
-        assertEquals(6, ratingController.findAll().size(),
+        assertEquals(5, ratingController.findAll().size(),
                 "Обнаружены неучтенные данные о рейтингах");
     }
 
     @Test
     void getGenreById() {
-        Genre genre = new Genre(1, "Action film",
-                "Associated with particular types of spectacle (e.g., explosions, chases, combat).");
+        Genre genre = new Genre(1, "Комедия",
+                "Defined by events that are primarily intended to make the audience laugh.");
         assertEquals(genre, genreController.getByKey(1), "Жанры не совпадают");
     }
 
@@ -123,7 +125,7 @@ public class FilmServiceDaoTest {
     void shouldThrowObjectAlreadyExistExceptionWhenObjectDataAlreadyExist() {
         filmService.create(film);
         film1 = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, mpa, genreIdSet, 0);
         film1.setId(film.getId());
         ObjectAlreadyExistException ex1 = Assertions.assertThrows(
                 ObjectAlreadyExistException.class,
@@ -150,6 +152,13 @@ public class FilmServiceDaoTest {
         int id = film.getId();
         assertEquals(film, filmService.getByKey(id), "Фильмы не совпадают");
     }
+    @Test
+    void create(){
+        Rating rating = new Rating(1, null, null);
+        Film test = new Film(null, "nisi eiusmod", "adipisicing",
+                LocalDate.of(1967, 3, 25), 100, rating, null, null);
+        filmService.create(test);
+    }
 
     @Test
     void addLikeShouldThrowNoSuchElementExceptionWhenFilmIdIncorrect() {
@@ -172,7 +181,7 @@ public class FilmServiceDaoTest {
     @Test
     void deleteLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         film = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2020, 1, 1), 1500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         int nonExistId = 999;
@@ -225,7 +234,7 @@ public class FilmServiceDaoTest {
     @Test
     void getPopularFilms() {
         film1 = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, mpa, genreIdSet, 0);
         User user1 = new User(null, "testuser1@gmail.com", "testUser1",
                 " ", LocalDate.of(2013, 1, 1));
         filmService.create(film);

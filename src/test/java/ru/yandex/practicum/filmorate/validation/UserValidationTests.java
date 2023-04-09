@@ -160,14 +160,14 @@ public class UserValidationTests {
         AssertionErrors.assertEquals("Количество пользователей не совпадает",
                 1, userController.findAll().size());
         user1 = new User(null, "testuser@gmail.com", "testRenewUser",
-                user.getUsername(), LocalDate.of(2023, 1, 1));
+                user.getName(), LocalDate.of(2023, 1, 1));
         user1.setId(user.getId());
         violations = validator.validate(user1);
         if (violations.isEmpty()) {
             userController.put(user1);
         }
         User user2 = new User(null, "testuser@gmail.com", "testRenewUser",
-                user.getUsername(), LocalDate.of(2023, 1, 1));
+                user.getName(), LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());
         AssertionErrors.assertEquals("Пользователи не совпадают", user2, this.user1);
     }

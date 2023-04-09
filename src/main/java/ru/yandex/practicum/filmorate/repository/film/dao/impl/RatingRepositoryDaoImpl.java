@@ -42,7 +42,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
 
     @Override
     public Collection<Rating> findAll() {
-        String sqlQuery = "select id, name, description from genres";
+        String sqlQuery = "select id, name, description from ratings";
         Collection<Rating> collection = jdbcTemplate.query(sqlQuery, this::mapRowToRating);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",

@@ -31,7 +31,7 @@ public class UserController extends ObjectController<UserService, Integer, User>
     }
 
     @GetMapping("/{id}/friends")
-    public Map<User, Boolean> getFriendsListById(@PathVariable("id") Integer id) {
+    public Collection<User> getFriendsListById(@PathVariable("id") Integer id) {
 
         return service.getFriendsListById(id);
     }

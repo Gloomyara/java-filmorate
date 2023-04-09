@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.film.GenreRepository;
 import ru.yandex.practicum.filmorate.repository.film.RatingRepository;
@@ -34,22 +35,32 @@ public class FilmService implements ObjectService<Integer, Film> {
 
     @Override
     public Film create(Film v) throws ObjectNotFoundException, ObjectAlreadyExistException {
-        int ratingId = v.getRatingId();
-        ratingRepository.containsOrElseThrow(ratingId);
-        Set<Integer> genreIdSet = v.getGenreIdSet();
-        for (int i : genreIdSet) {
-            genreRepository.containsOrElseThrow(i);
+
+        if (v.getMpa() != null) {
+            int ratingId = v.getMpa().getId();
+            ratingRepository.containsOrElseThrow(ratingId);
+        }
+        if (v.getGenres() != null && v.getGenres().size() > 0) {
+            Set<Genre> genreIdSet = v.getGenres();
+            for (Genre g : genreIdSet) {
+                genreRepository.containsOrElseThrow(g.getId());
+            }
         }
         return repository.create(v);
     }
 
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
-        int ratingId = v.getRatingId();
-        ratingRepository.containsOrElseThrow(ratingId);
-        Set<Integer> genreIdSet = v.getGenreIdSet();
-        for (int i : genreIdSet) {
-            genreRepository.containsOrElseThrow(i);
+
+        if (v.getMpa() != null) {
+            int ratingId = v.getMpa().getId();
+            ratingRepository.containsOrElseThrow(ratingId);
+        }
+        if (v.getGenres() != null && v.getGenres().size() > 0) {
+            Set<Genre> genreIdSet = v.getGenres();
+            for (Genre g : genreIdSet) {
+                genreRepository.containsOrElseThrow(g.getId());
+            }
         }
         return repository.put(v);
     }

@@ -63,8 +63,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
             throw new ObjectAlreadyExistException("User Id: " + k + " should be null," +
                     " Id генерируется автоматически.");
         }
-        if (v.getUsername() == null || v.getUsername().isBlank()) {
-            v.setUsername(v.getLogin());
+        if (v.getName() == null || v.getName().isBlank()) {
+            v.setName(v.getLogin());
         }
         v.setId(id);
         log.debug(
@@ -151,7 +151,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     }
 
     @Override
-    public Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k) throws ObjectNotFoundException {
 
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
@@ -159,7 +159,8 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         );
         return friendsInfo.get(k).keySet().stream()
                 //.filter(friendsInfo.get(k1)::get)
-                .collect(Collectors.toMap(this::getByKey, friendsInfo.get(k)::get));
+                .map(this::getByKey)
+                .collect(Collectors.toList());
     }
 
     @Override

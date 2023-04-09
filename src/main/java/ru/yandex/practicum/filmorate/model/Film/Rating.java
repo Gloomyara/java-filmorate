@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class Rating {
     private Integer id;
-    @NotBlank(message = "Name cannot be blank")
+    /*@NotBlank(message = "Name cannot be blank")*/
     private String name;
     private String description;
 }

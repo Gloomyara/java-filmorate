@@ -154,7 +154,7 @@ public class UserServiceDaoTest {
         assertEquals(1, userService.getFriendsListById(userId).size(),
                 "Количество друзей не совпадает");
         assertTrue("Пользователи не совпадают",
-                userService.getFriendsListById(userId).containsKey(user1));
+                userService.getFriendsListById(userId).contains(user1));
     }
 
     @Test

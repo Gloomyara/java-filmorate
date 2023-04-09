@@ -12,7 +12,7 @@ public interface UserRepository<K> extends ObjectsRepository<K, User> {
 
     User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException;
 
-    Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException;
+    Collection<User> getFriendsListById(Integer k) throws ObjectNotFoundException;
 
     Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException;

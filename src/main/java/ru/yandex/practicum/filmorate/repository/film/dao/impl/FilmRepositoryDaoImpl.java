@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
+import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
 
 import java.sql.Date;
@@ -20,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,20 +89,22 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, v.getTitle());
+            stmt.setString(1, v.getName());
             stmt.setString(2, v.getDescription());
             stmt.setDate(3, Date.valueOf(v.getReleaseDate()));
-            stmt.setInt(4, v.getLength());
-            stmt.setInt(5, v.getRatingId());
+            stmt.setInt(4, v.getDuration());
+            stmt.setInt(5, v.getMpa().getId());
             return stmt;
         }, keyHolder);
         Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
         v.setId(k);
-        Set<Integer> genreIdSet = v.getGenreIdSet();
-        for (int i : genreIdSet) {
-            String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
-                    "values (?, ?)";
-            jdbcTemplate.update(sqlQuery1, k, i);
+        if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+            Set<Genre> genreIdSet = v.getGenres();
+            for (Genre g : genreIdSet) {
+                String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
+                        "values (?, ?)";
+                jdbcTemplate.update(sqlQuery1, k, g.getId());
+            }
         }
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
@@ -118,19 +121,21 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 "title = ?, description = ?, release_date = ?, length = ?, rating_id = ?" +
                 " where id = ?";
         jdbcTemplate.update(sqlQuery
-                , v.getTitle()
+                , v.getName()
                 , v.getDescription()
                 , Date.valueOf(v.getReleaseDate())
-                , v.getLength()
-                , v.getRatingId()
+                , v.getDuration()
+                , v.getMpa().getId()
                 , k);
         String sqlQuery1 = "delete from film_genre where film_id = ?";
         jdbcTemplate.update(sqlQuery1, k);
-        Set<Integer> genreIdSet = v.getGenreIdSet();
-        for (int i : genreIdSet) {
-            String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
-                    "values (?, ?)";
-            jdbcTemplate.update(sqlQuery2, k, i);
+        if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+            Set<Genre> genreIdSet = v.getGenres();
+            for (Genre g : genreIdSet) {
+                String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
+                        "values (?, ?)";
+                jdbcTemplate.update(sqlQuery2, k, g.getId());
+            }
         }
         return v;
     }
@@ -199,21 +204,44 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        String sqlQuery = "select genre_id, from film_genre where film_id = ?";
-        var tempSet = jdbcTemplate.queryForStream(
-                        sqlQuery, (rs, rn) -> rs.getInt("genre_id"),
-                        resultSet.getInt("id"))
+        String sqlQuery = "select id, name, description from genres " +
+                "where id in(select genre_id, from film_genre where film_id = ?)";
+        var tempSet = jdbcTemplate.queryForStream(sqlQuery
+                        , this::mapRowToGenre
+                        , resultSet.getInt("id"))
                 .collect(Collectors.toSet());
+        String sqlQuery1 = "select id, name, description from ratings where id = ?";
+        Rating v = jdbcTemplate.queryForObject(sqlQuery1
+                , this::mapRowToRating
+                , resultSet.getInt("rating_id"));
 
         return Film.builder()
                 .id(resultSet.getInt("id"))
-                .title(resultSet.getString("title"))
+                .name(resultSet.getString("title"))
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .length(resultSet.getInt("length"))
-                .ratingId(resultSet.getInt("rating_id"))
-                .genreIdSet(tempSet)
+                .duration(resultSet.getInt("length"))
+                .mpa(v)
+                .genres(tempSet)
                 .rate(resultSet.getInt("rate"))
+                .build();
+    }
+
+    public Rating mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {
+
+        return Rating.builder()
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
+                .description(resultSet.getString("description"))
+                .build();
+    }
+
+    public Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+
+        return Genre.builder()
+                .id(resultSet.getInt("id"))
+                .name(resultSet.getString("name"))
+                .description(resultSet.getString("description"))
                 .build();
     }
 }

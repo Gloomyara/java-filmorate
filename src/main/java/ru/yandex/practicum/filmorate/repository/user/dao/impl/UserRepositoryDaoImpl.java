@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -82,13 +83,13 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         String sqlQuery = "insert into users(email, username, login, birthday) " +
                 "values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        if (v.getUsername() == null || v.getUsername().isBlank()) {
-            v.setUsername(v.getLogin());
+        if (v.getName() == null || v.getName().isBlank()) {
+            v.setName(v.getLogin());
         }
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
             stmt.setString(1, v.getEmail());
-            stmt.setString(2, v.getUsername());
+            stmt.setString(2, v.getName());
             stmt.setString(3, v.getLogin());
             stmt.setDate(4, Date.valueOf(v.getBirthday()));
             return stmt;
@@ -111,7 +112,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 "where id = ?";
         jdbcTemplate.update(sqlQuery
                 , v.getEmail()
-                , v.getUsername()
+                , v.getName()
                 , v.getLogin()
                 , Date.valueOf(v.getBirthday())
                 , k);
@@ -179,21 +180,19 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k) throws ObjectNotFoundException {
 
-        String sqlQuery = "select u.id, u.email, u.username, u.login, u.birthday, f.status " +
+        String sqlQuery = "select id, email, username, login, birthday " +
                 "from users u " +
-                "join friends f on u.id=f.friend_user_id " +
-                "where u.id in(select friend_user_id " +
+                "where id in(select friend_user_id " +
                 "from friends " +
-                "where user_id = ? )";
-        Map<User, Boolean> tempMap = jdbcTemplate.query(sqlQuery, this::mapRowToMapEntry, k).stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                "where user_id = ? ) order by id";
+        Collection<User> collection = jdbcTemplate.query(sqlQuery, this::mapRowToUser, k);
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
-                        "Всего друзей в списке: {}.", k, tempMap.size()
+                        "Всего друзей в списке: {}.", k, collection.size()
         );
-        return tempMap;
+        return collection;
     }
 
     @Override
@@ -204,11 +203,10 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 "where id in(select friend_user_id " +
                 "from friends " +
                 "where user_id = ? " +
-                "and status = true " +
                 "and friend_user_id in(select friend_user_id " +
                 "from friends " +
-                "where user_id = ? " +
-                "and status = true))";
+                "where user_id = ?))" +
+                "order by id";
         Collection<User> collection = jdbcTemplate.query(
                 sqlQuery, this::mapRowToUser, k1, k2);
         log.debug(
@@ -223,17 +221,17 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         return User.builder()
                 .id(resultSet.getInt("id"))
                 .email(resultSet.getString("email"))
-                .username(resultSet.getString("username"))
+                .name(resultSet.getString("username"))
                 .login(resultSet.getString("login"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
     }
 
-    @Override
+    /*@Override
     public Map.Entry<User, Boolean> mapRowToMapEntry(ResultSet resultSet, int rowNum) throws SQLException {
         return Map.entry(
                 mapRowToUser(resultSet, rowNum)
                 , resultSet.getBoolean("status")
         );
-    }
+    }*/
 }

@@ -11,5 +11,4 @@ public interface UserRepositoryDao<K> extends UserRepository<K> {
 
     User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException;
 
-    Map.Entry<User, Boolean> mapRowToMapEntry(ResultSet resultSet, int rowNum) throws SQLException;
 }

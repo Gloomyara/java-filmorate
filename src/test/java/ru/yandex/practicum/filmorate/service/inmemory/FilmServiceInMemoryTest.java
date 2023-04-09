@@ -30,7 +30,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
     UserRepository<Integer> userRepository;
     FilmRepository<Integer> filmRepository;
     FilmService filmService;
-    Set<Integer> genreIdSet;
+    Set<Genre> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
@@ -44,12 +44,12 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
         filmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
         genreIdSet = new HashSet<>();
-        genreIdSet.add(1);
+        genreIdSet.add(genre);
         char[] charArray = new char[200];
         film = new Film(null, "testFilmName", String.valueOf(charArray),
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
         film1 = new Film(null, "testFilm1Name", "d1",
-                LocalDate.of(2020, 1, 1), 1500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 1500, null, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
     }
@@ -76,7 +76,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
         assertEquals(1, filmService.findAll().size(), "Фильм не был добавлен в репозиторий");
         int id = film.getId();
         Film film2 = new Film(id, "testFilmName", film.getDescription(),
-                LocalDate.of(2020, 1, 1), 8500, 1, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 8500, null, genreIdSet, 0);
         assertEquals(film2, filmService.getByKey(id), "Фильмы не совпадают");
     }
 
