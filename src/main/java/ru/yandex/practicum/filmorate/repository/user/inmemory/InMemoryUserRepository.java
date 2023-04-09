@@ -111,8 +111,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
         friendsInfo.put(k1, tempMap1);
         log.debug(
                 "Запрос пользователя под Id: {} на добавление в друзья, " +
-                        "пользователя под Id: {}, успешно выполнен!"
-                , k1, k2
+                        "пользователя под Id: {}, успешно выполнен!", k1, k2
         );
         return getByKey(k1);
     }
