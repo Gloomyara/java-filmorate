@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.film.FilmController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
+import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryGenreRepository;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryRatingRepository;
@@ -37,6 +39,8 @@ public class FilmValidationTests {
 
     @BeforeEach
     void createSomeData() {
+        Genre genre = new Genre(null, "genre1", "d");
+        Rating rating = new Rating(null, "rating1", "d");
         genreIdSet = new HashSet<>();
         genreIdSet.add(1);
         char[] charArray = new char[200];
@@ -47,6 +51,8 @@ public class FilmValidationTests {
         var genreRepository = new InMemoryGenreRepository();
         var ratingRepository = new InMemoryRatingRepository();
         var userRepository = new InMemoryUserRepository();
+        genreRepository.create(genre);
+        ratingRepository.create(rating);
         filmRepository = new InMemoryFilmRepository();
         filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
         filmController = new FilmController(filmService);
@@ -69,7 +75,8 @@ public class FilmValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> filmController.create(film1)
         );
-        Assertions.assertEquals("Film под Id: 1 уже зарегистрирован.", ex1.getMessage());
+        Assertions.assertEquals("Film Id: " + film.getId()
+                + " should be null, Id генерируется автоматически.", ex1.getMessage());
     }
 
     @Test
@@ -78,7 +85,7 @@ public class FilmValidationTests {
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
-                "Name cannot be blank",
+                "Title cannot be blank",
                 violations.iterator().next().getMessage()
         );
     }
@@ -89,7 +96,7 @@ public class FilmValidationTests {
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
-                "Name cannot be blank",
+                "Title cannot be blank",
                 violations.iterator().next().getMessage()
         );
     }
@@ -134,7 +141,7 @@ public class FilmValidationTests {
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
-                "Duration should be positive",
+                "Length should be positive",
                 violations.iterator().next().getMessage()
         );
     }
@@ -145,7 +152,7 @@ public class FilmValidationTests {
         violations = validator.validate(film);
         Assertions.assertEquals(1, violations.size());
         Assertions.assertEquals(
-                "Duration cannot be null",
+                "Length cannot be null",
                 violations.iterator().next().getMessage()
         );
     }
@@ -161,7 +168,7 @@ public class FilmValidationTests {
 
     @Test
     void putShouldPassValidation() {
-       violations = validator.validate(film);
+        violations = validator.validate(film);
         if (violations.isEmpty()) {
             filmController.create(film);
         }

@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Repository
+@Repository("InMemoryUserRepository")
 public class InMemoryUserRepository implements UserRepository<Integer> {
     private final Map<Integer, User> userStorage = new HashMap<>();
     private final Map<Integer, Map<Integer, Boolean>> friendsInfo = new HashMap<>();
@@ -92,8 +92,6 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     @Override
     public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        User v = getByKey(k1);
-        containsOrElseThrow(k2);
         var tempMap1 = friendsInfo.getOrDefault(k1, new HashMap<>());
         var tempMap2 = friendsInfo.getOrDefault(k2, new HashMap<>());
         if (tempMap2.containsKey(k1)) {
@@ -107,7 +105,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
                             "Всего друзей в списке: {}.", k1, k2,
                     (int) tempMap1.keySet().stream().filter(tempMap1::get).count()
             );
-            return v;
+            return getByKey(k1);
         }
         tempMap1.put(k2, false);
         friendsInfo.put(k1, tempMap1);
@@ -116,14 +114,13 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
                         "пользователя под Id: {}, успешно выполнен!"
                 , k1, k2
         );
-        return v;
+        return getByKey(k1);
     }
 
     @Override
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
+
         try {
-            User v1 = getByKey(k1);
-            containsOrElseThrow(k2);
             var tempMap1 = friendsInfo.get(k1);
             if (tempMap1.get(k2)) {
                 var tempMap2 = friendsInfo.get(k2);
@@ -146,7 +143,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
                             "пользователя под Id: {}, успешно выполнен!",
                     k1, k2
             );
-            return v1;
+            return getByKey(k1);
         } catch (ObjectNotFoundException e) {
             log.warn(e.getMessage());
             throw e;
@@ -156,7 +153,6 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     @Override
     public Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException {
 
-        getByKey(k);
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
                         "Всего друзей в списке: {}.", k, friendsInfo.get(k).size()
@@ -170,8 +166,6 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        containsOrElseThrow(k1);
-        containsOrElseThrow(k2);
         Set<Integer> mutualFriendsSet = friendsInfo.get(k1).keySet().stream()
                 .filter(friendsInfo.get(k1)::get)
                 .collect(Collectors.toSet());

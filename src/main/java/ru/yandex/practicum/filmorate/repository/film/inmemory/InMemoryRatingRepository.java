@@ -13,13 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@Repository
+@Repository("InMemoryRatingRepository")
 public class InMemoryRatingRepository implements RatingRepository<Integer> {
     private final Map<Integer, Rating> ratingStorage = new HashMap<>();
     private Integer id = 1;
 
     public InMemoryRatingRepository() {
-        ratingStorage.put(0, null);
     }
 
     @Override
@@ -58,12 +57,35 @@ public class InMemoryRatingRepository implements RatingRepository<Integer> {
     }
 
     @Override
-    public Rating create(Rating rating) throws ObjectAlreadyExistException {
-        return null;
+    public Rating create(Rating v) throws ObjectAlreadyExistException {
+        Integer k = v.getId();
+        if (ratingStorage.containsKey(k)) {
+            log.warn(
+                    "{} Id: {} should be null, Id генерируется автоматически.",
+                    "Rating", k
+            );
+            throw new ObjectAlreadyExistException("Rating Id: " + k + " should be null," +
+                    " Id генерируется автоматически.");
+        }
+        v.setId(id);
+        log.debug(
+                "{} под Id: {}, успешно зарегистрирован.",
+                "Rating", k
+        );
+        ratingStorage.put(id, v);
+        id++;
+        return v;
     }
 
     @Override
-    public Rating put(Rating rating) throws ObjectNotFoundException {
-        return null;
+    public Rating put(Rating v) throws ObjectNotFoundException {
+        Integer k = v.getId();
+        containsOrElseThrow(k);
+        ratingStorage.put(k, v);
+        log.debug(
+                "Данные {} по Id: {}, успешно обновлены.",
+                "Rating", k
+        );
+        return v;
     }
 }

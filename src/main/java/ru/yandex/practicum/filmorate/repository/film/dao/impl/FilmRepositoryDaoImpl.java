@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.repository.film.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -24,7 +26,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@Repository
+@Repository("FilmRepositoryDao")
+@Primary
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
@@ -57,18 +60,15 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         try {
             String sqlQuery = "select id, title, description, release_date, " +
                     "length, rating_id, rate from films where id = ?";
-            Film v = Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k))
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException("Film with Id: " + k + " not found")
-                    );
+            Film v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k);
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Film", k
             );
             return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Film with Id: {} not found", k);
+            throw new ObjectNotFoundException("Film with Id: " + k + " not found");
         }
     }
 

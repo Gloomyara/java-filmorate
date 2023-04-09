@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Repository
+@Repository("InMemoryFilmRepository")
 public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private final Map<Integer, Film> filmStorage = new HashMap<>();
     private final Map<Integer, Set<Integer>> likesInfo = new HashMap<>();

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@Repository
+@Repository("InMemoryGenreRepository")
 public class InMemoryGenreRepository implements GenreRepository<Integer> {
     private final Map<Integer, Genre> genreStorage = new HashMap<>();
 
@@ -55,12 +55,35 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
     }
 
     @Override
-    public Genre create(Genre genre) throws ObjectAlreadyExistException {
-        return null;
+    public Genre create(Genre v) throws ObjectAlreadyExistException {
+        Integer k = v.getId();
+        if (genreStorage.containsKey(k)) {
+            log.warn(
+                    "{} Id: {} should be null, Id генерируется автоматически.",
+                    "Genre", k
+            );
+            throw new ObjectAlreadyExistException("Genre Id: " + k + " should be null," +
+                    " Id генерируется автоматически.");
+        }
+        v.setId(id);
+        log.debug(
+                "{} под Id: {}, успешно зарегистрирован.",
+                "Genre", k
+        );
+        genreStorage.put(id, v);
+        id++;
+        return v;
     }
 
     @Override
-    public Genre put(Genre genre) throws ObjectNotFoundException {
-        return null;
+    public Genre put(Genre v) throws ObjectNotFoundException {
+        Integer k = v.getId();
+        containsOrElseThrow(k);
+        genreStorage.put(k, v);
+        log.debug(
+                "Данные {} по Id: {}, успешно обновлены.",
+                "Genre", k
+        );
+        return v;
     }
 }

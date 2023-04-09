@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.GenreRepository;
@@ -24,12 +25,12 @@ public class GenreService implements ObjectService<Integer, Genre> {
     }
 
     @Override
-    public Genre create(Genre v) {
-        return null;
+    public Genre create(Genre v) throws ObjectAlreadyExistException  {
+        return repository.create(v);
     }
 
     @Override
-    public Genre put(Genre v) {
-        return null;
+    public Genre put(Genre v) throws ObjectNotFoundException {
+        return repository.put(v);
     }
 }

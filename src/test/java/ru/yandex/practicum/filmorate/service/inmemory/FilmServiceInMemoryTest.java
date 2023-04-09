@@ -1,13 +1,17 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.inmemory;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
+import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryGenreRepository;
 import ru.yandex.practicum.filmorate.repository.film.inmemory.InMemoryRatingRepository;
+import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
@@ -18,20 +22,27 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-
-class FilmServiceTest {
+ class FilmServiceInMemoryTest {
     Film film;
     Film film1;
     User user;
     User user1;
-    InMemoryUserRepository userRepository;
-    InMemoryFilmRepository filmRepository;
+    UserRepository<Integer> userRepository;
+    FilmRepository<Integer> filmRepository;
     FilmService filmService;
-    UserService userService;
     Set<Integer> genreIdSet;
 
     @BeforeEach
     void createSomeData() {
+        Genre genre = new Genre(null, "genre1", "d");
+        Rating rating = new Rating(null, "rating1", "d");
+        var genreRepository = new InMemoryGenreRepository();
+        var ratingRepository = new InMemoryRatingRepository();
+        genreRepository.create(genre);
+        ratingRepository.create(rating);
+        userRepository = new InMemoryUserRepository();
+        filmRepository = new InMemoryFilmRepository();
+        filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
         genreIdSet = new HashSet<>();
         genreIdSet.add(1);
         char[] charArray = new char[200];
@@ -41,17 +52,10 @@ class FilmServiceTest {
                 LocalDate.of(2020, 1, 1), 1500, 1, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
-        var genreRepository = new InMemoryGenreRepository();
-        var ratingRepository = new InMemoryRatingRepository();
-        userRepository = new InMemoryUserRepository();
-        filmRepository = new InMemoryFilmRepository();
-        filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
     }
 
     @Test
     void findAllShouldBeIsEmpty() {
-        film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 8500, null, null, 0);
         assertTrue("Обнаружены неучтенные данные о фильмах", filmService.findAll().isEmpty());
     }
 
@@ -128,7 +132,7 @@ class FilmServiceTest {
         int nonExistId = 999;
         filmService.create(film);
         int filmId = film.getId();
-        userService.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -163,7 +167,7 @@ class FilmServiceTest {
 
         filmService.create(film);
         int filmId = film.getId();
-        userService.create(user);
+        userRepository.create(user);
         int userId = user.getId();
         filmService.addLike(filmId, userId);
         assertEquals(1, film.getRate(),
@@ -187,8 +191,8 @@ class FilmServiceTest {
         filmService.create(film1);
         int filmId = film.getId();
         int film1Id = film1.getId();
-        userService.create(user);
-        userService.create(user1);
+        userRepository.create(user);
+        userRepository.create(user1);
         int userId = user.getId();
         int user1Id = user1.getId();
         filmService.addLike(filmId, userId);

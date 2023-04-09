@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.RatingRepository;
@@ -25,12 +26,12 @@ public class RatingService implements ObjectService<Integer, Rating> {
     }
 
     @Override
-    public Rating create(Rating v) {
-        return null;
+    public Rating create(Rating v) throws ObjectAlreadyExistException {
+        return repository.create(v);
     }
 
     @Override
-    public Rating put(Rating v) {
-        return null;
+    public Rating put(Rating v) throws ObjectNotFoundException {
+        return repository.put(v);
     }
 }

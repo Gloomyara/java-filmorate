@@ -18,7 +18,7 @@ import java.util.Set;
 public class Film {
 
     private Integer id;
-    @NotBlank(message = "Name cannot be blank")
+    @NotBlank(message = "Title cannot be blank")
     private String title;
     @Size(min = 1, max = 200, message = "Description must be between 1 and 200 characters")
     private String description;

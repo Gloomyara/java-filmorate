@@ -1,10 +1,14 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
@@ -13,12 +17,13 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
-class UserServiceTest {
-
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class UserServiceDaoTest {
+    private final UserService userService;
     User user;
     User user1;
-    InMemoryUserRepository inMemoryUserRepository;
-    UserService userService;
 
     @BeforeEach
     void createSomeData() {
@@ -26,19 +31,11 @@ class UserServiceTest {
                 null, LocalDate.of(2023, 1, 1));
         user1 = new User(null, "testuser1@gmail.com", "testUser1",
                 " ", LocalDate.of(2013, 1, 1));
-        inMemoryUserRepository = new InMemoryUserRepository();
-        userService = new UserService(inMemoryUserRepository);
-    }
-
-    @Test
-    void findAllShouldBeIsEmpty() {
-        assertTrue("Обнаружены не учтенные данные о пользователях", userService.findAll().isEmpty());
     }
 
     @Test
     void getByIdShouldThrowNoSuchElementException() {
-        int id = 1;
-        user.setId(id);
+        int id = 999;
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.getByKey(id)
@@ -49,11 +46,10 @@ class UserServiceTest {
     @Test
     void getById() {
         userService.create(user);
-        assertEquals(1, userService.findAll().size(), "Фильм не был добавлен в репозиторий");
         int id = user.getId();
         User user2 = new User(id, "testuser@gmail.com", "testUser",
                 "testUser", LocalDate.of(2023, 1, 1));
-        assertEquals(user2, userService.getByKey(id), "Фильмы не совпадают");
+        assertEquals(user2, userService.getByKey(id), "Пользователи не совпадают");
     }
 
     @Test

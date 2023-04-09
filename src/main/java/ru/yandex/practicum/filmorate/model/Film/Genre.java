@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @Builder
 @AllArgsConstructor
 public class Genre {
     private Integer id;
+    @NotBlank(message = "Name cannot be blank")
     private String name;
     private String description;
 }

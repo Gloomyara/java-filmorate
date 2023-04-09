@@ -60,7 +60,8 @@ public class UserValidationTests {
                 ObjectAlreadyExistException.class,
                 () -> userController.create(user2)
         );
-        assertEquals("User под Id: 1 уже зарегистрирован.", ex.getMessage());
+        assertEquals("User Id: " + user.getId()
+                + " should be null, Id генерируется автоматически.", ex.getMessage());
     }
 
     @Test

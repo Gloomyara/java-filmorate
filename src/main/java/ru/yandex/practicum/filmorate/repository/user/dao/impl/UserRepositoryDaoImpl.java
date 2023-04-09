@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.repository.user.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -19,12 +21,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@Repository
+@Repository("UserRepositoryDao")
+@Primary
 public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
@@ -54,18 +56,15 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         try {
             String sqlQuery = "select id, email, username, login, birthday " +
                     "from users where id = ?";
-            User v = Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, k))
-                    .orElseThrow(
-                            () -> new ObjectNotFoundException("User with Id: " + k + " not found")
-                    );
+            User v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, k);
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "User", k
             );
             return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("User with Id: {} not found", k);
+            throw new ObjectNotFoundException("User with Id: " + k + " not found");
         }
     }
 
@@ -121,84 +120,73 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
 
     @Override
     public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-        User v = getByKey(k1);
-        containsOrElseThrow(k2);
+
         SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
                 "select status from friends " +
                         "where user_id = ? " +
                         "and friend_user_id = ?", k2, k1);
 
         if (friendsRows.next()) {
-            String sqlQuery = "delete from friends where user_id = ? and friend_user_id = ?";
-            jdbcTemplate.update(sqlQuery, k2, k1);
+
             String sqlQuery1 = "insert into friends(user_id, friend_user_id, status) " +
                     "values (?, ?, ?)";
             jdbcTemplate.update(sqlQuery1,
                     k1, k2, true);
-            String sqlQuery2 = "insert into friends(user_id, friend_user_id, status) " +
-                    "values (?, ?, ?)";
+            String sqlQuery2 = "update friends set status =? " +
+                    "where user_id = ? and friend_user_id = ?";
             jdbcTemplate.update(sqlQuery2,
-                    k2, k1, true);
+                    true, k2, k1);
             log.debug(
                     "Подтверждение пользователем под Id:{} запроса на добавление в друзья, " +
                             "пользователя под Id: {}, успешно выполнено!", k1, k2
             );
-            return v;
+            return getByKey(k1);
         }
-        String sqlQuery = "insert into friends(user_id, friend_user_id, status) " +
-                "values (?, ?, ?)";
+        String sqlQuery = "insert into friends(user_id, friend_user_id) " +
+                "values (?, ?)";
         jdbcTemplate.update(sqlQuery,
-                k1, k2, false);
+                k1, k2);
         log.debug(
                 "Запрос пользователя под Id: {} на добавление в друзья, " +
                         "пользователя под Id: {}, успешно выполнен!"
                 , k1, k2
         );
-        return v;
+        return getByKey(k1);
     }
 
     @Override
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-        try {
-            User v = getByKey(k1);
-            containsOrElseThrow(k2);
-            String sqlQuery1 = "delete from friends where user_id = ? and friend_user_id = ?";
-            boolean b1 = jdbcTemplate.update(sqlQuery1, k1, k2) > 0;
-            String sqlQuery2 = "delete from friends where user_id = ? and friend_user_id = ?";
-            boolean b2 = jdbcTemplate.update(sqlQuery2, k2, k1) > 0;
-            String exMsg = "Error! Cannot delete User Id: ";
-            if (!b1) {
-                exMsg = exMsg + k1 + " friend with id: "
-                        + k2 + ", user doesn't in your friends list!";
-            }
-            if (!b2) {
-                exMsg = exMsg + "\nError! Cannot delete User Id: " + k2 + " friend " +
-                        "with id: " + k1 + ", user doesn't in your friends list!";
-            }
-            if (!b1 || !b2) {
-                throw new ObjectNotFoundException(exMsg);
-            }
-            log.debug(
-                    "Запрос пользователя под Id: {} на удаление из друзей, " +
-                            "пользователя под Id: {}, успешно выполнен!",
-                    k1, k2
+
+        String sqlQuery1 = "delete from friends where user_id = ? and friend_user_id = ?";
+        boolean b = jdbcTemplate.update(sqlQuery1, k1, k2) > 0;
+        if (!b) {
+            log.warn(
+                    "Error! Cannot delete User Id: {} friend with id: {}," +
+                            " user doesn't in your friends list!", k1, k2
             );
-            return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+            throw new ObjectNotFoundException("Error! Cannot delete User Id: "
+                    + k1 + " friend with id: "
+                    + k2 + ", user doesn't in your friends list!");
         }
+        String sqlQuery2 = "delete from friends where user_id = ? and friend_user_id = ?";
+        jdbcTemplate.update(sqlQuery2, k2, k1);
+        log.debug(
+                "Запрос пользователя под Id: {} на удаление из друзей, " +
+                        "пользователя под Id: {}, успешно выполнен!",
+                k1, k2
+        );
+        return getByKey(k1);
     }
 
     @Override
     public Map<User, Boolean> getFriendsListById(Integer k) throws ObjectNotFoundException {
-        containsOrElseThrow(k);
+
         String sqlQuery = "select u.id, u.email, u.username, u.login, u.birthday, f.status " +
                 "from users u " +
                 "join friends f on u.id=f.friend_user_id " +
                 "where u.id in(select friend_user_id " +
                 "from friends " +
-                "where user_id = ?";
+                "where user_id = ? )";
         Map<User, Boolean> tempMap = jdbcTemplate.query(sqlQuery, this::mapRowToMapEntry, k).stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         log.debug(
@@ -210,18 +198,17 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
 
     @Override
     public Collection<User> getMutualFriendsList(Integer k1, Integer k2) throws ObjectNotFoundException {
-        containsOrElseThrow(k1);
-        containsOrElseThrow(k2);
+
         String sqlQuery = "select id, email, username, login, birthday " +
                 "from users " +
                 "where id in(select friend_user_id " +
                 "from friends " +
                 "where user_id = ? " +
-                "and confirmed = true " +
-                "and friend_id in(select friend_user_id " +
+                "and status = true " +
+                "and friend_user_id in(select friend_user_id " +
                 "from friends " +
                 "where user_id = ? " +
-                "and confirmed = true))";
+                "and status = true))";
         Collection<User> collection = jdbcTemplate.query(
                 sqlQuery, this::mapRowToUser, k1, k2);
         log.debug(

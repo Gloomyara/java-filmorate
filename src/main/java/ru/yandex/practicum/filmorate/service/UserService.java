@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -36,20 +37,33 @@ public class UserService implements ObjectService<Integer, User> {
         return repository.put(v);
     }
 
-    public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
+    public User addFriend(Integer k1, Integer k2)
+            throws ObjectNotFoundException, ObjectAlreadyExistException {
+
+        if (Objects.equals(k1, k2)) {
+            throw new ObjectAlreadyExistException(
+                    "Ошибка! Нельзя добавить в друзья самого себя!");
+        }
+        repository.containsOrElseThrow(k1);
+        repository.containsOrElseThrow(k2);
         return repository.addFriend(k1, k2);
     }
 
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
+        repository.containsOrElseThrow(k1);
+        repository.containsOrElseThrow(k2);
         return repository.deleteFriend(k1, k2);
     }
 
     public Map<User, Boolean> getFriendsListById(Integer k1) throws ObjectNotFoundException {
+        repository.containsOrElseThrow(k1);
         return repository.getFriendsListById(k1);
     }
 
     public Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException {
+        repository.containsOrElseThrow(k1);
+        repository.containsOrElseThrow(k2);
         return repository.getMutualFriendsList(k1, k2);
     }
 }
