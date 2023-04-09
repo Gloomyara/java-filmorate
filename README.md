@@ -22,7 +22,7 @@
 
 ### [dbdiagram.io](https://dbdiagram.io/d/)
 
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/230780900-0ff014a3-3ece-4950-846f-5ad7439ee51f.jpg)
+![Схема базы данных:](https://user-images.githubusercontent.com/115705343/230781050-901603e6-8b43-402f-ac1c-ba0dc56d75f0.jpg)
    
 </details>
 
