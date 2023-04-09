@@ -36,7 +36,7 @@ public class FilmService implements ObjectService<Integer, Film> {
     @Override
     public Film create(Film v) throws ObjectNotFoundException, ObjectAlreadyExistException {
 
-        if (v.getMpa() != null) {
+        /*if (v.getMpa() != null) {
             int ratingId = v.getMpa().getId();
             ratingRepository.containsOrElseThrow(ratingId);
         }
@@ -45,14 +45,14 @@ public class FilmService implements ObjectService<Integer, Film> {
             for (Genre g : genreIdSet) {
                 genreRepository.containsOrElseThrow(g.getId());
             }
-        }
+        }*/
         return repository.create(v);
     }
 
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
 
-        if (v.getMpa() != null) {
+        /*if (v.getMpa() != null) {
             int ratingId = v.getMpa().getId();
             ratingRepository.containsOrElseThrow(ratingId);
         }
@@ -61,7 +61,7 @@ public class FilmService implements ObjectService<Integer, Film> {
             for (Genre g : genreIdSet) {
                 genreRepository.containsOrElseThrow(g.getId());
             }
-        }
+        }*/
         return repository.put(v);
     }
 

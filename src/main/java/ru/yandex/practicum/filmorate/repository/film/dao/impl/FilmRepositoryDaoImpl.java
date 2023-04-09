@@ -205,7 +205,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         String sqlQuery = "select id, name from genres " +
                 "where id in(select genre_id, from film_genre where film_id = ?)" +
                 "order by id";
-        TreeSet<Genre> tempSet = new TreeSet<>(Comparator.comparing(Genre::getId));
+        TreeSet<Genre> tempSet = new TreeSet<>(Comparator.comparingInt(Genre::getId).reversed());
         tempSet.addAll(jdbcTemplate.queryForStream(sqlQuery,
                         this::mapRowToGenre,
                         resultSet.getInt("id"))
