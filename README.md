@@ -22,7 +22,8 @@
 
 ### [dbdiagram.io](https://dbdiagram.io/d/)
 
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/229625278-628874b4-f287-4528-b827-41d944ab3671.png)
+![Схема базы данных:](https://user-images.githubusercontent.com/115705343/230780900-0ff014a3-3ece-4950-846f-5ad7439ee51f.jpg)
+   
 </details>
 
    ### Короткое описание БД:
@@ -60,12 +61,11 @@
 3.  WHERE id IN(SELECT friend_id
 4.             FROM friends
 5.             WHERE user_id = X
-6.             AND confirmed = true
-7.             AND friend_id IN(SELECT friend_id
+6.             AND status = true
+7.             AND user_friend_id IN(SELECT user_friend_id
 8.                             FROM friends
 9.                             WHERE user_id = Y
-10.                            AND confirmed = true))
-11. GROUP BY u.id;
+10.                            AND status = true))
 ```
    
 </details>
@@ -79,7 +79,6 @@
 ```sql 
 1. SELECT *
 2. FROM films f
-3. GROUP BY f.id;
 ```
    
 </details>
@@ -93,7 +92,6 @@
 ```sql
 1. SELECT *
 2. FROM users u
-3. GROUP BY u.id;
 ```
    
 </details>
@@ -107,14 +105,8 @@
 ```sql
 1.  SELECT *
 2.  FROM films f
-3.  WHERE f.id IN (SELECT most_popular.film_id
-4.                FROM (SELECT film_id,
-5.                             COUNT(user_id) likes_count
-6.                      FROM favorite_films
-7.                      GROUP BY film_id
-8.                      ORDER BY likes_count DESC
-9.                      LIMIT N) as most_popular)
-10. GROUP BY f.id;
+3.  ORDER BY rate DESC
+4.  LIMIT N;              
 ```
    
 </details>
