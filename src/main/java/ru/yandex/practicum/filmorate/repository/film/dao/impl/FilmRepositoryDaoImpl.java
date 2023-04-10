@@ -104,10 +104,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
         v.setId(k);
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
-            List<Genre> genreIdSet = v.getGenres().stream()
-                    .distinct().collect(Collectors.toList());
-            v.setGenres(genreIdSet);
-            for (Genre g : genreIdSet) {
+            for (Genre g : v.getGenres()) {
                 String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
                         "values (?, ?)";
                 jdbcTemplate.update(sqlQuery1, k, g.getId());
@@ -137,10 +134,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         String sqlQuery1 = "delete from film_genre where film_id = ?";
         jdbcTemplate.update(sqlQuery1, k);
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
-            List<Genre> genreIdSet = v.getGenres().stream()
-                    .distinct().collect(Collectors.toList());
-            v.setGenres(genreIdSet);
-            for (Genre g : genreIdSet) {
+            for (Genre g : v.getGenres()) {
                 String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
                         "values (?, ?)";
                 jdbcTemplate.update(sqlQuery2, k, g.getId());

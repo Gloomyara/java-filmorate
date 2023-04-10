@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.film.GenreRepository;
 import ru.yandex.practicum.filmorate.repository.film.RatingRepository;
@@ -12,6 +13,8 @@ import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +42,15 @@ public class FilmService implements ObjectService<Integer, Film> {
             ratingRepository.containsOrElseThrow(ratingId);
         }
         if (v.getGenres() != null && v.getGenres().size() > 0) {
-            Set<Genre> genreIdSet = v.getGenres();
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
             for (Genre g : genreIdSet) {
                 genreRepository.containsOrElseThrow(g.getId());
             }
         }*/
+        List<Genre> genreIdSet = v.getGenres().stream()
+                .distinct().collect(Collectors.toList());
+        v.setGenres(genreIdSet);
         return repository.create(v);
     }
 
@@ -55,11 +62,15 @@ public class FilmService implements ObjectService<Integer, Film> {
             ratingRepository.containsOrElseThrow(ratingId);
         }
         if (v.getGenres() != null && v.getGenres().size() > 0) {
-            Set<Genre> genreIdSet = v.getGenres();
+            List<Genre> genreIdSet = v.getGenres().stream()
+                    .distinct().collect(Collectors.toList());
             for (Genre g : genreIdSet) {
                 genreRepository.containsOrElseThrow(g.getId());
             }
         }*/
+        List<Genre> genreIdSet = v.getGenres().stream()
+                .distinct().collect(Collectors.toList());
+        v.setGenres(genreIdSet);
         return repository.put(v);
     }
 
