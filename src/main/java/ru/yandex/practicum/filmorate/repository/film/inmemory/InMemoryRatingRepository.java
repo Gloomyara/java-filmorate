@@ -36,20 +36,17 @@ public class InMemoryRatingRepository implements RatingRepository<Integer> {
     }
 
     @Override
-    public Rating getByKey(Integer k) throws ObjectNotFoundException {
-        try {
-            Rating v = Optional.ofNullable(ratingStorage.get(k)).orElseThrow(
-                    () -> new ObjectNotFoundException("Rating with Id: " + k + " not found")
-            );
+    public Optional<Rating> getByKey(Integer k) throws ObjectNotFoundException {
+        Optional<Rating> optV = Optional.ofNullable(ratingStorage.get(k));
+        if (optV.isPresent()) {
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Rating", k
             );
-            return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+            return optV;
         }
+        log.warn("Rating with Id: {} not found", k);
+        return Optional.empty();
     }
 
     @Override

@@ -36,20 +36,17 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     }
 
     @Override
-    public Film getByKey(Integer k) throws ObjectNotFoundException {
-        try {
-            Film v = Optional.ofNullable(filmStorage.get(k)).orElseThrow(
-                    () -> new ObjectNotFoundException("Film with Id: " + k + " not found")
-            );
+    public Optional<Film> getByKey(Integer k) throws ObjectNotFoundException {
+        Optional<Film> optV = Optional.ofNullable(filmStorage.get(k));
+        if (optV.isPresent()) {
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Film", k
             );
-            return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+            return optV;
         }
+        log.warn("Film with Id: {} not found", k);
+        return Optional.empty();
     }
 
     @Override
@@ -88,7 +85,9 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     @Override
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        Film v = getByKey(k1);
+        Film v = getByKey(k1).orElseThrow(
+                () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
+        );
         Set<Integer> tempSet = likesInfo.getOrDefault(k1, new HashSet<>());
         tempSet.add(k2);
         v.setRate(tempSet.size());
@@ -104,7 +103,9 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     @Override
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
 
-        Film v = getByKey(k1);
+        Film v = getByKey(k1).orElseThrow(
+                () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
+        );
         Set<Integer> tempSet = likesInfo.getOrDefault(k1, new HashSet<>());
         if (!tempSet.remove(k2)) {
             log.warn(

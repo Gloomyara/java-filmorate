@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.film.GenreRepository;
-import ru.yandex.practicum.filmorate.repository.film.RatingRepository;
 import ru.yandex.practicum.filmorate.repository.user.UserRepository;
 import ru.yandex.practicum.filmorate.service.ObjectService;
 
@@ -16,12 +15,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService implements ObjectService<Integer, Film> {
     private final FilmRepository<Integer> repository;
-    private final GenreRepository<Integer> genreRepository;
-    private final RatingRepository<Integer> ratingRepository;
     private final UserRepository<Integer> userRepository;
 
     @Override
@@ -31,7 +29,10 @@ public class FilmService implements ObjectService<Integer, Film> {
 
     @Override
     public Film getByKey(Integer k) throws ObjectNotFoundException {
-        return repository.getByKey(k);
+
+        return repository.getByKey(k).orElseThrow(
+                () -> new ObjectNotFoundException("Film with Id: " + k + " not found")
+        );
     }
 
     @Override

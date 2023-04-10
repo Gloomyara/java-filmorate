@@ -37,20 +37,17 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
     }
 
     @Override
-    public Genre getByKey(Integer k) throws ObjectNotFoundException {
-        try {
-            Genre v = Optional.ofNullable(genreStorage.get(k)).orElseThrow(
-                    () -> new ObjectNotFoundException("Genre with Id: " + k + " not found")
-            );
+    public Optional<Genre> getByKey(Integer k) throws ObjectNotFoundException {
+        Optional<Genre> optV = Optional.ofNullable(genreStorage.get(k));
+        if (optV.isPresent()) {
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Genre", k
             );
-            return v;
-        } catch (ObjectNotFoundException e) {
-            log.warn(e.getMessage());
-            throw e;
+            return optV;
         }
+        log.warn("Genre with Id: {} not found", k);
+        return Optional.empty();
     }
 
     @Override

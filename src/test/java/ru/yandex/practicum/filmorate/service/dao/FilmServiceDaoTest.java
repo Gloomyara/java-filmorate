@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.service.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.server.MethodNotAllowedException;
 import ru.yandex.practicum.filmorate.controller.film.GenreController;
 import ru.yandex.practicum.filmorate.controller.film.RatingController;
@@ -34,6 +36,7 @@ public class FilmServiceDaoTest {
     private final UserService userService;
     private final GenreController genreController;
     private final RatingController ratingController;
+    private final JdbcTemplate jdbcTemplate;
     Film film;
     Film film1;
     User user;
@@ -49,6 +52,19 @@ public class FilmServiceDaoTest {
                 LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
+    }
+
+    @AfterEach
+    void deleteSomeData() {
+
+        String sqlQuery1 = "delete from film_genre";
+        jdbcTemplate.update(sqlQuery1);
+        String sqlQuery2 = "delete from favorite_films";
+        jdbcTemplate.update(sqlQuery2);
+        String sqlQuery3 = "delete from films";
+        jdbcTemplate.update(sqlQuery3);
+        String sqlQuery4 = "delete from users";
+        jdbcTemplate.update(sqlQuery4);
     }
 
     @Test

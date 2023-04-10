@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.service.ObjectService;
 
 import java.util.Collection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GenreService implements ObjectService<Integer, Genre> {
@@ -22,7 +24,10 @@ public class GenreService implements ObjectService<Integer, Genre> {
 
     @Override
     public Genre getByKey(Integer k) throws ObjectNotFoundException {
-        return repository.getByKey(k);
+
+        return repository.getByKey(k).orElseThrow(
+                () -> new ObjectNotFoundException("Genre with Id: " + k + " not found")
+        );
     }
 
     @Override

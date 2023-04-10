@@ -16,16 +16,12 @@ import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
-import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,7 +31,6 @@ import java.util.stream.Collectors;
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
     private final GenreRepositoryDao<Integer> genreRepository;
-    private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
     public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -62,20 +57,21 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     }
 
     @Override
-    public Film getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Film> getByKey(Integer k) throws ObjectNotFoundException {
         try {
             String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
                     "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
                     "left join ratings as r on r.id=f.rating_id where f.id = ?";
-            Film v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k);
+            Optional<Film> optV = Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k));
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Film", k
             );
-            return v;
+            return optV;
         } catch (EmptyResultDataAccessException e) {
             log.warn("Film with Id: {} not found", k);
-            throw new ObjectNotFoundException("Film with Id: " + k + " not found");
+            return Optional.empty();
         }
     }
 
@@ -145,8 +141,10 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     }
 
     @Override
-    public Film addLike(Integer k1, Integer k2) {
-        Film v = getByKey(k1);
+    public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
+        Film v = getByKey(k1).orElseThrow(
+                () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
+        );
         SqlRowSet favoriteFilmsRows = jdbcTemplate.queryForRowSet(
                 "select * from favorite_films " +
                         "where film_id = ? " +
@@ -170,8 +168,10 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     }
 
     @Override
-    public Film deleteLike(Integer k1, Integer k2) {
-        Film v = getByKey(k1);
+    public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
+        Film v = getByKey(k1).orElseThrow(
+                () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
+        );
         String sqlQuery = "delete from favorite_films where film_id = ? and user_id = ?";
         boolean b1 = jdbcTemplate.update(sqlQuery, k1, k2) > 0;
         if (!b1) {
@@ -217,7 +217,11 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 resultSet.getInt("id"));
         List<Genre> genreList = new ArrayList<>();
         if (!tempList.isEmpty()) {
-            genreList = tempList.stream().map(genreRepository::getByKey).collect(Collectors.toList());
+            genreList = tempList.stream()
+                    .map(genreRepository::getByKey)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
         }
 
         return Film.builder()

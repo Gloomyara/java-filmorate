@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,19 +52,19 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public User getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<User> getByKey(Integer k) throws ObjectNotFoundException {
         try {
             String sqlQuery = "select id, email, username, login, birthday " +
                     "from users where id = ?";
-            User v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, k);
+            Optional<User> optV = Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, k));
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "User", k
             );
-            return v;
+            return optV;
         } catch (EmptyResultDataAccessException e) {
             log.warn("User with Id: {} not found", k);
-            throw new ObjectNotFoundException("User with Id: " + k + " not found");
+            return Optional.empty();
         }
     }
 
@@ -139,7 +140,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                     "Подтверждение пользователем под Id:{} запроса на добавление в друзья, " +
                             "пользователя под Id: {}, успешно выполнено!", k1, k2
             );
-            return getByKey(k1);
+            return getByKey(k1).orElseThrow();
         }
         String sqlQuery = "insert into friends(user_id, friend_user_id) " +
                 "values (?, ?)";
@@ -149,7 +150,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 "Запрос пользователя под Id: {} на добавление в друзья, " +
                         "пользователя под Id: {}, успешно выполнен!", k1, k2
         );
-        return getByKey(k1);
+        return getByKey(k1).orElseThrow();
     }
 
     @Override
@@ -173,7 +174,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                         "пользователя под Id: {}, успешно выполнен!",
                 k1, k2
         );
-        return getByKey(k1);
+        return getByKey(k1).orElseThrow();
     }
 
     @Override

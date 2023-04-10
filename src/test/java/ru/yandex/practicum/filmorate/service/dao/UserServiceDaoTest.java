@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.service.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -22,6 +24,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserServiceDaoTest {
     private final UserService userService;
+    private final JdbcTemplate jdbcTemplate;
     User user;
     User user1;
 
@@ -31,6 +34,15 @@ public class UserServiceDaoTest {
                 null, LocalDate.of(2023, 1, 1));
         user1 = new User(null, "testuser1@gmail.com", "testUser1",
                 " ", LocalDate.of(2013, 1, 1));
+    }
+
+    @AfterEach
+    void deleteSomeData() {
+
+        String sqlQuery1 = "delete from friends";
+        jdbcTemplate.update(sqlQuery1);
+        String sqlQuery2 = "delete from users";
+        jdbcTemplate.update(sqlQuery2);
     }
 
     @Test
@@ -162,7 +174,7 @@ public class UserServiceDaoTest {
         Function<User, Integer> getId = (User::getId);
         User user2 = new User(null, "testuser2@gmail.com", "testUser2",
                 " ", LocalDate.of(2003, 1, 1));
-        User user3 = new User(null, "testuser2@gmail.com", "testUser2",
+        User user3 = new User(null, "testuser3@gmail.com", "testUser3",
                 " ", LocalDate.of(1993, 1, 1));
         userService.create(user);
         userService.create(user1);

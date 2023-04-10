@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,10 +51,11 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     }
 
     @Override
-    public Rating getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Rating> getByKey(Integer k) throws ObjectNotFoundException {
         try {
             String sqlQuery = "select id, name from ratings where id = ?";
-            Rating v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, k);
+            Optional<Rating> v = Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, k));
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Rating", k
@@ -61,7 +63,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
             return v;
         } catch (EmptyResultDataAccessException e) {
             log.warn("Rating with Id: {} not found", k);
-            throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
+            return Optional.empty();
         }
     }
 

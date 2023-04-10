@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface ObjectsRepository<K, V> {
 
@@ -11,7 +12,7 @@ public interface ObjectsRepository<K, V> {
 
     Collection<V> findAll();
 
-    V getByKey(K k) throws ObjectNotFoundException;
+    Optional<V> getByKey(K k) throws ObjectNotFoundException;
 
     V create(V v) throws ObjectAlreadyExistException;
 

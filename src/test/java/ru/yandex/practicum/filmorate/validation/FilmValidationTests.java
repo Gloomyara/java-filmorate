@@ -55,7 +55,7 @@ public class FilmValidationTests {
         genreIdSet = new ArrayList<>();
         genreIdSet.add(genre);
         filmRepository = new InMemoryFilmRepository();
-        filmService = new FilmService(filmRepository, genreRepository, ratingRepository, userRepository);
+        filmService = new FilmService(filmRepository, userRepository);
         filmController = new FilmController(filmService);
     }
 

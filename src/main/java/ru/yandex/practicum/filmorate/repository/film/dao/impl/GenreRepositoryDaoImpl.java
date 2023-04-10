@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,10 +51,11 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     }
 
     @Override
-    public Genre getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Genre> getByKey(Integer k) throws ObjectNotFoundException {
         try {
             String sqlQuery = "select id, name from genres where id = ?";
-            Genre v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, k);
+            Optional<Genre> v = Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, k));
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
                     "Genre", k
@@ -61,7 +63,7 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
             return v;
         } catch (EmptyResultDataAccessException e) {
             log.warn("Genre with Id: {} not found", k);
-            throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
+            return Optional.empty();
         }
     }
 
