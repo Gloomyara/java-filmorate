@@ -51,7 +51,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     }
 
     @Override
-    public Optional<Rating> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Rating> getByKey(Integer k) {
         try {
             String sqlQuery = "select id, name from ratings where id = ?";
             Optional<Rating> v = Optional.ofNullable(

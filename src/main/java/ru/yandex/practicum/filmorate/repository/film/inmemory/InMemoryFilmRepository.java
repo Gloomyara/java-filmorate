@@ -36,7 +36,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     }
 
     @Override
-    public Optional<Film> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Film> getByKey(Integer k) {
         Optional<Film> optV = Optional.ofNullable(filmStorage.get(k));
         if (optV.isPresent()) {
             log.debug(

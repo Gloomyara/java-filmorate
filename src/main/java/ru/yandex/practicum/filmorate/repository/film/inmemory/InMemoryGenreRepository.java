@@ -37,7 +37,7 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
     }
 
     @Override
-    public Optional<Genre> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Genre> getByKey(Integer k) {
         Optional<Genre> optV = Optional.ofNullable(genreStorage.get(k));
         if (optV.isPresent()) {
             log.debug(

@@ -18,7 +18,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     private Integer id = 1;
 
     @Override
-    public void containsOrElseThrow(Integer k) {
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         if (!userStorage.containsKey(k) || !friendsInfo.containsKey(k)) {
             throw new ObjectNotFoundException("User with Id: " + k + " not found");
         }
@@ -35,7 +35,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     }
 
     @Override
-    public Optional<User> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<User> getByKey(Integer k) {
 
         Optional<User> optV = Optional.ofNullable(userStorage.get(k));
         if (optV.isPresent()) {
@@ -147,7 +147,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     }
 
     @Override
-    public Collection<User> getFriendsListById(Integer k) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k) {
 
         log.debug(
                 "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
@@ -162,7 +162,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
 
     @Override
     public Collection<User> getMutualFriendsList(
-            Integer k1, Integer k2) throws ObjectNotFoundException {
+            Integer k1, Integer k2) {
 
         Set<Integer> mutualFriendsSet = friendsInfo.get(k1).keySet().stream()
                 .filter(friendsInfo.get(k1)::get)

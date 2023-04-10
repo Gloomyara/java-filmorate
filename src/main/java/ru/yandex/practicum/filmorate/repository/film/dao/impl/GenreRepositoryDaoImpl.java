@@ -51,7 +51,7 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     }
 
     @Override
-    public Optional<Genre> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Genre> getByKey(Integer k) {
         try {
             String sqlQuery = "select id, name from genres where id = ?";
             Optional<Genre> v = Optional.ofNullable(

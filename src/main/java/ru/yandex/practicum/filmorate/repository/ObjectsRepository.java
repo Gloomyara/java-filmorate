@@ -12,7 +12,7 @@ public interface ObjectsRepository<K, V> {
 
     Collection<V> findAll();
 
-    Optional<V> getByKey(K k) throws ObjectNotFoundException;
+    Optional<V> getByKey(K k);
 
     V create(V v) throws ObjectAlreadyExistException;
 

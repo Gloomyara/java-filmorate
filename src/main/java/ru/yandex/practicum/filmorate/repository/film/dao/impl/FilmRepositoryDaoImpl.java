@@ -57,7 +57,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     }
 
     @Override
-    public Optional<Film> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<Film> getByKey(Integer k) {
         try {
             String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
                     "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +

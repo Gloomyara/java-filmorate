@@ -52,7 +52,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public Optional<User> getByKey(Integer k) throws ObjectNotFoundException {
+    public Optional<User> getByKey(Integer k) {
         try {
             String sqlQuery = "select id, email, username, login, birthday " +
                     "from users where id = ?";
@@ -119,7 +119,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
+    public User addFriend(Integer k1, Integer k2) {
 
         SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
                 "select status from friends " +
@@ -178,7 +178,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public Collection<User> getFriendsListById(Integer k) throws ObjectNotFoundException {
+    public Collection<User> getFriendsListById(Integer k) {
 
         String sqlQuery = "select id, email, username, login, birthday " +
                 "from users u " +
@@ -194,7 +194,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     }
 
     @Override
-    public Collection<User> getMutualFriendsList(Integer k1, Integer k2) throws ObjectNotFoundException {
+    public Collection<User> getMutualFriendsList(Integer k1, Integer k2) {
 
         String sqlQuery = "select id, email, username, login, birthday " +
                 "from users " +
