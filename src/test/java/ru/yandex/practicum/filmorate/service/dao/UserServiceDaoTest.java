@@ -46,6 +46,11 @@ public class UserServiceDaoTest {
     }
 
     @Test
+    void findAllShouldBeIsEmpty() {
+        assertTrue("Обнаружены не учтенные данные о пользователях", userService.findAll().isEmpty());
+    }
+
+    @Test
     void getByIdShouldThrowNoSuchElementException() {
         int id = 999;
         NoSuchElementException ex = Assertions.assertThrows(

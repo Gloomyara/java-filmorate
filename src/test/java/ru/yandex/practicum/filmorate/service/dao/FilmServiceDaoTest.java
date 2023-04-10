@@ -68,6 +68,11 @@ public class FilmServiceDaoTest {
     }
 
     @Test
+    void findAllShouldBeIsEmpty() {
+        assertTrue("Обнаружены неучтенные данные о фильмах", filmService.findAll().isEmpty());
+    }
+
+    @Test
     void findAllGenre() {
         assertEquals(6, genreController.findAll().size(),
                 "Обнаружены неучтенные данные о жанрах");
