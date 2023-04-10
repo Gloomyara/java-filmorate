@@ -223,6 +223,10 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                     .map(Optional::get)
                     .collect(Collectors.toList());
         }
+        Rating v = null;
+        if (resultSet.getString("rating_id") != null) {
+            v = new Rating(resultSet.getInt("rating_id"), resultSet.getString("mpa"));
+        }
 
         return Film.builder()
                 .id(resultSet.getInt("id"))
@@ -230,7 +234,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
-                .mpa(new Rating(resultSet.getInt("rating_id"), resultSet.getString("mpa")))
+                .mpa(v)
                 .genres(genreList)
                 .rate(resultSet.getInt("rate"))
                 .build();
