@@ -38,21 +38,21 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "select id from films where id = ?", k);
-        if (filmRows.next()) {
-            return true;
+        if (!filmRows.next()) {
+            log.warn("{} with Id: {} not found",
+                    "Film", k);
+            throw new ObjectNotFoundException("Film with Id: " + k + " not found");
         }
-        log.warn("{} with Id: {} not found",
-                "Film", k);
-        throw new ObjectNotFoundException("Film with Id: " + k + " not found");
     }
 
     @Override
     public Collection<Film> findAll() {
-        String sqlQuery = "select id, title, description, release_date, " +
-                "length, rating_id, rate from films";
+        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
+                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
+                "left join ratings as r on r.id=f.rating_id";
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -64,8 +64,9 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Film getByKey(Integer k) throws ObjectNotFoundException {
         try {
-            String sqlQuery = "select id, title, description, release_date, " +
-                    "length, rating_id, rate from films where id = ?";
+            String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
+                    "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
+                    "left join ratings as r on r.id=f.rating_id where f.id = ?";
             Film v = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k);
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
@@ -195,8 +196,10 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Collection<Film> getPopularFilms(Integer i) {
-        String sqlQuery = "select id, title, description, release_date, " +
-                "length, rating_id, rate from films order by rate desc limit ?";
+        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
+                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
+                "left join ratings as r on r.id=f.rating_id order by f.rate desc limit ?";
+
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, i);
         log.debug(
                 "Запрос списка самых популярных {}'s успешно выполнен, всего {}: {}",
@@ -216,13 +219,6 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         if (!tempList.isEmpty()) {
             genreList = tempList.stream().map(genreRepository::getByKey).collect(Collectors.toList());
         }
-        Rating v = null;
-        SqlRowSet ratingRows = jdbcTemplate.queryForRowSet(
-                "select id from ratings where id = ?",
-                resultSet.getInt("rating_id"));
-        if (ratingRows.next()) {
-            v = ratingRepository.getByKey(ratingRows.getInt("id"));
-        }
 
         return Film.builder()
                 .id(resultSet.getInt("id"))
@@ -230,7 +226,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
-                .mpa(v)
+                .mpa(new Rating(resultSet.getInt("rating_id"), resultSet.getString("mpa")))
                 .genres(genreList)
                 .rate(resultSet.getInt("rate"))
                 .build();

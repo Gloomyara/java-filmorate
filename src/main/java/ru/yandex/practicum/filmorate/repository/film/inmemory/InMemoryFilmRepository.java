@@ -19,11 +19,10 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private Integer id = 1;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
-        if (filmStorage.containsKey(k)) {
-            return true;
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+        if (!filmStorage.containsKey(k)) {
+            throw new ObjectNotFoundException("Film with Id: " + k + " not found");
         }
-        throw new ObjectNotFoundException("Film with Id: " + k + " not found");
     }
 
     @Override

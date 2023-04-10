@@ -29,13 +29,14 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(
                 "select id from users where id = ?", k);
-        if (userRows.next()) {
-            return true;
+        if (!userRows.next()) {
+            log.warn("{} with Id: {} not found",
+                    "User", k);
+            throw new ObjectNotFoundException("User with Id: " + k + " not found");
         }
-        throw new ObjectNotFoundException("User with Id: " + k + " not found");
     }
 
     @Override
@@ -222,12 +223,4 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
     }
-
-    /*@Override
-    public Map.Entry<User, Boolean> mapRowToMapEntry(ResultSet resultSet, int rowNum) throws SQLException {
-        return Map.entry(
-                mapRowToUser(resultSet, rowNum)
-                , resultSet.getBoolean("status")
-        );
-    }*/
 }

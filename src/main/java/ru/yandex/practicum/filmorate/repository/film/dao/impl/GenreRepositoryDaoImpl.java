@@ -28,15 +28,14 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "select id from genres where id = ?", k);
-        if (filmRows.next()) {
-            return true;
+        if (!filmRows.next()) {
+            log.warn("{} with Id: {} not found",
+                    "Genre", k);
+            throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
         }
-        log.warn("{} with Id: {} not found",
-                "Genre", k);
-        throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
     }
 
     @Override

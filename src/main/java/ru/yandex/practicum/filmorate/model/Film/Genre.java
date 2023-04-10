@@ -9,6 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class Genre {
     private Integer id;
-    /*@NotBlank(message = "Name cannot be blank")*/
     private String name;
 }

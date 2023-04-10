@@ -18,11 +18,10 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     private Integer id = 1;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) {
-        if (userStorage.containsKey(k) && friendsInfo.containsKey(k)) {
-            return true;
+    public void containsOrElseThrow(Integer k) {
+        if (!userStorage.containsKey(k) || !friendsInfo.containsKey(k)) {
+            throw new ObjectNotFoundException("User with Id: " + k + " not found");
         }
-        throw new ObjectNotFoundException("User with Id: " + k + " not found");
     }
 
     @Override
@@ -157,7 +156,6 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
                         "Всего друзей в списке: {}.", k, friendsInfo.get(k).size()
         );
         return friendsInfo.get(k).keySet().stream()
-                //.filter(friendsInfo.get(k1)::get)
                 .map(this::getByKey)
                 .collect(Collectors.toList());
     }

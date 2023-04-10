@@ -20,11 +20,10 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
     private Integer id = 1;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) {
-        if (genreStorage.containsKey(k)) {
-            return true;
+    public void containsOrElseThrow(Integer k) {
+        if (!genreStorage.containsKey(k)) {
+            throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
         }
-        throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
     }
 
     @Override

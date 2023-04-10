@@ -37,40 +37,22 @@ public class FilmService implements ObjectService<Integer, Film> {
     @Override
     public Film create(Film v) throws ObjectNotFoundException, ObjectAlreadyExistException {
 
-        /*if (v.getMpa() != null) {
-            int ratingId = v.getMpa().getId();
-            ratingRepository.containsOrElseThrow(ratingId);
-        }
         if (v.getGenres() != null && v.getGenres().size() > 0) {
             List<Genre> genreIdSet = v.getGenres().stream()
                     .distinct().collect(Collectors.toList());
-            for (Genre g : genreIdSet) {
-                genreRepository.containsOrElseThrow(g.getId());
-            }
-        }*/
-        List<Genre> genreIdSet = v.getGenres().stream()
-                .distinct().collect(Collectors.toList());
-        v.setGenres(genreIdSet);
+            v.setGenres(genreIdSet);
+        }
         return repository.create(v);
     }
 
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
 
-        /*if (v.getMpa() != null) {
-            int ratingId = v.getMpa().getId();
-            ratingRepository.containsOrElseThrow(ratingId);
-        }
         if (v.getGenres() != null && v.getGenres().size() > 0) {
             List<Genre> genreIdSet = v.getGenres().stream()
                     .distinct().collect(Collectors.toList());
-            for (Genre g : genreIdSet) {
-                genreRepository.containsOrElseThrow(g.getId());
-            }
-        }*/
-        List<Genre> genreIdSet = v.getGenres().stream()
-                .distinct().collect(Collectors.toList());
-        v.setGenres(genreIdSet);
+            v.setGenres(genreIdSet);
+        }
         return repository.put(v);
     }
 

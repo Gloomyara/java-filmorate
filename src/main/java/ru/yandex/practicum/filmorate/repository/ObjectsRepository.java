@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public interface ObjectsRepository<K, V> {
 
-    boolean containsOrElseThrow(K k) throws ObjectNotFoundException;
+    void containsOrElseThrow(K k) throws ObjectNotFoundException;
 
     Collection<V> findAll();
 

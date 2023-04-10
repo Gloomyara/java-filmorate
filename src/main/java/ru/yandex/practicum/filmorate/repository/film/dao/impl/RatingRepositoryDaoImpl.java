@@ -28,15 +28,14 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean containsOrElseThrow(Integer k) throws ObjectNotFoundException {
+    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
                 "select id from ratings where id = ?", k);
-        if (filmRows.next()) {
-            return true;
+        if (!filmRows.next()) {
+            log.warn("{} with Id: {} not found",
+                    "Rating", k);
+            throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
         }
-        log.warn("{} with Id: {} not found",
-                "Rating", k);
-        throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
     }
 
     @Override
