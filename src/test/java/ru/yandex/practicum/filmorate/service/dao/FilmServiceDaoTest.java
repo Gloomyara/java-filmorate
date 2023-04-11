@@ -180,7 +180,7 @@ public class FilmServiceDaoTest {
                 LocalDate.of(1967, 3, 25), 100, rating, null, null);
         filmService.create(test);
         Film test1 = new Film(test.getId(), "nisi eiusmod", "adipisicing",
-                LocalDate.of(1967, 3, 25), 100, mpa, null, 0);
+                LocalDate.of(1967, 3, 25), 100, mpa, new ArrayList<>(), 0);
 
         assertEquals(test1, filmService.getByKey(test.getId()));
     }

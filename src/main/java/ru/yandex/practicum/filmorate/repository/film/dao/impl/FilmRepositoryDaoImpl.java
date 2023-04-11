@@ -220,10 +220,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         List<Genre> genreList = jdbcTemplate.query(sqlQuery,
                 genreRepository::mapRowToGenre,
                 resultSet.getInt("id"));
-        Optional<List<Genre>> optGenreList = Optional.empty();
-        if (!genreList.isEmpty()) {
-            optGenreList = Optional.of(genreList);
-        }
+
         Optional<Rating> optV = Optional.empty();
         if (resultSet.getInt("rating_id") > 0) {
             optV = Optional.of(ratingRepository.mapRowToRating(resultSet, rowNum));
@@ -236,7 +233,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
                 .mpa(optV.orElse(null))
-                .genres(optGenreList.orElse(null))
+                .genres(genreList) //postman null не принимает -_-
                 .rate(resultSet.getInt("rate"))
                 .build();
     }
