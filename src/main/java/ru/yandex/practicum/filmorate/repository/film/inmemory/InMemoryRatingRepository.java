@@ -41,7 +41,7 @@ public class InMemoryRatingRepository implements RatingRepository<Integer> {
         if (optV.isPresent()) {
             log.debug(
                     "Запрос {} по Id: {} успешно выполнен.",
-                    "Rating", k
+                    "Rating", id
             );
             return optV;
         }

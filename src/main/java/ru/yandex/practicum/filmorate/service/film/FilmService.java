@@ -19,18 +19,18 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmService implements ObjectService<Integer, Film> {
-    private final FilmRepository<Integer> repository;
+    private final FilmRepository<Integer> filmRepository;
     private final UserRepository<Integer> userRepository;
 
     @Override
     public Collection<Film> findAll() {
-        return repository.findAll();
+        return filmRepository.findAll();
     }
 
     @Override
     public Film getByKey(Integer k) throws ObjectNotFoundException {
 
-        return repository.getByKey(k).orElseThrow(
+        return filmRepository.getByKey(k).orElseThrow(
                 () -> new ObjectNotFoundException("Film with Id: " + k + " not found")
         );
     }
@@ -43,7 +43,7 @@ public class FilmService implements ObjectService<Integer, Film> {
                     .distinct().collect(Collectors.toList());
             v.setGenres(genreIdSet);
         }
-        return repository.create(v);
+        return filmRepository.create(v);
     }
 
     @Override
@@ -54,20 +54,20 @@ public class FilmService implements ObjectService<Integer, Film> {
                     .distinct().collect(Collectors.toList());
             v.setGenres(genreIdSet);
         }
-        return repository.put(v);
+        return filmRepository.put(v);
     }
 
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
         userRepository.containsOrElseThrow(k2);
-        return repository.addLike(k1, k2);
+        return filmRepository.addLike(k1, k2);
     }
 
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
         userRepository.containsOrElseThrow(k2);
-        return repository.deleteLike(k1, k2);
+        return filmRepository.deleteLike(k1, k2);
     }
 
     public Collection<Film> getPopularFilms(Integer limit) {
-        return repository.getPopularFilms(limit);
+        return filmRepository.getPopularFilms(limit);
     }
 }

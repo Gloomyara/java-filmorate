@@ -15,28 +15,28 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 public class GenreService implements ObjectService<Integer, Genre> {
-    private final GenreRepository<Integer> repository;
+    private final GenreRepository<Integer> genreRepository;
 
     @Override
     public Collection<Genre> findAll() {
-        return repository.findAll();
+        return genreRepository.findAll();
     }
 
     @Override
     public Genre getByKey(Integer k) throws ObjectNotFoundException {
 
-        return repository.getByKey(k).orElseThrow(
+        return genreRepository.getByKey(k).orElseThrow(
                 () -> new ObjectNotFoundException("Genre with Id: " + k + " not found")
         );
     }
 
     @Override
     public Genre create(Genre v) throws ObjectAlreadyExistException {
-        return repository.create(v);
+        return genreRepository.create(v);
     }
 
     @Override
     public Genre put(Genre v) throws ObjectNotFoundException {
-        return repository.put(v);
+        return genreRepository.put(v);
     }
 }

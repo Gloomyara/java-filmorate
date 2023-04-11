@@ -15,28 +15,28 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 public class RatingService implements ObjectService<Integer, Rating> {
-    private final RatingRepository<Integer> repository;
+    private final RatingRepository<Integer> ratingRepository;
 
     @Override
     public Collection<Rating> findAll() {
-        return repository.findAll();
+        return ratingRepository.findAll();
     }
 
     @Override
     public Rating getByKey(Integer k) throws ObjectNotFoundException {
 
-        return repository.getByKey(k).orElseThrow(
+        return ratingRepository.getByKey(k).orElseThrow(
                 () -> new ObjectNotFoundException("Rating with Id: " + k + " not found")
         );
     }
 
     @Override
     public Rating create(Rating v) throws ObjectAlreadyExistException {
-        return repository.create(v);
+        return ratingRepository.create(v);
     }
 
     @Override
     public Rating put(Rating v) throws ObjectNotFoundException {
-        return repository.put(v);
+        return ratingRepository.put(v);
     }
 }

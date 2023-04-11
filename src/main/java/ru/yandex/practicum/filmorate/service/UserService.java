@@ -16,29 +16,29 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserService implements ObjectService<Integer, User> {
 
-    private final UserRepository<Integer> repository;
+    private final UserRepository<Integer> userRepository;
 
     @Override
     public Collection<User> findAll() {
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
     @Override
     public User getByKey(Integer k) throws ObjectNotFoundException {
 
-        return repository.getByKey(k).orElseThrow(
+        return userRepository.getByKey(k).orElseThrow(
                 () -> new ObjectNotFoundException("User with Id: " + k + " not found")
         );
     }
 
     @Override
     public User create(User v) throws ObjectAlreadyExistException {
-        return repository.create(v);
+        return userRepository.create(v);
     }
 
     @Override
     public User put(User v) throws ObjectNotFoundException {
-        return repository.put(v);
+        return userRepository.put(v);
     }
 
     public User addFriend(Integer k1, Integer k2)
@@ -48,26 +48,26 @@ public class UserService implements ObjectService<Integer, User> {
             throw new ObjectAlreadyExistException(
                     "Ошибка! Нельзя добавить в друзья самого себя!");
         }
-        repository.containsOrElseThrow(k1);
-        repository.containsOrElseThrow(k2);
-        return repository.addFriend(k1, k2);
+        userRepository.containsOrElseThrow(k1);
+        userRepository.containsOrElseThrow(k2);
+        return userRepository.addFriend(k1, k2);
     }
 
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-        repository.containsOrElseThrow(k1);
-        repository.containsOrElseThrow(k2);
-        return repository.deleteFriend(k1, k2);
+        userRepository.containsOrElseThrow(k1);
+        userRepository.containsOrElseThrow(k2);
+        return userRepository.deleteFriend(k1, k2);
     }
 
     public Collection<User> getFriendsListById(Integer k1) throws ObjectNotFoundException {
-        repository.containsOrElseThrow(k1);
-        return repository.getFriendsListById(k1);
+        userRepository.containsOrElseThrow(k1);
+        return userRepository.getFriendsListById(k1);
     }
 
     public Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException {
-        repository.containsOrElseThrow(k1);
-        repository.containsOrElseThrow(k2);
-        return repository.getMutualFriendsList(k1, k2);
+        userRepository.containsOrElseThrow(k1);
+        userRepository.containsOrElseThrow(k2);
+        return userRepository.getMutualFriendsList(k1, k2);
     }
 }

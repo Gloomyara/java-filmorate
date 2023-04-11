@@ -63,7 +63,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
         v.setId(id);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
-                "Film", k
+                "Film", id
         );
         filmStorage.put(id, v);
         id++;

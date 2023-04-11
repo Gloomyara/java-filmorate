@@ -64,7 +64,7 @@ public class InMemoryGenreRepository implements GenreRepository<Integer> {
         v.setId(id);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
-                "Genre", k
+                "Genre", id
         );
         genreStorage.put(id, v);
         id++;
