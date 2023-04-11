@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
+import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -33,6 +34,7 @@ import java.util.Optional;
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
     private final GenreRepositoryDao<Integer> genreRepository;
+    private final RatingRepositoryDao<Integer> ratingRepository;
 
     @Override
     public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -220,9 +222,8 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 resultSet.getInt("id"));
 
         Optional<Rating> optV = Optional.empty();
-        if (resultSet.getString("rating_id") != null) {
-            optV = Optional.of(new Rating(resultSet.getInt("rating_id"),
-                    resultSet.getString("mpa")));
+        if (resultSet.getInt("rating_id") > 0) {
+            optV = Optional.of(ratingRepository.mapRowToRating(resultSet, rowNum));
         }
 
         return Film.builder()

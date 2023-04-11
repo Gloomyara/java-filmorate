@@ -41,7 +41,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
 
     @Override
     public Collection<Rating> findAll() {
-        String sqlQuery = "select id, name from ratings";
+        String sqlQuery = "select id rating_id, name mpa from ratings";
         Collection<Rating> collection = jdbcTemplate.query(sqlQuery, this::mapRowToRating);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -53,7 +53,7 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     @Override
     public Optional<Rating> getByKey(Integer k) {
         try {
-            String sqlQuery = "select id, name from ratings where id = ?";
+            String sqlQuery = "select id rating_id, name mpa from ratings where id = ?";
             Optional<Rating> v = Optional.ofNullable(
                     jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, k));
             log.debug(
@@ -107,8 +107,8 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     public Rating mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {
 
         return Rating.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
+                .id(resultSet.getInt("rating_id"))
+                .name(resultSet.getString("mpa"))
                 .build();
     }
 }
