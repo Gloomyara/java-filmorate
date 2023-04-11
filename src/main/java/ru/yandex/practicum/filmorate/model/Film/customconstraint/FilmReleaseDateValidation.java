@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model.customconstraint;
+package ru.yandex.practicum.filmorate.model.Film.customconstraint;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

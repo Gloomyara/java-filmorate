@@ -1,10 +1,16 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.dao;
 
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
@@ -13,31 +19,40 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
-class UserServiceTest {
-
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class UserServiceDaoTest {
+    private final UserService userService;
+    private final JdbcTemplate jdbcTemplate;
     User user;
     User user1;
-    InMemoryUserRepository inMemoryUserRepository;
-    UserService userService;
 
     @BeforeEach
     void createSomeData() {
-        inMemoryUserRepository = new InMemoryUserRepository();
-        userService = new UserService(inMemoryUserRepository);
+        user = new User(null, "testuser@gmail.com", "testUser",
+                null, LocalDate.of(2023, 1, 1));
+        user1 = new User(null, "testuser1@gmail.com", "testUser1",
+                " ", LocalDate.of(2013, 1, 1));
+    }
+
+    @AfterEach
+    void deleteSomeData() {
+
+        String sqlQuery1 = "delete from friends";
+        jdbcTemplate.update(sqlQuery1);
+        String sqlQuery2 = "delete from users";
+        jdbcTemplate.update(sqlQuery2);
     }
 
     @Test
     void findAllShouldBeIsEmpty() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
         assertTrue("Обнаружены не учтенные данные о пользователях", userService.findAll().isEmpty());
     }
 
     @Test
     void getByIdShouldThrowNoSuchElementException() {
-        int id = 1;
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
+        int id = 999;
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.getByKey(id)
@@ -47,24 +62,17 @@ class UserServiceTest {
 
     @Test
     void getById() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
         userService.create(user);
-        assertEquals(1, userService.findAll().size(), "Фильм не был добавлен в репозиторий");
         int id = user.getId();
-        user1 = new User(id, "testuser@gmail.com", "testUser",
+        User user2 = new User(id, "testuser@gmail.com", "testUser",
                 "testUser", LocalDate.of(2023, 1, 1));
-        assertEquals(user1, userService.getByKey(id), "Фильмы не совпадают");
+        assertEquals(user2, userService.getByKey(id), "Пользователи не совпадают");
     }
 
     @Test
     void addFriendShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
         int nonExistId1 = 9999;
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -87,10 +95,6 @@ class UserServiceTest {
 
     @Test
     void addFriend() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -104,10 +108,6 @@ class UserServiceTest {
     void deleteFriendShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
         int nonExistId1 = 9999;
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -130,10 +130,6 @@ class UserServiceTest {
 
     @Test
     void deleteFriend() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -148,9 +144,8 @@ class UserServiceTest {
 
     @Test
     void getFriendsListByIdShouldThrowNoSuchElementException() {
-        int id = 1;
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
+        int id = 999;
+        user.setId(id);
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.getFriendsListById(id)
@@ -160,8 +155,6 @@ class UserServiceTest {
 
     @Test
     void getFriendsListByIdShouldBeIsEmpty() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
         userService.create(user);
         int userId = user.getId();
         assertTrue("Обнаружены не учтенные данные о пользователях",
@@ -170,10 +163,6 @@ class UserServiceTest {
 
     @Test
     void getFriendsListById() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -188,21 +177,20 @@ class UserServiceTest {
     @Test
     void getMutualFriendsListShouldBeIsEmpty() {
         Function<User, Integer> getId = (User::getId);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         User user2 = new User(null, "testuser2@gmail.com", "testUser2",
                 " ", LocalDate.of(2003, 1, 1));
-        User user3 = new User(null, "testuser2@gmail.com", "testUser2",
+        User user3 = new User(null, "testuser3@gmail.com", "testUser3",
                 " ", LocalDate.of(1993, 1, 1));
         userService.create(user);
         userService.create(user1);
         userService.create(user2);
         userService.create(user3);
         userService.addFriend(getId.apply(user), getId.apply(user1));
+        userService.addFriend(getId.apply(user1), getId.apply(user));
         userService.addFriend(getId.apply(user), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user));
         userService.addFriend(getId.apply(user1), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user1));
         assertTrue("Обнаружены не учтенные данные о друзьях",
                 userService.getMutualFriendsList(getId.apply(user), getId.apply(user3)).isEmpty());
     }
@@ -211,10 +199,6 @@ class UserServiceTest {
     void getMutualFriendsListShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
         int nonExistId1 = 9999;
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         userService.create(user);
         userService.create(user1);
         int userId = user.getId();
@@ -237,18 +221,17 @@ class UserServiceTest {
     @Test
     void getMutualFriendsList() {
         Function<User, Integer> getId = (User::getId);
-        user = new User(null, "testuser@gmail.com", "testUser",
-                null, LocalDate.of(2023, 1, 1));
-        user1 = new User(null, "testuser1@gmail.com", "testUser1",
-                " ", LocalDate.of(2013, 1, 1));
         User user2 = new User(null, "testuser2@gmail.com", "testUser2",
                 " ", LocalDate.of(2003, 1, 1));
         userService.create(user);
         userService.create(user1);
         userService.create(user2);
         userService.addFriend(getId.apply(user), getId.apply(user1));
+        userService.addFriend(getId.apply(user1), getId.apply(user));
         userService.addFriend(getId.apply(user), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user));
         userService.addFriend(getId.apply(user1), getId.apply(user2));
+        userService.addFriend(getId.apply(user2), getId.apply(user1));
         assertTrue("Друзья не совпадают",
                 userService.getMutualFriendsList(getId.apply(user), getId.apply(user1)).contains(user2));
         assertTrue("Друзья не совпадают",

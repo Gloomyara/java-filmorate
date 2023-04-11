@@ -7,7 +7,7 @@ import org.springframework.test.util.AssertionErrors;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.InMemoryUserRepository;
+import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.ConstraintViolation;
@@ -26,21 +26,23 @@ public class UserValidationTests {
     Set<ConstraintViolation<User>> violations;
     User user;
     User user1;
-    InMemoryUserRepository inMemoryUserRepository;
+    InMemoryUserRepository userRepository;
     UserService userService;
     UserController userController;
 
     @BeforeEach
     void createSomeData() {
-        inMemoryUserRepository = new InMemoryUserRepository();
-        userService = new UserService(inMemoryUserRepository);
+        user = new User(null, "testuser@gmail.com", "testUser",
+                " ", LocalDate.of(2023, 1, 1));
+        user1 = new User(null, "testuser@gmail.com", "testRenewUser",
+                null, LocalDate.of(2023, 1, 1));
+        userRepository = new InMemoryUserRepository();
+        userService = new UserService(userRepository);
         userController = new UserController(userService);
     }
 
     @Test
     void shouldThrowNoSuchElementExceptionWhenPutNewUser() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userController.put(user)
@@ -50,24 +52,21 @@ public class UserValidationTests {
 
     @Test
     void shouldThrowObjectAlreadyExistExceptionWhenUserDataAlreadyExist() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         userController.create(user);
-        user1 = new User(null, "testuser@gmail.com", "testUser",
+        User user2 = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
-        user1.setId(user.getId());
+        user2.setId(user.getId());
         ObjectAlreadyExistException ex = Assertions.assertThrows(
                 ObjectAlreadyExistException.class,
-                () -> userController.create(user1)
+                () -> userController.create(user2)
         );
-        assertEquals("Пользователь с электронной почтой" +
-                " testuser@gmail.com уже зарегистрирован.", ex.getMessage());
+        assertEquals("User Id: " + user.getId()
+                + " should be null, Id генерируется автоматически.", ex.getMessage());
     }
 
     @Test
-    void shouldNotPassValidationWhenUserBirthdayInFuture() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 4, 1));
+    void shouldNotPassValidationWhenUserBirthdayInTheFuture() {
+        user.setBirthday(LocalDate.now().plusMonths(1));
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -78,8 +77,7 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserBirthdayIsNull() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", null);
+        user.setBirthday(null);
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -90,8 +88,7 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserEmailIsBlank() {
-        user = new User(null, " ", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
+        user.setEmail(" ");
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -102,8 +99,7 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserEmailIsNull() {
-        user = new User(null, null, "testUser",
-                " ", LocalDate.of(2023, 1, 1));
+        user.setEmail(null);
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -114,8 +110,7 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserEmailIsNotValid() {
-        user = new User(null, "это-неправильный?эмейл@", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
+        user.setEmail("это-неправильный?эмейл@");
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -126,8 +121,7 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserLoginIsBlank() {
-        user = new User(null, "testuser@gmail.com", " ",
-                " ", LocalDate.of(2023, 1, 1));
+        user.setLogin(" ");
         violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
@@ -138,9 +132,8 @@ public class UserValidationTests {
 
     @Test
     void shouldNotPassValidationWhenUserLoginIsNull() {
-        user1 = new User(null, "testuser@gmail.com", null,
-                " ", LocalDate.of(2023, 1, 1));
-        violations = validator.validate(user1);
+        user.setLogin(null);
+        violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals(
                 "Login cannot be blank",
@@ -150,8 +143,6 @@ public class UserValidationTests {
 
     @Test
     void create() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         violations = validator.validate(user);
         if (violations.isEmpty()) {
             userController.create(user);
@@ -162,8 +153,6 @@ public class UserValidationTests {
 
     @Test
     void put() {
-        user = new User(null, "testuser@gmail.com", "testUser",
-                " ", LocalDate.of(2023, 1, 1));
         violations = validator.validate(user);
         if (violations.isEmpty()) {
             userController.create(user);
@@ -171,15 +160,15 @@ public class UserValidationTests {
         AssertionErrors.assertEquals("Количество пользователей не совпадает",
                 1, userController.findAll().size());
         user1 = new User(null, "testuser@gmail.com", "testRenewUser",
-                null, LocalDate.of(2023, 1, 1));
+                user.getName(), LocalDate.of(2023, 1, 1));
         user1.setId(user.getId());
         violations = validator.validate(user1);
         if (violations.isEmpty()) {
             userController.put(user1);
         }
         User user2 = new User(null, "testuser@gmail.com", "testRenewUser",
-                null, LocalDate.of(2023, 1, 1));
+                user.getName(), LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());
-        AssertionErrors.assertEquals("Пользователи не совпадают", user2, user1);
+        AssertionErrors.assertEquals("Пользователи не совпадают", user2, this.user1);
     }
 }

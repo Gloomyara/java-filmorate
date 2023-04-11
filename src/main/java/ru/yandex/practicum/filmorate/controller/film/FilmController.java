@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller.film;
 
 
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.controller.ObjectController;
+import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
 
