@@ -49,7 +49,7 @@ public class FilmServiceDaoTest {
         genreIdSet.add(genreController.getByKey(1));
         mpa = ratingController.getByKey(1);
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 1500, mpa, null, 0);
+                LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
     }
