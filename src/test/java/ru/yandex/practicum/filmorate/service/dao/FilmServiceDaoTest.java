@@ -49,7 +49,7 @@ public class FilmServiceDaoTest {
         genreIdSet.add(genreController.getByKey(1));
         mpa = ratingController.getByKey(1);
         film = new Film(null, "testFilmName", "d",
-                LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
+                LocalDate.of(2020, 1, 1), 1500, mpa, null, 0);
         user = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
     }
@@ -179,6 +179,10 @@ public class FilmServiceDaoTest {
         Film test = new Film(null, "nisi eiusmod", "adipisicing",
                 LocalDate.of(1967, 3, 25), 100, rating, null, null);
         filmService.create(test);
+        Film test1 = new Film(test.getId(), "nisi eiusmod", "adipisicing",
+                LocalDate.of(1967, 3, 25), 100, mpa, null, 0);
+
+        assertEquals(test1, filmService.getByKey(test.getId()));
     }
 
     @Test
