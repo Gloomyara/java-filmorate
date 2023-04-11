@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -13,32 +13,14 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class UserService implements ObjectService<Integer, User> {
+public class UserService extends ObjectService<Integer, User> {
 
     private final UserRepository<Integer> userRepository;
 
-    @Override
-    public Collection<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User getByKey(Integer k) throws ObjectNotFoundException {
-
-        return userRepository.getByKey(k).orElseThrow(
-                () -> new ObjectNotFoundException("User with Id: " + k + " not found")
-        );
-    }
-
-    @Override
-    public User create(User v) throws ObjectAlreadyExistException {
-        return userRepository.create(v);
-    }
-
-    @Override
-    public User put(User v) throws ObjectNotFoundException {
-        return userRepository.put(v);
+    @Autowired
+    public UserService(UserRepository<Integer> repository) {
+        super(repository, "User");
+        this.userRepository = repository;
     }
 
     public User addFriend(Integer k1, Integer k2)

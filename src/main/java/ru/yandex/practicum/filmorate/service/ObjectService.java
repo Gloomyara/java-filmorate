@@ -1,14 +1,37 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
+
 import java.util.Collection;
 
-public interface ObjectService<K, V> {
+@Slf4j
+public abstract class ObjectService<K, V> {
 
-    Collection<V> findAll();
+    protected final ObjectsRepository<K, V> repository;
+    private final String className;
 
-    V getByKey(K k);
+    protected ObjectService(ObjectsRepository<K, V> repository, String className) {
+        this.repository = repository;
+        this.className = className;
+    }
 
-    V create(V v);
+    public Collection<V> findAll() {
+        return repository.findAll();
+    }
 
-    V put(V v);
+    public V getByKey(K k) {
+        return repository.getByKey(k).orElseThrow(
+                () -> new ObjectNotFoundException(className + " with Id: " + k + " not found")
+        );
+    }
+
+    public V create(V v) {
+        return repository.create(v);
+    }
+
+    public V put(V v) {
+        return repository.put(v);
+    }
 }

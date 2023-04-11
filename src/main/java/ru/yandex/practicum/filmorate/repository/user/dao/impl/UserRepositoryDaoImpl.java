@@ -187,7 +187,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                 "where user_id = ? ) order by id";
         Collection<User> collection = jdbcTemplate.query(sqlQuery, this::mapRowToUser, k);
         log.debug(
-                "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
+                "Запрос списка друзей пользователя под Id: {} успешно выполнен! " +
                         "Всего друзей в списке: {}.", k, collection.size()
         );
         return collection;
@@ -208,7 +208,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
         Collection<User> collection = jdbcTemplate.query(
                 sqlQuery, this::mapRowToUser, k1, k2);
         log.debug(
-                "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
+                "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен! " +
                         "Всего общих друзей: {}.", k1, k2, collection.size()
         );
         return collection;

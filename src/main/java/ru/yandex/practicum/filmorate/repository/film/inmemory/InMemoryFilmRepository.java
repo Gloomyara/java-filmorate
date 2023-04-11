@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
+import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
 
 import java.util.*;
@@ -14,9 +16,17 @@ import java.util.stream.Collectors;
 @Repository("InMemoryFilmRepository")
 public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private final Map<Integer, Film> filmStorage = new HashMap<>();
+    private final InMemoryGenreRepository genreRepository;
+    private final InMemoryRatingRepository ratingRepository;
     private final Map<Integer, Set<Integer>> likesInfo = new HashMap<>();
 
     private Integer id = 1;
+
+    public InMemoryFilmRepository(InMemoryGenreRepository genreRepository,
+                                  InMemoryRatingRepository ratingRepository) {
+        this.genreRepository = genreRepository;
+        this.ratingRepository = ratingRepository;
+    }
 
     @Override
     public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -61,6 +71,21 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
                     " Id генерируется автоматически.");
         }
         v.setId(id);
+        if (v.getGenres() != null && !v.getGenres().isEmpty()) {
+            List<Genre> tempList = v.getGenres().stream()
+                    .map(Genre::getId)
+                    .distinct()
+                    .map(genreRepository::getByKey)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .sorted(Comparator.comparingInt(Genre::getId))
+                    .collect(Collectors.toList());
+            v.setGenres(tempList);
+        }
+        if (v.getMpa() != null) {
+            Rating r = v.getMpa();
+            v.setMpa(ratingRepository.getByKey(r.getId()).orElse(null));
+        }
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
                 "Film", id
@@ -74,6 +99,21 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
     public Film put(Film v) throws ObjectNotFoundException {
         Integer k = v.getId();
         containsOrElseThrow(k);
+        if (v.getGenres() != null && !v.getGenres().isEmpty()) {
+            List<Genre> tempList = v.getGenres().stream()
+                    .map(Genre::getId)
+                    .distinct()
+                    .map(genreRepository::getByKey)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .sorted(Comparator.comparingInt(Genre::getId))
+                    .collect(Collectors.toList());
+            v.setGenres(tempList);
+        }
+        if (v.getMpa() != null) {
+            Rating r = v.getMpa();
+            v.setMpa(ratingRepository.getByKey(r.getId()).orElse(null));
+        }
         filmStorage.put(k, v);
         log.debug(
                 "Данные {} по Id: {}, успешно обновлены.",

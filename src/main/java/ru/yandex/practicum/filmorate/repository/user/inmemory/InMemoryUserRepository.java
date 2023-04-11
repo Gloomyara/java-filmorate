@@ -98,7 +98,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
             friendsInfo.put(k2, tempMap2);
             log.debug(
                     "Подтверждение пользователем под Id:{} запроса на добавление в друзья, " +
-                            "пользователя под Id: {}, успешно выполнено!\n" +
+                            "пользователя под Id: {}, успешно выполнено! " +
                             "Всего друзей в списке: {}.", k1, k2,
                     (int) tempMap1.keySet().stream().filter(tempMap1::get).count()
             );
@@ -150,7 +150,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
     public Collection<User> getFriendsListById(Integer k) {
 
         log.debug(
-                "Запрос списка друзей пользователя под Id: {} успешно выполнен!\n" +
+                "Запрос списка друзей пользователя под Id: {} успешно выполнен! " +
                         "Всего друзей в списке: {}.", k, friendsInfo.get(k).size()
         );
         return friendsInfo.get(k).keySet().stream()
@@ -173,7 +173,7 @@ public class InMemoryUserRepository implements UserRepository<Integer> {
                 .collect(Collectors.toSet()));
 
         log.debug(
-                "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен!\n" +
+                "Запрос списка общих друзей пользователей под Id: {} и Id: {} успешно выполнен! " +
                         "Всего общих друзей: {}.", k1, k2, mutualFriendsSet.size()
         );
         return mutualFriendsSet.stream()
