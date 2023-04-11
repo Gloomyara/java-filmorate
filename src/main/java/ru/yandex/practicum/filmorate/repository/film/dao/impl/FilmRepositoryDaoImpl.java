@@ -21,8 +21,10 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -211,21 +213,16 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
 
-        String sqlQuery = "select genre_id, from film_genre where film_id = ? order by genre_id";
-        List<Integer> tempList = jdbcTemplate.query(sqlQuery,
-                (rs, rw) -> rs.getInt("genre_id"),
+        String sqlQuery = "select fg.genre_id id, g.name from film_genre as fg " +
+                "left join genres as g on g.id=fg.genre_id where fg.film_id = ? order by id";
+        List<Genre> genreList = jdbcTemplate.query(sqlQuery,
+                genreRepository::mapRowToGenre,
                 resultSet.getInt("id"));
-        List<Genre> genreList = new ArrayList<>();
-        if (!tempList.isEmpty()) {
-            genreList = tempList.stream()
-                    .map(genreRepository::getByKey)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-        }
-        Rating v = null;
+
+        Optional<Rating> optV = Optional.empty();
         if (resultSet.getString("rating_id") != null) {
-            v = new Rating(resultSet.getInt("rating_id"), resultSet.getString("mpa"));
+            optV = Optional.of(new Rating(resultSet.getInt("rating_id"),
+                    resultSet.getString("mpa")));
         }
 
         return Film.builder()
@@ -234,7 +231,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
-                .mpa(v)
+                .mpa(optV.orElse(null))
                 .genres(genreList)
                 .rate(resultSet.getInt("rate"))
                 .build();
