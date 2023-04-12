@@ -42,8 +42,10 @@ class FilmServiceInMemoryTest {
         genreRepository.create(genre);
         ratingRepository.create(rating);
         userRepository = new InMemoryUserRepository();
-        filmRepository = new InMemoryFilmRepository(genreRepository, ratingRepository);
-        filmService = new FilmService(filmRepository, userRepository);
+        filmRepository = new InMemoryFilmRepository(
+                (InMemoryUserRepository) userRepository,
+                genreRepository, ratingRepository);
+        filmService = new FilmService(filmRepository);
         genreIdSet = new ArrayList<>();
         genreIdSet.add(genre);
         char[] charArray = new char[200];

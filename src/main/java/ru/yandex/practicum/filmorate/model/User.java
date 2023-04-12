@@ -8,7 +8,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
@@ -25,4 +28,13 @@ public class User {
     @NotNull(message = "Birthday cannot be null")
     @Past(message = "Birthday should be in the past")
     private LocalDate birthday;
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("email", email);
+        values.put("login", login);
+        values.put("username", name);
+        values.put("birthday", Date.valueOf(birthday));
+        return values;
+    }
 }

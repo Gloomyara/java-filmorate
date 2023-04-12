@@ -56,7 +56,6 @@ public class FilmServiceDaoTest {
 
     @AfterEach
     void deleteSomeData() {
-
         String sqlQuery1 = "delete from film_genre";
         jdbcTemplate.update(sqlQuery1);
         String sqlQuery2 = "delete from favorite_films";
@@ -174,6 +173,36 @@ public class FilmServiceDaoTest {
     }
 
     @Test
+    void createShouldThrowObjectNotFoundException() {
+        Rating rating = new Rating(1, null);
+
+        Film test1 = new Film(null, "testFilm2", "testFilm2d",
+                LocalDate.of(1967, 3, 25), 100, mpa, new ArrayList<>(), 0);
+        test1.getGenres().add(new Genre(999, " "));
+        NoSuchElementException ex1 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Ошибка при создании фильма Id: " + test1.getId() +
+                "! В списке жанров, обнаружены не зарегистрированные жанры! " +
+                test1.getGenres(), ex1.getMessage());
+        test1.setMpa(new Rating(999, " "));
+        NoSuchElementException ex2 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Ошибка при создании фильма Id: " + test1.getId() +
+                "! Обнаружен не зарегистрированный рейтинг! " +
+                test1.getMpa(), ex2.getMessage());
+        test1.setId(999);
+        ObjectAlreadyExistException ex = Assertions.assertThrows(
+                ObjectAlreadyExistException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Film Id: " + 999 + " should be null, Id генерируется автоматически.", ex.getMessage());
+    }
+
+    @Test
     void create() {
         Rating rating = new Rating(1, null);
         Film test = new Film(null, "nisi eiusmod", "adipisicing",
@@ -183,6 +212,50 @@ public class FilmServiceDaoTest {
                 LocalDate.of(1967, 3, 25), 100, mpa, new ArrayList<>(), 0);
 
         assertEquals(test1, filmService.getByKey(test.getId()));
+    }
+
+    @Test
+    void putShouldThrowObjectNotFoundException() {
+        Rating rating = new Rating(1, null);
+        Film test = new Film(null, "nisi eiusmod", "adipisicing",
+                LocalDate.of(1967, 3, 25), 100, rating, null, null);
+        Film film2 = filmService.create(test);
+        Film test1 = new Film(film2.getId(), "testFilm2", "testFilm2d",
+                LocalDate.of(1967, 3, 25), 100, mpa, new ArrayList<>(), 0);
+        test1.getGenres().add(new Genre(999, " "));
+        NoSuchElementException ex1 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.put(test1)
+        );
+        assertEquals("Ошибка при обновлении фильма Id: " + test1.getId() +
+                "! В списке жанров, обнаружены не зарегистрированные жанры! " +
+                test1.getGenres(), ex1.getMessage());
+        test1.setMpa(new Rating(999, " "));
+        NoSuchElementException ex2 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.put(test1)
+        );
+        assertEquals("Ошибка при обновлении фильма Id: " + test1.getId() +
+                "! Обнаружен не зарегистрированный рейтинг! " +
+                test1.getMpa(), ex2.getMessage());
+        test1.setId(999);
+        NoSuchElementException ex = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.put(test1)
+        );
+        assertEquals("Film with Id: " + 999 + " not found", ex.getMessage());
+    }
+
+    @Test
+    void put() {
+        Rating rating = new Rating(1, null);
+        Film test = new Film(null, "nisi eiusmod", "adipisicing",
+                LocalDate.of(1967, 3, 25), 100, rating, null, null);
+        Film film1 = filmService.create(test);
+        Film test1 = new Film(film1.getId(), "nisi eiusmod", "adipisicing",
+                LocalDate.of(1967, 3, 25), 100, rating, genreIdSet, null);
+        Film film2 = filmService.put(test1);
+        assertEquals(test1, film2);
     }
 
     @Test
@@ -204,6 +277,24 @@ public class FilmServiceDaoTest {
     }
 
     @Test
+    void addLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
+
+        int nonExistId = 999;
+        filmService.create(film);
+        int filmId = film.getId();
+        userService.create(user);
+        int userId = user.getId();
+        Film film2 = filmService.addLike(filmId, userId);
+        assertEquals(1, film2.getRate(),
+                "Количество лайков не совпадает");
+        NoSuchElementException ex = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.addLike(filmId, nonExistId)
+        );
+        assertEquals("Error! Cannot add user Id: " + nonExistId + " like, user not found.", ex.getMessage());
+    }
+
+    @Test
     void deleteLikeShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         film = new Film(null, "testFilm1Name", "d1",
                 LocalDate.of(2020, 1, 1), 1500, mpa, genreIdSet, 0);
@@ -214,14 +305,15 @@ public class FilmServiceDaoTest {
         int filmId = film.getId();
         userService.create(user);
         int userId = user.getId();
-        filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getRate(),
+        Film film2 = filmService.addLike(filmId, userId);
+        assertEquals(1, film2.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> filmService.deleteLike(filmId, nonExistId)
         );
-        assertEquals("User with Id: " + nonExistId + " not found", ex.getMessage());
+        assertEquals("Error! Cannot delete user Id: " + nonExistId +
+                " like, user like not found.", ex.getMessage());
     }
 
     @Test
@@ -232,8 +324,8 @@ public class FilmServiceDaoTest {
         int filmId = film.getId();
         userService.create(user);
         int userId = user.getId();
-        filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getRate(),
+        Film film2 = filmService.addLike(filmId, userId);
+        assertEquals(1, film2.getRate(),
                 "Количество лайков не совпадает");
         NoSuchElementException ex = Assertions.assertThrows(
                 NoSuchElementException.class,
@@ -249,8 +341,8 @@ public class FilmServiceDaoTest {
         int filmId = film.getId();
         userService.create(user);
         int userId = user.getId();
-        filmService.addLike(filmId, userId);
-        assertEquals(1, filmService.getByKey(filmId).getRate(),
+        Film film2 = filmService.addLike(filmId, userId);
+        assertEquals(1, film2.getRate(),
                 "Количество лайков не совпадает");
         filmService.deleteLike(filmId, userId);
         assertTrue("Лайк не был удален", filmService.getByKey(filmId).getRate() == 0);
@@ -271,12 +363,12 @@ public class FilmServiceDaoTest {
         int userId = user.getId();
         int user1Id = user1.getId();
         filmService.addLike(filmId, userId);
-        filmService.addLike(filmId, user1Id);
+        Film film2 = filmService.addLike(filmId, user1Id);
 
-        assertEquals(2, filmService.getByKey(filmId).getRate(),
+        assertEquals(2, film2.getRate(),
                 "Количество лайков не совпадает");
-        filmService.addLike(film1Id, user1Id);
-        assertEquals(1, filmService.getByKey(film1Id).getRate(),
+        Film film3 = filmService.addLike(film1Id, user1Id);
+        assertEquals(1, film3.getRate(),
                 "Количество лайков не совпадает");
         assertTrue("Фильмы не совпадают",
                 filmService.getPopularFilms(1).contains(filmService.getByKey(filmId)));

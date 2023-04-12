@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.repository.user.dao.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -15,11 +15,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.user.dao.UserRepositoryDao;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -28,17 +26,6 @@ import java.util.Optional;
 @Primary
 public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(
-                "select id from users where id = ?", k);
-        if (!userRows.next()) {
-            log.warn("{} with Id: {} not found",
-                    "User", k);
-            throw new ObjectNotFoundException("User with Id: " + k + " not found");
-        }
-    }
 
     @Override
     public Collection<User> findAll() {
@@ -79,21 +66,13 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("User Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into users(email, username, login, birthday) " +
-                "values (?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
         if (v.getName() == null || v.getName().isBlank()) {
             v.setName(v.getLogin());
         }
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, v.getEmail());
-            stmt.setString(2, v.getName());
-            stmt.setString(3, v.getLogin());
-            stmt.setDate(4, Date.valueOf(v.getBirthday()));
-            return stmt;
-        }, keyHolder);
-        Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("users")
+                .usingGeneratedKeyColumns("id");
+        Integer k = simpleJdbcInsert.executeAndReturnKey(v.toMap()).intValue();
         v.setId(k);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
@@ -105,33 +84,52 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
     @Override
     public User put(User v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        containsOrElseThrow(k);
         String sqlQuery = "update users set " +
                 "email = ?, username = ?, login = ?, birthday = ? " +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery,
+        boolean b = jdbcTemplate.update(sqlQuery,
                 v.getEmail(),
                 v.getName(),
                 v.getLogin(),
                 Date.valueOf(v.getBirthday()),
-                k);
-        return v;
+                k) > 0;
+        if (b) {
+            log.debug(
+                    "Данные {} по Id: {}, успешно обновлены.",
+                    "Rating", k
+            );
+            return v;
+        }
+        log.warn("{} with Id: {} not found",
+                "Rating", k);
+        throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
     }
 
     @Override
-    public User addFriend(Integer k1, Integer k2) {
-
-        SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(
-                "select status from friends " +
-                        "where user_id = ? " +
-                        "and friend_user_id = ?", k2, k1);
-
-        if (friendsRows.next()) {
-
-            String sqlQuery1 = "insert into friends(user_id, friend_user_id, status) " +
-                    "values (?, ?, ?)";
-            jdbcTemplate.update(sqlQuery1,
-                    k1, k2, true);
+    public User addFriend(Integer k1, Integer k2) throws ObjectNotFoundException, ObjectAlreadyExistException {
+        User v = getByKey(k1).orElseThrow(() -> new ObjectNotFoundException("User with Id: " + k1 + " not found"));
+        try {
+            String sqlQuery = "insert into friends(user_id, friend_user_id) " +
+                    "values (?, ?)";
+            jdbcTemplate.update(sqlQuery,
+                    k1, k2);
+            log.debug(
+                    "Запрос пользователя под Id: {} на добавление в друзья, " +
+                            "пользователя под Id: {}, успешно выполнен!", k1, k2
+            );
+            return v;
+        } catch (DuplicateKeyException e) {
+            try {
+                String sqlQuery1 = "insert into friends(user_id, friend_user_id, status) " +
+                        "values (?, ?, ?)";
+                jdbcTemplate.update(sqlQuery1,
+                        k1, k2, true);
+            } catch (DuplicateKeyException e1) {
+                log.warn("Error! Cannot add in friends User with Id: " +
+                        "{}, user already in your friends list.", k1);
+                throw new ObjectAlreadyExistException("Error! Cannot add in friends User with Id: " +
+                        k1 + ", user already in your friends list.");
+            }
             String sqlQuery2 = "update friends set status =? " +
                     "where user_id = ? and friend_user_id = ?";
             jdbcTemplate.update(sqlQuery2,
@@ -140,22 +138,17 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                     "Подтверждение пользователем под Id:{} запроса на добавление в друзья, " +
                             "пользователя под Id: {}, успешно выполнено!", k1, k2
             );
-            return getByKey(k1).orElseThrow();
+            return v;
+        } catch (DataIntegrityViolationException e2) {
+            log.warn("{} with Id: {} not found",
+                    "User", k2);
+            throw new ObjectNotFoundException("User with Id: " + k2 + " not found");
         }
-        String sqlQuery = "insert into friends(user_id, friend_user_id) " +
-                "values (?, ?)";
-        jdbcTemplate.update(sqlQuery,
-                k1, k2);
-        log.debug(
-                "Запрос пользователя под Id: {} на добавление в друзья, " +
-                        "пользователя под Id: {}, успешно выполнен!", k1, k2
-        );
-        return getByKey(k1).orElseThrow();
     }
 
     @Override
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-
+        User v = getByKey(k1).orElseThrow(() -> new ObjectNotFoundException("User with Id: " + k1 + " not found"));
         String sqlQuery1 = "delete from friends where user_id = ? and friend_user_id = ?";
         boolean b = jdbcTemplate.update(sqlQuery1, k1, k2) > 0;
         if (!b) {
@@ -174,7 +167,7 @@ public class UserRepositoryDaoImpl implements UserRepositoryDao<Integer> {
                         "пользователя под Id: {}, успешно выполнен!",
                 k1, k2
         );
-        return getByKey(k1).orElseThrow();
+        return v;
     }
 
     @Override

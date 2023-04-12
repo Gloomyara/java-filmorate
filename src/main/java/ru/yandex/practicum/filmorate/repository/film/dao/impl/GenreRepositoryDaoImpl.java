@@ -5,20 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -29,19 +25,8 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
-                "select id from genres where id = ?", k);
-        if (!filmRows.next()) {
-            log.warn("{} with Id: {} not found",
-                    "Genre", k);
-            throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
-        }
-    }
-
-    @Override
     public Collection<Genre> findAll() {
-        String sqlQuery = "select id, name from genres";
+        String sqlQuery = "select id genre_id, name genre_name from genres";
         Collection<Genre> collection = jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -53,7 +38,7 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     @Override
     public Optional<Genre> getByKey(Integer k) {
         try {
-            String sqlQuery = "select id, name from genres where id = ?";
+            String sqlQuery = "select id genre_id, name genre_name from genres where id = ?";
             Optional<Genre> v = Optional.ofNullable(
                     jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, k));
             log.debug(
@@ -78,14 +63,10 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("Genre Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into genres(name) values (?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, v.getName());
-            return stmt;
-        }, keyHolder);
-        Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("genres")
+                .usingGeneratedKeyColumns("id");
+        Integer k = simpleJdbcInsert.executeAndReturnKey(v.toMap()).intValue();
         v.setId(k);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
@@ -97,18 +78,25 @@ public class GenreRepositoryDaoImpl implements GenreRepositoryDao<Integer> {
     @Override
     public Genre put(Genre v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        containsOrElseThrow(k);
         String sqlQuery = "update genres set name = ? where id = ?";
-        jdbcTemplate.update(sqlQuery, v.getName(), k);
-        return v;
+        if (jdbcTemplate.update(sqlQuery, v.getName(), k) > 0) {
+            log.debug(
+                    "Данные {} по Id: {}, успешно обновлены.",
+                    "Genre", k
+            );
+            return v;
+        }
+        log.warn("{} with Id: {} not found",
+                "Genre", k);
+        throw new ObjectNotFoundException("Genre with Id: " + k + " not found");
     }
 
     @Override
     public Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
 
         return Genre.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
+                .id(resultSet.getInt("genre_id"))
+                .name(resultSet.getString("genre_name"))
                 .build();
     }
 }

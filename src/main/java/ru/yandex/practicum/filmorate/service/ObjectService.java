@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.repository.ObjectsRepository;
 
 import java.util.Collection;
 
-@Slf4j
 public abstract class ObjectService<K, V> {
 
     protected final ObjectsRepository<K, V> repository;
@@ -34,4 +32,6 @@ public abstract class ObjectService<K, V> {
     public V put(V v) {
         return repository.put(v);
     }
+
+    protected abstract ObjectsRepository<K, V> getRepository();
 }
