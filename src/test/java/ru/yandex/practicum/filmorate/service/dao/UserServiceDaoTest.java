@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -105,6 +106,16 @@ public class UserServiceDaoTest {
     }
 
     @Test
+    void addFriendListShouldThrowObjectAlreadyExistException() {
+        int id = 999;
+        ObjectAlreadyExistException ex = Assertions.assertThrows(
+                ObjectAlreadyExistException.class,
+                () -> userService.addFriend(id, id)
+        );
+        assertEquals("Ошибка! Нельзя добавить в друзья самого себя!", ex.getMessage());
+    }
+
+    @Test
     void deleteFriendShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
         int nonExistId = 999;
         int nonExistId1 = 9999;
@@ -119,8 +130,10 @@ public class UserServiceDaoTest {
                 NoSuchElementException.class,
                 () -> userService.deleteFriend(userId, nonExistId)
         );
-        assertEquals("User with Id: " + nonExistId
-                + " not found", ex.getMessage());
+        assertEquals("Error! Cannot delete User Id: " + userId
+                        + " friend with id: " + nonExistId +
+                        ", user doesn't in your friends list!",
+                ex.getMessage());
         NoSuchElementException ex1 = Assertions.assertThrows(
                 NoSuchElementException.class,
                 () -> userService.deleteFriend(nonExistId1, user1Id)
@@ -143,22 +156,14 @@ public class UserServiceDaoTest {
     }
 
     @Test
-    void getFriendsListByIdShouldThrowNoSuchElementException() {
-        int id = 999;
-        user.setId(id);
-        NoSuchElementException ex = Assertions.assertThrows(
-                NoSuchElementException.class,
-                () -> userService.getFriendsListById(id)
-        );
-        assertEquals("User with Id: " + id + " not found", ex.getMessage());
-    }
-
-    @Test
     void getFriendsListByIdShouldBeIsEmpty() {
+        int nonExistId = 999;
         userService.create(user);
         int userId = user.getId();
         assertTrue("Обнаружены не учтенные данные о пользователях",
                 userService.getFriendsListById(userId).isEmpty());
+        assertTrue("Обнаружены не учтенные данные о пользователях",
+                userService.getFriendsListById(nonExistId).isEmpty());
     }
 
     @Test
@@ -176,6 +181,7 @@ public class UserServiceDaoTest {
 
     @Test
     void getMutualFriendsListShouldBeIsEmpty() {
+        int nonExistId = 999;
         Function<User, Integer> getId = (User::getId);
         User user2 = new User(null, "testuser2@gmail.com", "testUser2",
                 " ", LocalDate.of(2003, 1, 1));
@@ -193,29 +199,20 @@ public class UserServiceDaoTest {
         userService.addFriend(getId.apply(user2), getId.apply(user1));
         assertTrue("Обнаружены не учтенные данные о друзьях",
                 userService.getMutualFriendsList(getId.apply(user), getId.apply(user3)).isEmpty());
+        assertTrue("Обнаружены не учтенные данные о друзьях",
+                userService.getMutualFriendsList(getId.apply(user), nonExistId).isEmpty());
+        assertTrue("Обнаружены не учтенные данные о друзьях",
+                userService.getMutualFriendsList(nonExistId, getId.apply(user)).isEmpty());
     }
 
     @Test
-    void getMutualFriendsListShouldThrowNoSuchElementExceptionWhenUserIdIncorrect() {
-        int nonExistId = 999;
-        int nonExistId1 = 9999;
-        userService.create(user);
-        userService.create(user1);
-        int userId = user.getId();
-        int user1Id = user1.getId();
-        userService.addFriend(userId, user1Id);
-        assertEquals(1, userService.getFriendsListById(userId).size(),
-                "Количество друзей не совпадает");
-        NoSuchElementException ex = Assertions.assertThrows(
-                NoSuchElementException.class,
-                () -> userService.getMutualFriendsList(userId, nonExistId)
+    void getMutualFriendsListShouldThrowObjectAlreadyExistException() {
+        int id = 999;
+        ObjectAlreadyExistException ex = Assertions.assertThrows(
+                ObjectAlreadyExistException.class,
+                () -> userService.getMutualFriendsList(id, id)
         );
-        assertEquals("User with Id: " + nonExistId + " not found", ex.getMessage());
-        NoSuchElementException ex1 = Assertions.assertThrows(
-                NoSuchElementException.class,
-                () -> userService.getMutualFriendsList(nonExistId1, user1Id)
-        );
-        assertEquals("User with Id: " + nonExistId1 + " not found", ex1.getMessage());
+        assertEquals("Ошибка! Нельзя запросить общий список друзей с самим собой!", ex.getMessage());
     }
 
     @Test

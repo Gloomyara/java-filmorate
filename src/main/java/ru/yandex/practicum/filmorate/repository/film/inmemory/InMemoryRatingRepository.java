@@ -18,7 +18,6 @@ public class InMemoryRatingRepository implements RatingRepository<Integer> {
     private final Map<Integer, Rating> ratingStorage = new HashMap<>();
     private Integer id = 1;
 
-    @Override
     public void containsOrElseThrow(Integer k) {
         if (!ratingStorage.containsKey(k)) {
             throw new ObjectNotFoundException("Rating with Id: " + k + " not found");

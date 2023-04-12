@@ -39,14 +39,13 @@ CREATE TABLE IF NOT EXISTS friends (
   user_id integer,
 friend_user_id integer CONSTRAINT not_identiсal CHECK(friend_user_id != user_id),
 status boolean DEFAULT FALSE,
-CONSTRAINT uq_friends UNIQUE (user_id,
-friend_user_id),
 CONSTRAINT fk_fr_user_id
   FOREIGN KEY(user_id)
       REFERENCES users(id),
 CONSTRAINT fk_fr_friend_user_id
       FOREIGN KEY(friend_user_id)
-      REFERENCES users(id)
+      REFERENCES users(id),
+      PRIMARY KEY(user_id, friend_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS ratings (
@@ -75,25 +74,23 @@ name varchar(64)
 CREATE TABLE IF NOT EXISTS film_genre (
   film_id integer,
 genre_id integer,
-CONSTRAINT uq_film_genre UNIQUE (film_id,
-genre_id),
 CONSTRAINT fk_fc_genre_id
   FOREIGN KEY(genre_id) 
       REFERENCES genres(id),
 CONSTRAINT fk_fc_film_id
       FOREIGN KEY(film_id) 
-      REFERENCES films(id)
+      REFERENCES films(id),
+      PRIMARY KEY(film_id, genre_id)
 );
 
 CREATE TABLE IF NOT EXISTS favorite_films (
   film_id integer,
 user_id integer,
-CONSTRAINT uq_favorite_films UNIQUE (film_id,
-user_id),
 CONSTRAINT fk_ff_user_id
   FOREIGN KEY(user_id) 
       REFERENCES users(id),
 CONSTRAINT fk_ff_film_id
       FOREIGN KEY(film_id) 
-      REFERENCES films(id)
+      REFERENCES films(id),
+      PRIMARY KEY(film_id, user_id)
 );

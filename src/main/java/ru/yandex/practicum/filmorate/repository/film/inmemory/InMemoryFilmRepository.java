@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,19 +17,20 @@ import java.util.stream.Collectors;
 @Repository("InMemoryFilmRepository")
 public class InMemoryFilmRepository implements FilmRepository<Integer> {
     private final Map<Integer, Film> filmStorage = new HashMap<>();
+    private final InMemoryUserRepository userRepository;
     private final InMemoryGenreRepository genreRepository;
     private final InMemoryRatingRepository ratingRepository;
     private final Map<Integer, Set<Integer>> likesInfo = new HashMap<>();
 
     private Integer id = 1;
 
-    public InMemoryFilmRepository(InMemoryGenreRepository genreRepository,
+    public InMemoryFilmRepository(InMemoryUserRepository userRepository, InMemoryGenreRepository genreRepository,
                                   InMemoryRatingRepository ratingRepository) {
+        this.userRepository = userRepository;
         this.genreRepository = genreRepository;
         this.ratingRepository = ratingRepository;
     }
 
-    @Override
     public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
         if (!filmStorage.containsKey(k)) {
             throw new ObjectNotFoundException("Film with Id: " + k + " not found");
@@ -124,7 +126,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
 
     @Override
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
-
+        userRepository.containsOrElseThrow(k2);
         Film v = getByKey(k1).orElseThrow(
                 () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
         );
@@ -142,7 +144,7 @@ public class InMemoryFilmRepository implements FilmRepository<Integer> {
 
     @Override
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
-
+        userRepository.containsOrElseThrow(k2);
         Film v = getByKey(k1).orElseThrow(
                 () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
         );

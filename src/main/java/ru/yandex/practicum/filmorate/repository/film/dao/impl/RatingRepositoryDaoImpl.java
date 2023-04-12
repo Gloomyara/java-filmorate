@@ -5,20 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -27,17 +23,6 @@ import java.util.Optional;
 @Primary
 public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
-                "select id from ratings where id = ?", k);
-        if (!filmRows.next()) {
-            log.warn("{} with Id: {} not found",
-                    "Rating", k);
-            throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
-        }
-    }
 
     @Override
     public Collection<Rating> findAll() {
@@ -78,14 +63,10 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("Rating Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into ratings(name) values (?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, v.getName());
-            return stmt;
-        }, keyHolder);
-        Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("genres")
+                .usingGeneratedKeyColumns("id");
+        Integer k = simpleJdbcInsert.executeAndReturnKey(v.toMap()).intValue();
         v.setId(k);
         log.debug(
                 "{} под Id: {}, успешно зарегистрирован.",
@@ -97,10 +78,17 @@ public class RatingRepositoryDaoImpl implements RatingRepositoryDao<Integer> {
     @Override
     public Rating put(Rating v) throws ObjectNotFoundException {
         Integer k = v.getId();
-        containsOrElseThrow(k);
         String sqlQuery = "update ratings set name = ? where id = ?";
-        jdbcTemplate.update(sqlQuery, v.getName(), k);
-        return v;
+        if (jdbcTemplate.update(sqlQuery, v.getName(), k) > 0) {
+            log.debug(
+                    "Данные {} по Id: {}, успешно обновлены.",
+                    "Rating", k
+            );
+            return v;
+        }
+        log.warn("{} with Id: {} not found",
+                "Rating", k);
+        throw new ObjectNotFoundException("Rating with Id: " + k + " not found");
     }
 
     @Override

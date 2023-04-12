@@ -7,5 +7,5 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface FilmRepositoryDao<K> extends FilmRepository<K> {
-    Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException;
+
 }

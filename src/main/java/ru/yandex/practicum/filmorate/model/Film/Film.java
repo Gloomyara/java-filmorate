@@ -9,8 +9,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Data
@@ -31,4 +34,15 @@ public class Film {
     private Rating mpa;
     private List<Genre> genres;
     private Integer rate;
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("title", name);
+        values.put("description", description);
+        values.put("release_date", Date.valueOf(releaseDate));
+        values.put("length", duration);
+        values.put("rating_id", mpa.getId());
+        values.put("rate", rate);
+        return values;
+    }
 }

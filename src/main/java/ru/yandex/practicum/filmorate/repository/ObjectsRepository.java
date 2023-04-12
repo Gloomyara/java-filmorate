@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface ObjectsRepository<K, V> {
 
-    void containsOrElseThrow(K k) throws ObjectNotFoundException;
-
     Collection<V> findAll();
 
     Optional<V> getByKey(K k);

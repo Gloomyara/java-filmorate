@@ -3,11 +3,12 @@ package ru.yandex.practicum.filmorate.repository.film.dao.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -15,17 +16,12 @@ import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
-import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,39 +30,38 @@ import java.util.stream.Collectors;
 @Primary
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
-    private final GenreRepositoryDao<Integer> genreRepository;
     private final RatingRepositoryDao<Integer> ratingRepository;
 
-    @Override
-    public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(
-                "select id from films where id = ?", k);
-        if (!filmRows.next()) {
-            log.warn("{} with Id: {} not found",
-                    "Film", k);
-            throw new ObjectNotFoundException("Film with Id: " + k + " not found");
-        }
-    }
+    private final String newBigSqlQuery = "select f.id, f.title, f.description, f.release_date, " +
+            "f.length, r.id rating_id, r.name mpa, f.rate, " +
+            "listagg (fg.genre_id, ',') within group (order by g.id) genre_id_list, " +
+            "listagg (g.name, ',') within group (order by g.id) genre_name_list " +
+            "from films as f " +
+            "left join ratings as r on r.id = f.rating_id " +
+            "left join film_genre as fg on fg.film_id = f.id " +
+            "left join genres as g on g.id = fg.genre_id "; //+ " group by f.id"
 
     @Override
     public Collection<Film> findAll() {
-        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                "left join ratings as r on r.id=f.rating_id";
-        Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
-        log.debug(
-                "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
-                "Film", "Film", collection.size()
-        );
-        return collection;
+        try {
+            String sqlQuery = newBigSqlQuery + " group by f.id";
+            Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+            log.debug(
+                    "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
+                    "Film", "Film", collection.size()
+            );
+            return collection;
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public Optional<Film> getByKey(Integer k) {
         try {
-            String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                    "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                    "left join ratings as r on r.id=f.rating_id where f.id = ?";
+            String sqlQuery = newBigSqlQuery +
+                    " where f.id = ? group by f.id";
+
             Optional<Film> optV = Optional.ofNullable(
                     jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k));
             log.debug(
@@ -82,6 +77,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Film create(Film v) throws ObjectAlreadyExistException {
+        Integer k;
         if (v.getId() != null) {
             int i = v.getId();
             log.warn(
@@ -91,77 +87,117 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
             throw new ObjectAlreadyExistException("Film Id: " + i + " should be null," +
                     " Id генерируется автоматически.");
         }
-        String sqlQuery = "insert into films(title, description, release_date, " +
-                "length, rating_id) values (?, ?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setString(1, v.getName());
-            stmt.setString(2, v.getDescription());
-            stmt.setDate(3, Date.valueOf(v.getReleaseDate()));
-            stmt.setInt(4, v.getDuration());
-            stmt.setInt(5, v.getMpa().getId());
-            return stmt;
-        }, keyHolder);
-        Integer k = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        v.setId(k);
-        if (v.getGenres() != null && (v.getGenres().size() > 0)) {
-            List<Genre> genreIdSet = v.getGenres().stream()
-                    .distinct().collect(Collectors.toList());
-            v.setGenres(genreIdSet);
-            for (Genre g : genreIdSet) {
-                String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
-                        "values (?, ?)";
-                jdbcTemplate.update(sqlQuery1, k, g.getId());
-            }
+        try {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("films")
+                    .usingGeneratedKeyColumns("id");
+            k = simpleJdbcInsert.executeAndReturnKey(v.toMap()).intValue();
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Ошибка при создании фильма Id: {}! " +
+                    "Обнаружен не зарегистрированный рейтинг! " +
+                    v.getId(), v.getMpa());
+            throw new ObjectNotFoundException(
+                    "Ошибка при создании фильма Id: " + v.getId() +
+                            "! Обнаружен не зарегистрированный рейтинг! " +
+                            v.getMpa());
         }
-        log.debug(
-                "{} под Id: {}, успешно зарегистрирован.",
-                "Film", k
-        );
-        return v;
+        try {
+            addFilmGenreLink(v, k);
+            log.debug(
+                    "{} под Id: {}, успешно зарегистрирован.",
+                    "Film", v.getId()
+            );
+            v.setId(k);
+            return v;
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Ошибка при создании фильма Id: {}! " +
+                    "В списке жанров, обнаружены не зарегистрированные жанры! " +
+                    v.getId(), v.getGenres());
+            throw new ObjectNotFoundException(
+                    "Ошибка при создании фильма Id: " + v.getId() +
+                            "! В списке жанров, обнаружены не зарегистрированные жанры! " +
+                            v.getGenres());
+        }
     }
 
     @Override
     public Film put(Film v) throws ObjectNotFoundException {
+        boolean b;
         Integer k = v.getId();
-        containsOrElseThrow(k);
-        String sqlQuery = "update films set " +
-                "title = ?, description = ?, release_date = ?, length = ?, rating_id = ?" +
-                " where id = ?";
-        jdbcTemplate.update(sqlQuery,
-                v.getName(),
-                v.getDescription(),
-                Date.valueOf(v.getReleaseDate()),
-                v.getDuration(),
-                v.getMpa().getId(),
-                k);
-        String sqlQuery1 = "delete from film_genre where film_id = ?";
-        jdbcTemplate.update(sqlQuery1, k);
+        try {
+            String sqlQuery = "update films set " +
+                    "title = ?, description = ?, release_date = ?, length = ?, rating_id = ?" +
+                    " where id = ?";
+            b = jdbcTemplate.update(sqlQuery,
+                    v.getName(),
+                    v.getDescription(),
+                    Date.valueOf(v.getReleaseDate()),
+                    v.getDuration(),
+                    v.getMpa().getId(),
+                    k) > 0;
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Ошибка при обновлении фильма Id: {}!" +
+                    " Обнаружен не зарегистрированный рейтинг! " +
+                    k, v.getMpa());
+            throw new ObjectNotFoundException(
+                    "Ошибка при обновлении фильма Id: " + k +
+                            "! Обнаружен не зарегистрированный рейтинг! " +
+                            v.getMpa());
+        }
+        if (b) {
+            try {
+                String sqlQuery1 = "delete from film_genre where film_id = ?";
+                jdbcTemplate.update(sqlQuery1, k);
+                addFilmGenreLink(v, k);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("Ошибка при обновлении фильма Id: {}! " +
+                        "В списке жанров, обнаружены не зарегистрированные жанры! " +
+                        k, v.getGenres());
+                throw new ObjectNotFoundException(
+                        "Ошибка при обновлении фильма Id: " + k +
+                                "! В списке жанров, обнаружены не зарегистрированные жанры! " +
+                                v.getGenres());
+            }
+            log.debug(
+                    "Данные {} по Id: {}, успешно обновлены.",
+                    "Film", k
+            );
+            return v;
+        }
+        log.warn("{} with Id: {} not found",
+                "Film", k);
+        throw new ObjectNotFoundException("Film with Id: " + k + " not found");
+    }
+
+    private void addFilmGenreLink(Film v, Integer k) {
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+            List<Map<String, Object>> records = new LinkedList<>();
             List<Genre> genreIdSet = v.getGenres().stream()
-                    .distinct().collect(Collectors.toList());
+                    .map(Genre::getId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .map((i) -> Genre.builder().id(i).build())
+                    .collect(Collectors.toList());
             v.setGenres(genreIdSet);
             for (Genre g : genreIdSet) {
-                String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
-                        "values (?, ?)";
-                jdbcTemplate.update(sqlQuery2, k, g.getId());
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("film_id", k);
+                entry.put("genre_id", g.getId());
+                records.add(entry);
             }
+            SimpleJdbcInsert statement = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("film_genre");
+            statement.executeBatch(SqlParameterSourceUtils.createBatch(records));
         }
-        return v;
     }
 
     @Override
-    public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
-        Film v = getByKey(k1).orElseThrow(
-                () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
-        );
-        SqlRowSet favoriteFilmsRows = jdbcTemplate.queryForRowSet(
-                "select * from favorite_films " +
-                        "where film_id = ? " +
-                        "and user_id = ?", k1, k2);
-        Integer rate = v.getRate();
-        if (!favoriteFilmsRows.next()) {
+    public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException, ObjectAlreadyExistException {
+        try {
+            Film v = getByKey(k1).orElseThrow(
+                    () -> new ObjectNotFoundException("Film with Id: " + k1 + " not found")
+            );
+            Integer rate = v.getRate();
             String sqlQuery = "insert into favorite_films(film_id, user_id) " +
                     "values (?, ?)";
             jdbcTemplate.update(sqlQuery, k1, k2);
@@ -169,13 +205,28 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
             v.setRate(rate);
             String sqlQuery1 = "update films set rate = ? where id = ?";
             jdbcTemplate.update(sqlQuery1, rate, k1);
+            log.debug(
+                    "Фильм под Id: {} получил лайк от пользователя" +
+                            " с Id: {}. Всего лайков: {}.",
+                    k1, k2, rate
+            );
+            return v;
+        } catch (DuplicateKeyException e) {
+            log.warn(
+                    "Error! Cannot add user Id: {} like." +
+                            " User like already registered for Film Id: {}.",
+                    k2, k1
+            );
+            throw new ObjectAlreadyExistException("Error! Cannot add user Id: " + k2 + " like." +
+                    " User like already registered for Film Id: " + k1);
+        } catch (DataIntegrityViolationException e) {
+            log.warn(
+                    "Error! Cannot add user Id: {} like, user not found.",
+                    k2
+            );
+            throw new ObjectNotFoundException("Error! Cannot add user Id: "
+                    + k2 + " like, user not found.");
         }
-        log.debug(
-                "Фильм под Id: {} получил лайк от пользователя" +
-                        " с Id: {}.\n Всего лайков: {}.",
-                k1, k2, rate
-        );
-        return v;
     }
 
     @Override
@@ -199,7 +250,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         v.setRate(rate);
         log.debug(
                 "У фильма под Id: {} удален лайк от пользователя" +
-                        " с Id: {}.\n Всего лайков: {}.",
+                        " с Id: {}. Всего лайков: {}.",
                 k1, k2, rate
         );
         return v;
@@ -207,9 +258,8 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Collection<Film> getPopularFilms(Integer i) {
-        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                "left join ratings as r on r.id=f.rating_id order by f.rate desc limit ?";
+        String sqlQuery = newBigSqlQuery +
+                " group by f.id order by f.rate desc limit ?";
 
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, i);
         log.debug(
@@ -219,29 +269,29 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         return collection;
     }
 
-    @Override
-    public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-
-        String sqlQuery = "select fg.genre_id id, g.name from film_genre as fg " +
-                "left join genres as g on g.id=fg.genre_id where fg.film_id = ? order by id";
-        List<Genre> genreList = jdbcTemplate.query(sqlQuery,
-                genreRepository::mapRowToGenre,
-                resultSet.getInt("id"));
-
+    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+        Film film;
         Optional<Rating> optV = Optional.empty();
         if (resultSet.getInt("rating_id") > 0) {
             optV = Optional.of(ratingRepository.mapRowToRating(resultSet, rowNum));
         }
-
-        return Film.builder()
+        film = Film.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("title"))
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
                 .mpa(optV.orElse(null))
-                .genres(genreList) //postman null не принимает -_-
+                .genres(new ArrayList<>())
                 .rate(resultSet.getInt("rate"))
                 .build();
+        if (resultSet.getString("genre_id_list") != null) {
+            String[] genreId = resultSet.getString("genre_id_list").split(",");
+            String[] genreName = resultSet.getString("genre_name_list").split(",");
+            for (int i = 0; i < genreId.length; i++) {
+                film.getGenres().add(new Genre(Integer.parseInt(genreId[i]), genreName[i]));
+            }
+        }
+        return film;
     }
 }
