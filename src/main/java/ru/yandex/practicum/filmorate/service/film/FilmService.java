@@ -14,27 +14,30 @@ import java.util.Collection;
 @Slf4j
 @Service
 public class FilmService extends ObjectService<Integer, Film> {
-    private final FilmRepository<Integer> filmRepository;
     private final UserRepository<Integer> userRepository;
 
     @Autowired
     public FilmService(FilmRepository<Integer> repository, UserRepository<Integer> userRepository) {
         super(repository, "Film");
-        this.filmRepository = repository;
         this.userRepository = userRepository;
     }
 
     public Film addLike(Integer k1, Integer k2) throws ObjectNotFoundException {
         userRepository.containsOrElseThrow(k2);
-        return filmRepository.addLike(k1, k2);
+        return getRepository().addLike(k1, k2);
     }
 
     public Film deleteLike(Integer k1, Integer k2) throws ObjectNotFoundException {
         userRepository.containsOrElseThrow(k2);
-        return filmRepository.deleteLike(k1, k2);
+        return getRepository().deleteLike(k1, k2);
     }
 
     public Collection<Film> getPopularFilms(Integer limit) {
-        return filmRepository.getPopularFilms(limit);
+        return getRepository().getPopularFilms(limit);
+    }
+
+    @Override
+    protected FilmRepository<Integer> getRepository() {
+        return (FilmRepository<Integer>) repository;
     }
 }

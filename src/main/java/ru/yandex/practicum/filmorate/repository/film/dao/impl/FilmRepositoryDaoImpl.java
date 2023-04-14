@@ -15,17 +15,13 @@ import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.repository.film.dao.FilmRepositoryDao;
-import ru.yandex.practicum.filmorate.repository.film.dao.GenreRepositoryDao;
 import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,8 +30,15 @@ import java.util.stream.Collectors;
 @Primary
 public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     private final JdbcTemplate jdbcTemplate;
-    private final GenreRepositoryDao<Integer> genreRepository;
     private final RatingRepositoryDao<Integer> ratingRepository;
+    private final String newBigSqlQuery = "select f.id, f.title, f.description, f.release_date, " +
+            "f.length, r.id rating_id, r.name mpa, f.rate, " +
+            "listagg (fg.genre_id, ',') within group (order by g.id) genre_id_list, " +
+            "listagg (g.name, ',') within group (order by g.id) genre_name_list " +
+            "from films as f " +
+            "left join ratings as r on r.id = f.rating_id " +
+            "left join film_genre as fg on fg.film_id = f.id " +
+            "left join genres as g on g.id = fg.genre_id "; //+ " group by f.id"
 
     @Override
     public void containsOrElseThrow(Integer k) throws ObjectNotFoundException {
@@ -50,9 +53,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Collection<Film> findAll() {
-        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                "left join ratings as r on r.id=f.rating_id";
+        String sqlQuery = newBigSqlQuery + " group by f.id";
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         log.debug(
                 "Запрос списка {}'s успешно выполнен, всего {}'s: {}",
@@ -64,9 +65,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
     @Override
     public Optional<Film> getByKey(Integer k) {
         try {
-            String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                    "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                    "left join ratings as r on r.id=f.rating_id where f.id = ?";
+            String sqlQuery = newBigSqlQuery + " where f.id = ? group by f.id";
             Optional<Film> optV = Optional.ofNullable(
                     jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, k));
             log.debug(
@@ -207,9 +206,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Collection<Film> getPopularFilms(Integer i) {
-        String sqlQuery = "select f.id, f.title, f.description, f.release_date, " +
-                "f.length, r.id rating_id, r.name mpa, f.rate from films as f " +
-                "left join ratings as r on r.id=f.rating_id order by f.rate desc limit ?";
+        String sqlQuery = newBigSqlQuery + " group by f.id order by f.rate desc limit ?";
 
         Collection<Film> collection = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, i);
         log.debug(
@@ -221,27 +218,28 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
 
     @Override
     public Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-
-        String sqlQuery = "select fg.genre_id id, g.name from film_genre as fg " +
-                "left join genres as g on g.id=fg.genre_id where fg.film_id = ? order by id";
-        List<Genre> genreList = jdbcTemplate.query(sqlQuery,
-                genreRepository::mapRowToGenre,
-                resultSet.getInt("id"));
-
+        Film film;
         Optional<Rating> optV = Optional.empty();
         if (resultSet.getInt("rating_id") > 0) {
             optV = Optional.of(ratingRepository.mapRowToRating(resultSet, rowNum));
         }
-
-        return Film.builder()
+        film = Film.builder()
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("title"))
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("length"))
                 .mpa(optV.orElse(null))
-                .genres(genreList) //postman null не принимает -_-
+                .genres(new ArrayList<>())
                 .rate(resultSet.getInt("rate"))
                 .build();
+        if (resultSet.getString("genre_id_list") != null) {
+            String[] genreId = resultSet.getString("genre_id_list").split(",");
+            String[] genreName = resultSet.getString("genre_name_list").split(",");
+            for (int i = 0; i < genreId.length; i++) {
+                film.getGenres().add(new Genre(Integer.parseInt(genreId[i]), genreName[i]));
+            }
+        }
+        return film;
     }
 }

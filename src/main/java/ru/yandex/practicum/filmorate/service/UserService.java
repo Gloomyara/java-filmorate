@@ -15,12 +15,9 @@ import java.util.Objects;
 @Service
 public class UserService extends ObjectService<Integer, User> {
 
-    private final UserRepository<Integer> userRepository;
-
     @Autowired
     public UserService(UserRepository<Integer> repository) {
         super(repository, "User");
-        this.userRepository = repository;
     }
 
     public User addFriend(Integer k1, Integer k2)
@@ -30,26 +27,31 @@ public class UserService extends ObjectService<Integer, User> {
             throw new ObjectAlreadyExistException(
                     "Ошибка! Нельзя добавить в друзья самого себя!");
         }
-        userRepository.containsOrElseThrow(k1);
-        userRepository.containsOrElseThrow(k2);
-        return userRepository.addFriend(k1, k2);
+        getRepository().containsOrElseThrow(k1);
+        getRepository().containsOrElseThrow(k2);
+        return getRepository().addFriend(k1, k2);
     }
 
     public User deleteFriend(Integer k1, Integer k2) throws ObjectNotFoundException {
-        userRepository.containsOrElseThrow(k1);
-        userRepository.containsOrElseThrow(k2);
-        return userRepository.deleteFriend(k1, k2);
+        getRepository().containsOrElseThrow(k1);
+        getRepository().containsOrElseThrow(k2);
+        return getRepository().deleteFriend(k1, k2);
     }
 
     public Collection<User> getFriendsListById(Integer k1) throws ObjectNotFoundException {
-        userRepository.containsOrElseThrow(k1);
-        return userRepository.getFriendsListById(k1);
+        getRepository().containsOrElseThrow(k1);
+        return getRepository().getFriendsListById(k1);
     }
 
     public Collection<User> getMutualFriendsList(
             Integer k1, Integer k2) throws ObjectNotFoundException {
-        userRepository.containsOrElseThrow(k1);
-        userRepository.containsOrElseThrow(k2);
-        return userRepository.getMutualFriendsList(k1, k2);
+        getRepository().containsOrElseThrow(k1);
+        getRepository().containsOrElseThrow(k2);
+        return getRepository().getMutualFriendsList(k1, k2);
+    }
+
+    @Override
+    protected UserRepository<Integer> getRepository() {
+        return (UserRepository<Integer>) repository;
     }
 }

@@ -34,4 +34,6 @@ public abstract class ObjectService<K, V> {
     public V put(V v) {
         return repository.put(v);
     }
+
+    protected abstract ObjectsRepository<K, V> getRepository();
 }
