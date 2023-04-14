@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
@@ -20,10 +21,7 @@ import ru.yandex.practicum.filmorate.repository.film.dao.RatingRepositoryDao;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -105,14 +103,19 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         }
         try {
             if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+                List<Map<String, Object>> records = new LinkedList<>();
                 List<Genre> genreIdSet = v.getGenres().stream()
                         .distinct().collect(Collectors.toList());
                 v.setGenres(genreIdSet);
                 for (Genre g : genreIdSet) {
-                    String sqlQuery1 = "insert into film_genre(film_id, genre_id) " +
-                            "values (?, ?)";
-                    jdbcTemplate.update(sqlQuery1, k, g.getId());
+                    Map<String, Object> entry = new HashMap<>();
+                    entry.put("film_id", k);
+                    entry.put("genre_id", g.getId());
+                    records.add(entry);
                 }
+                SimpleJdbcInsert statement = new SimpleJdbcInsert(jdbcTemplate)
+                        .withTableName("film_genre");
+                statement.executeBatch(SqlParameterSourceUtils.createBatch(records));
             }
             log.debug(
                     "{} под Id: {}, успешно зарегистрирован.",
@@ -160,14 +163,19 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
                 String sqlQuery1 = "delete from film_genre where film_id = ?";
                 jdbcTemplate.update(sqlQuery1, k);
                 if (v.getGenres() != null && (v.getGenres().size() > 0)) {
+                    List<Map<String, Object>> records = new LinkedList<>();
                     List<Genre> genreIdSet = v.getGenres().stream()
                             .distinct().collect(Collectors.toList());
                     v.setGenres(genreIdSet);
                     for (Genre g : genreIdSet) {
-                        String sqlQuery2 = "insert into film_genre(film_id, genre_id) " +
-                                "values (?, ?)";
-                        jdbcTemplate.update(sqlQuery2, k, g.getId());
+                        Map<String, Object> entry = new HashMap<>();
+                        entry.put("film_id", k);
+                        entry.put("genre_id", g.getId());
+                        records.add(entry);
                     }
+                    SimpleJdbcInsert statement = new SimpleJdbcInsert(jdbcTemplate)
+                            .withTableName("film_genre");
+                    statement.executeBatch(SqlParameterSourceUtils.createBatch(records));
                 }
             } catch (DataIntegrityViolationException e) {
                 log.warn("Ошибка при обновлении фильма Id: {}! " +
