@@ -205,6 +205,36 @@ public class FilmServiceDaoTest {
     }
 
     @Test
+    void createShouldThrowObjectNotFoundException() {
+        Rating rating = new Rating(1, null);
+
+        Film test1 = new Film(null, "testFilm2", "testFilm2d",
+                LocalDate.of(1967, 3, 25), 100, mpa, new ArrayList<>(), 0);
+        test1.getGenres().add(new Genre(999, " "));
+        NoSuchElementException ex1 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Ошибка при создании фильма Id: " + test1.getId() +
+                "! В списке жанров, обнаружены не зарегистрированные жанры! " +
+                test1.getGenres(), ex1.getMessage());
+        test1.setMpa(new Rating(999, " "));
+        NoSuchElementException ex2 = Assertions.assertThrows(
+                NoSuchElementException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Ошибка при создании фильма Id: " + test1.getId() +
+                "! Обнаружен не зарегистрированный рейтинг! " +
+                test1.getMpa(), ex2.getMessage());
+        test1.setId(999);
+        ObjectAlreadyExistException ex = Assertions.assertThrows(
+                ObjectAlreadyExistException.class,
+                () -> filmService.create(test1)
+        );
+        assertEquals("Film Id: " + 999 + " should be null, Id генерируется автоматически.", ex.getMessage());
+    }
+
+    @Test
     void create() {
         Rating rating = new Rating(1, null);
         Film test = new Film(null, "nisi eiusmod", "adipisicing",
