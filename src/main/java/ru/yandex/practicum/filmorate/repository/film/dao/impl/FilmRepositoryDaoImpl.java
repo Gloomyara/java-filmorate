@@ -146,7 +146,7 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         }
         if (b) {
             try {
-                String sqlQuery1 = "delete from film_genre where film_id = ?";
+                 String sqlQuery1 = "delete from film_genre where film_id = ?";
                 jdbcTemplate.update(sqlQuery1, k);
                 addFilmGenreLink(v, k);
             } catch (DataIntegrityViolationException e) {
@@ -173,10 +173,9 @@ public class FilmRepositoryDaoImpl implements FilmRepositoryDao<Integer> {
         if (v.getGenres() != null && (v.getGenres().size() > 0)) {
             List<Map<String, Object>> records = new LinkedList<>();
             List<Genre> genreIdSet = v.getGenres().stream()
-                    .map(Genre::getId)
                     .filter(Objects::nonNull)
+                    .sorted(Comparator.comparingInt(Genre::getId))
                     .distinct()
-                    .map((i) -> Genre.builder().id(i).build())
                     .collect(Collectors.toList());
             v.setGenres(genreIdSet);
             for (Genre g : genreIdSet) {
