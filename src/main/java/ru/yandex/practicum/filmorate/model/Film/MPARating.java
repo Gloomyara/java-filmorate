@@ -7,17 +7,9 @@ import ru.yandex.practicum.filmorate.model.AbstractEntity;
 
 @Data
 @NoArgsConstructor
-public class Genre extends AbstractEntity {
+public class MPARating extends AbstractEntity {
 
     @JsonProperty("name")
     private String name;
 
-    public Genre(long id) {
-        super(id);
-    }
-
-    public Genre(Long id, String name) {
-        super(id);
-        this.name = name;
-    }
 }

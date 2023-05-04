@@ -5,19 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.model.AbstractEntity;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @NoArgsConstructor
-public class Genre extends AbstractEntity {
+public class Director extends AbstractEntity {
 
+    @NotBlank
     @JsonProperty("name")
     private String name;
 
-    public Genre(long id) {
-        super(id);
-    }
-
-    public Genre(Long id, String name) {
-        super(id);
-        this.name = name;
-    }
 }
