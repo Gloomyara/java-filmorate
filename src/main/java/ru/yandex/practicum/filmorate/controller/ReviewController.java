@@ -13,7 +13,7 @@ import java.util.Map;
 @RestController
 @Validated
 @RequestMapping("/reviews")
-public class ReviewController extends AbstractController<Review> {
+public class ReviewController extends AbstractController<Review, ReviewService> {
 
 
     protected ReviewController(ReviewService service) {
@@ -23,36 +23,31 @@ public class ReviewController extends AbstractController<Review> {
     @PutMapping("{id}/like/{userId}")
     public Review addLike(@PathVariable @Positive long id,
                           @PathVariable @Positive long userId) {
-        return getService().addLikes(id, userId);
+        return service.addLikes(id, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
     public Review removeLike(@PathVariable @Positive long id,
                              @PathVariable @Positive long userId) {
-        return getService().removeLikes(id, userId);
+        return service.removeLikes(id, userId);
     }
 
     @PutMapping("{id}/dislike/{userId}")
     public Review addDislike(@PathVariable @Positive long id,
                              @PathVariable @Positive long userId) {
-        return getService().addDislike(id, userId);
+        return service.addDislike(id, userId);
     }
 
     @DeleteMapping("{id}/dislike/{userId}")
     public Review removeDislike(@PathVariable @Positive long id,
                                 @PathVariable @Positive long userId) {
-        return getService().removeDislikes(id, userId);
+        return service.removeDislikes(id, userId);
     }
 
     @GetMapping
     public List<Review> findAllWithParams(@RequestParam Map<String, String> requestParams) {
         long filmId = Long.parseLong(requestParams.getOrDefault("filmId", "0"));
         int count = Integer.parseInt(requestParams.getOrDefault("count", "10"));
-        return getService().findAllByFilmId(filmId, count);
-    }
-
-    @Override
-    protected ReviewService getService() {
-        return (ReviewService) service;
+        return service.findAllByFilmId(filmId, count);
     }
 }

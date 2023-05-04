@@ -1,21 +1,23 @@
 package ru.yandex.practicum.filmorate.model.film;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.AbstractEntity;
-import ru.yandex.practicum.filmorate.model.validation.MovieBirthdayOrLater;
+import ru.yandex.practicum.filmorate.model.Entity;
+import ru.yandex.practicum.filmorate.model.film.customconstraint.FilmReleaseDateValidation;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Data
-public class Film extends AbstractEntity {
+@Builder
+public class Film implements Entity {
 
+    private Long id;
     @NotBlank
     @JsonProperty("name")
     private String name;
@@ -23,7 +25,7 @@ public class Film extends AbstractEntity {
     @JsonProperty("description")
     private String description;
     @NotNull
-    @MovieBirthdayOrLater
+    @FilmReleaseDateValidation(message = "ReleaseDate invalid", value = "1895-12-28")
     @JsonProperty("releaseDate")
     private LocalDate releaseDate;
     @Positive
@@ -32,10 +34,10 @@ public class Film extends AbstractEntity {
     @JsonProperty("rate")
     private float rate;
     @JsonProperty("genres")
-    private Set<Genre> genres = new HashSet<>();
+    private List<Genre> genres;
     @JsonProperty("mpa")
-    private MPARating mpa = new MPARating();
+    private MPARating mpa;
     @JsonProperty("directors")
-    private Set<Director> directors = new HashSet<>();
+    private List<Director> directors;
 
 }

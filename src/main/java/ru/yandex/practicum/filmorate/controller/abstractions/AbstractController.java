@@ -7,11 +7,11 @@ import ru.yandex.practicum.filmorate.service.Service;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
-public abstract class AbstractController<T extends Entity> implements Controller<T> {
+public abstract class AbstractController<T extends Entity, S extends Service<T>> implements Controller<T> {
 
-    protected final Service<T> service;
+    protected final S service;
 
-    protected AbstractController(Service<T> service) {
+    protected AbstractController(S service) {
         this.service = service;
     }
 
@@ -34,6 +34,4 @@ public abstract class AbstractController<T extends Entity> implements Controller
     public void delete(@PathVariable @Positive Long id) {
         service.delete(id);
     }
-
-    protected abstract Service<T> getService();
 }

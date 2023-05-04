@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequestMapping("/users")
-public class UserController extends AbstractControllerWOParams<User> {
+public class UserController extends AbstractControllerWOParams<User, UserService> {
 
     public UserController(UserService service) {
         super(service);
@@ -23,38 +23,33 @@ public class UserController extends AbstractControllerWOParams<User> {
     @PutMapping("{id}/friends/{friendId}")
     public User addFriend(@PathVariable @Positive Long id,
                           @PathVariable @Positive Long friendId) {
-        return getService().addFriend(id, friendId);
+        return service.addFriend(id, friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
     public User removeFriend(@PathVariable @Positive Long id,
                              @PathVariable @Positive Long friendId) {
-        return getService().removeFriend(id, friendId);
+        return service.removeFriend(id, friendId);
     }
 
     @GetMapping("{id}/friends")
     public List<User> getUserFriends(@PathVariable @Positive Long id) {
-        return getService().findUserFriends(id);
+        return service.findUserFriends(id);
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> getMutualFriends(@PathVariable @Positive Long id,
                                        @PathVariable @Positive Long otherId) {
-        return getService().findMutualFriends(id, otherId);
+        return service.findMutualFriends(id, otherId);
     }
 
     @GetMapping("{id}/recommendations")
     public List<Film> getFilmRecommendation(@PathVariable @Positive Long id) {
-        return getService().getFilmRecommendation(id);
+        return service.getFilmRecommendation(id);
     }
 
     @GetMapping("{id}/feed")
     public List<Feed> findAllUserFeed(@PathVariable @Positive Long id) {
-        return getService().findAllUserFeed(id);
-    }
-
-    @Override
-    protected UserService getService() {
-        return (UserService) service;
+        return service.findAllUserFeed(id);
     }
 }

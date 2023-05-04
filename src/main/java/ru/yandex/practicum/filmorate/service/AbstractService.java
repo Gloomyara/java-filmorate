@@ -3,17 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Entity;
-import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.repository.Repository;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public abstract class AbstractService<T extends Entity> implements Service<T> {
+public abstract class AbstractService<T extends Entity, R extends Repository<T>> implements Service<T> {
 
-    protected final Storage<T> storage;
+    protected final R storage;
 
-    protected AbstractService(Storage<T> storage) {
+    protected AbstractService(R storage) {
         this.storage = storage;
     }
 

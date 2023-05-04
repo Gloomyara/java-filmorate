@@ -3,14 +3,17 @@ package ru.yandex.practicum.filmorate.model.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.AbstractEntity;
+import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.user.enums.EventType;
 import ru.yandex.practicum.filmorate.model.user.enums.OperationType;
 
-@Builder
-@Data
-public class Feed extends AbstractEntity {
 
+@Data
+@Builder
+public class Feed implements Entity {
+
+    @JsonProperty("eventId")
+    private Long id;
     @JsonProperty("timestamp")
     private Long timestamp;
     @JsonProperty("userId")
@@ -22,9 +25,4 @@ public class Feed extends AbstractEntity {
     @JsonProperty("entityId")
     private Long entityId;
 
-    @JsonProperty("eventId")
-    @Override
-    public Long getId() {
-        return super.getId();
-    }
 }

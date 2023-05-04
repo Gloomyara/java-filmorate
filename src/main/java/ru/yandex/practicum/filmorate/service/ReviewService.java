@@ -4,30 +4,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.review.Review;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.review.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storage.review.ReviewLikesDbStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.repository.film.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.film.dao.impl.FilmDaoImpl;
+import ru.yandex.practicum.filmorate.repository.review.ReviewRepository;
+import ru.yandex.practicum.filmorate.repository.review.dao.impl.ReviewDaoImpl;
+import ru.yandex.practicum.filmorate.repository.review.dao.impl.ReviewLikesDaoImpl;
+import ru.yandex.practicum.filmorate.repository.user.dao.impl.UserDaoImpl;
 
 import java.util.List;
 
 @Service("reviewService")
 @Slf4j
-public class ReviewService extends AbstractService<Review> {
+public class ReviewService extends AbstractService<Review, ReviewRepository> {
 
-    private final ReviewDbStorage storage;
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
-    private final ReviewLikesDbStorage likesDbStorage;
+    private final UserDaoImpl userStorage;
+    private final FilmRepository filmStorage;
+    private final ReviewLikesDaoImpl likesStorage;
 
 
-    protected ReviewService(ReviewDbStorage storage, UserDbStorage userStorage,
-                            FilmDbStorage filmStorage, ReviewLikesDbStorage likesDbStorage) {
+    protected ReviewService(ReviewDaoImpl storage, UserDaoImpl userStorage,
+                            FilmDaoImpl filmStorage, ReviewLikesDaoImpl likesStorage) {
         super(storage);
-        this.storage = storage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
-        this.likesDbStorage = likesDbStorage;
+        this.likesStorage = likesStorage;
     }
 
     @Override
@@ -45,23 +45,23 @@ public class ReviewService extends AbstractService<Review> {
 
     public Review addLikes(long id, long userId) throws EntityNotFoundException {
         userStorage.containsOrElseThrow(userId);
-        likesDbStorage.addLikes(id, userId, true);
+        likesStorage.addLikes(id, userId, true);
         return storage.findById(id).get();
     }
 
     public Review removeLikes(long id, long userId) throws EntityNotFoundException {
-        likesDbStorage.deleteLikes(id, userId, true);
+        likesStorage.deleteLikes(id, userId, true);
         return storage.findById(id).get();
     }
 
     public Review addDislike(long id, long userId) throws EntityNotFoundException {
         userStorage.containsOrElseThrow(userId);
-        likesDbStorage.addLikes(id, userId, false);
+        likesStorage.addLikes(id, userId, false);
         return storage.findById(id).get();
     }
 
     public Review removeDislikes(long id, long userId) throws EntityNotFoundException {
-        likesDbStorage.deleteLikes(id, userId, false);
+        likesStorage.deleteLikes(id, userId, false);
         return storage.findById(id).get();
     }
 }

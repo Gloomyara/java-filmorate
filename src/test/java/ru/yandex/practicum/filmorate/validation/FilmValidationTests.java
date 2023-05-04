@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.film.FilmController;
-import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
@@ -72,8 +72,8 @@ public class FilmValidationTests {
     void shouldThrowObjectAlreadyExistExceptionWhenObjectDataAlreadyExist() {
         filmController.create(film);
         film1.setId(film.getId());
-        ObjectAlreadyExistException ex1 = Assertions.assertThrows(
-                ObjectAlreadyExistException.class,
+        EntityAlreadyExistException ex1 = Assertions.assertThrows(
+                EntityAlreadyExistException.class,
                 () -> filmController.create(film1)
         );
         Assertions.assertEquals("Film Id: " + film.getId()

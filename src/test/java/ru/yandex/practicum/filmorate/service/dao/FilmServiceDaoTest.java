@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.server.MethodNotAllowedException;
 import ru.yandex.practicum.filmorate.controller.film.GenreController;
 import ru.yandex.practicum.filmorate.controller.film.RatingController;
-import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film.Film;
 import ru.yandex.practicum.filmorate.model.Film.Genre;
 import ru.yandex.practicum.filmorate.model.Film.Rating;
@@ -147,8 +147,8 @@ public class FilmServiceDaoTest {
         film1 = new Film(null, "testFilm1Name", "d1",
                 LocalDate.of(2020, 1, 1), 8500, mpa, genreIdSet, 0);
         film1.setId(film.getId());
-        ObjectAlreadyExistException ex1 = Assertions.assertThrows(
-                ObjectAlreadyExistException.class,
+        EntityAlreadyExistException ex1 = Assertions.assertThrows(
+                EntityAlreadyExistException.class,
                 () -> filmService.create(film1)
         );
         Assertions.assertEquals("Film Id: " + film.getId()

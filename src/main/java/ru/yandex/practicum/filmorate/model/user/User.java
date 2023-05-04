@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.model.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.AbstractEntity;
+import ru.yandex.practicum.filmorate.model.Entity;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -10,8 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class User extends AbstractEntity {
+@Builder
+public class User implements Entity {
 
+    private Long id;
     @Email
     @NotNull
     @JsonProperty("email")

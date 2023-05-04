@@ -1,14 +1,15 @@
 package ru.yandex.practicum.filmorate.model.film;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.model.AbstractEntity;
+import ru.yandex.practicum.filmorate.model.Entity;
 
 @Data
-@NoArgsConstructor
-public class MPARating extends AbstractEntity {
+@Builder
+public class MPARating implements Entity {
 
+    private Long id;
     @JsonProperty("name")
     private String name;
 

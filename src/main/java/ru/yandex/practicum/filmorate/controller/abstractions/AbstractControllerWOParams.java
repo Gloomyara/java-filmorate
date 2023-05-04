@@ -6,9 +6,10 @@ import ru.yandex.practicum.filmorate.service.Service;
 
 import java.util.List;
 
-public abstract class AbstractControllerWOParams<T extends Entity> extends AbstractController<T> {
+public abstract class AbstractControllerWOParams<T extends Entity, S extends Service<T>>
+        extends AbstractController<T, S> {
 
-    protected AbstractControllerWOParams(Service<T> service) {
+    protected AbstractControllerWOParams(S service) {
         super(service);
     }
 

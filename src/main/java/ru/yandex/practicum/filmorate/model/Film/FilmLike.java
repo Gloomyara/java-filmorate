@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.model.film;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.AbstractEntity;
+import ru.yandex.practicum.filmorate.model.Entity;
 
 import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
-public class FilmLike extends AbstractEntity {
+public class FilmLike implements Entity {
 
     @NotNull
     private Long filmId;

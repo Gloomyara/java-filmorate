@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AssertionErrors;
 import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.user.inmemory.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -56,8 +56,8 @@ public class UserValidationTests {
         User user2 = new User(null, "testuser@gmail.com", "testUser",
                 " ", LocalDate.of(2023, 1, 1));
         user2.setId(user.getId());
-        ObjectAlreadyExistException ex = Assertions.assertThrows(
-                ObjectAlreadyExistException.class,
+        EntityAlreadyExistException ex = Assertions.assertThrows(
+                EntityAlreadyExistException.class,
                 () -> userController.create(user2)
         );
         assertEquals("User Id: " + user.getId()
