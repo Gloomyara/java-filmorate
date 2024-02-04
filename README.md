@@ -1,122 +1,78 @@
-   # **java-filmorate**
+# Filmorate
+Filmorate - база фильмов, приложение позволяет пользователям добавлять фильмы и отзывы,
+находить лучшие фильмы и получить рекомендации на основе интересов пользователей.
 
-   ### **Final 9**
+## Стек-Технологий
+- Java 11
+- Maven
+- Spring Boot 2
+- JDBC
+- H2 Database
 
-Каркас Spring Boot приложения "Filmorate" для оценки фильмов
+## API
+Service URL: http://localhost:9090.  
+Id текущего пользователя передается в заголовке запроса "X-Sharer-User-Id". 
 
-   ### **Final 10**
-
-Добавлены методы позволяющие пользователям добавлять друг друга в друзья, получать список общих друзей и лайкать фильмы.
-
-   ### **Staging task 11**
-   
 <details>
+  <summary>Пользователи /items</summary>
+  <br>
 
-<summary> Создание схемы базы данных </summary>
-   
-   ### Схема:
-   
-<details>
-   
-<summary> DB Diagram </summary>
-
-   ### [dbdiagram.io](https://dbdiagram.io/d/)
-
-![Схема базы данных:](https://user-images.githubusercontent.com/115705343/230781050-901603e6-8b43-402f-ac1c-ba0dc56d75f0.jpg)
-   
+- GET /users - получить список всех пользователей.
+- GET /users/{id} - получить информациб о пользователе по его id.
+- POST /users - добавить нового пользователя.
+- PUT /users - обновить информацию о пользователе.
+- PUT /users/{id}/friends/{friendId} - добавить пользователя {friendId} в друзья пользователя {id}.
+- DELETE /users/{id}/friends/{friendId} - удалить пользователя {friendId} из друзей пользователя {id}.
+- GET /users/{id}/friends - получить список друзей пользователя.
+- GET /users/{id}/friends/common/{otherId} - получить список дбщих друзей двух пользователей.
+  
 </details>
 
-   ### Короткое описание БД:
-   
 <details>
-
-<summary> Filmorate DB description </summary>
-   
-   - База данных состоит из таблиц с данными о пользователях(*users*), друзьях(*friends*), любимых фильмах(*favorite_films*), фильмах(*films*), жанров фильмов(*genre*), рейтинга фильмов(*ratings*) и служебной таблицы для связи фильмов и жанров(*film_genre*).
-
-   - Таблица _friends_ связана многие к одному с _PK(id)_ _users_, также имеет поле для определения связи(дружбы) между пользователями.
-   
-   - Таблицы _users_ и _films_ связаны один к многим по _PK(id)_ с таблицей *favorite_films* для хранения информации о любимых фильмах пользователя.
-
-   - Таблица _films_ связана многие к одному по _FK(rating_id)_ с таблицей *ratings* для (здесь могла быть ваша реклама).
-
-   - Таблицы _films_ и _genres_ связаны один ко многим по _PK(id)_ с таблицей *film_category* для сортировки/поиска фильмов по жанрам, а также для удовлетворения требований по нормализации баз данных.
-   
+  <summary>Фильмы /films</summary>
+  <br>
+  
+- GET /films - получть список всех фильмов.
+- GET /films/{id} - получить описание о фильме по его id.
+- POST /films - добавить новый фильм.
+- PUT /films - обновить информацию о фильме
+- PUT /films/{id}/like/{userId} - добавить лайк фильму {id} от пользователя {userId}.
+- DELETE /films/{id}/like/{userId} - удалить лайк фильму {id} от пользователя {userId}.
+- GET /films/popular - получить список фильмов с наибольшим числом лайков.
+- GET /films/friends - получиться список фильмов, понравивщихся друзьям.
+  
 </details>
-   
-   ### Примеры SQL запросов из ТЗ:
-   
+
 <details>
+  <summary>Жанры /genres</summary>
+  <br>
 
-<summary> SQL requests example </summary>
+- GET /genres - получить список доступных жанров для фильмов
+- GET /genres/{id} - получить описание жанра по его id
+  
+</details>
 
-   ### Поиск общих друзей:
-   
 <details>
+  <summary>Рейтинг MPA /mpa</summary>
+  <br>
+  
+- GET /mpa - получить список доступных возрастных рейтингов для фильмов
+- GET /mpa/{id} - получить описание рейтинга по его id
 
-<summary> getMutualFriends </summary>
-   
-```sql   
-1.  SELECT *
-2.  FROM users u
-3.  WHERE id IN(SELECT friend_id
-4.             FROM friends
-5.             WHERE user_id = X
-6.             AND status = true
-7.             AND user_friend_id IN(SELECT user_friend_id
-8.                             FROM friends
-9.                             WHERE user_id = Y
-10.                            AND status = true))
+</details>
+
+## Сборка
+1. Клонируйте репозиторий:
+```Bash
+git clone https://github.com/Gloomyara/java-filmorate.git
 ```
-   
-</details>
-
-   ### Получить список всех фильмов:
-   
-<details>
-
-<summary> findAllFilms </summary> 
-
-```sql 
-1. SELECT *
-2. FROM films f
+2. Перейдите в каталог проекта: 
+```Bash
+cd java-filmorate
 ```
-   
-</details>
-
-   ### Получить список всех пользователей:
-   
-<details>
-
-<summary> findAllUsers </summary> 
-   
-```sql
-1. SELECT *
-2. FROM users u
+3. Скомпилируйте исходные файлы:
+```Bash
+mvn clean package
 ```
-   
-</details>
-
-   ### Получить список N популярных фильмов:
-   
-<details>
-   
-<summary> topNMostPopularFilms </summary>
-   
-```sql
-1.  SELECT *
-2.  FROM films f
-3.  ORDER BY rate DESC
-4.  LIMIT N;              
-```
-   
-</details>
-</details>
-</details>
-
-   ### **Final 11**
-
-- Добавлена новая функциональность — сохранение состояния данных после перезапуска.
-- Добавлены объекты жанров и рейтингов фильмов.
-- Объекты фильмов теперь хранят в себе количество лайков, список объектов жанров и объект рейтинга.
-- Так же дружба стала односторонней(чтобы это не значило(никак не реализовано)).
+## Статус проекта
+Завершен.
